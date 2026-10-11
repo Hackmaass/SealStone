@@ -119,7 +119,8 @@ async function main() {
   const dep = JSON.parse(readFileSync(new URL("../web/src/generated/deployment.json", import.meta.url), "utf8"));
   say("");
   say("┌─ Sealstone is ready ─────────────────────────────────────────────");
-  say(`│  Open the app      ${WEB}`);
+  say(`│  Landing page      ${WEB}`);
+  say(`│  Dashboard         ${WEB}/dashboard`);
   say(`│  Demo vault        ${WEB}/vault/${dep.preseededVault.address}`);
   say(`│  Attack Lab        ${WEB}/attack-lab`);
   say(`│  AI                ${ai}`);

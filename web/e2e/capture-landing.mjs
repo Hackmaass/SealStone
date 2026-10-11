@@ -13,6 +13,8 @@ mkdirSync(OUT, { recursive: true });
 const VAULT = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
 
 const reset = () => execSync("npm run demo:reset", { cwd: ROOT, stdio: "ignore" });
+// Status toasts are transient and would sit on top of the pictures: keep them out of the frame.
+const hideToasts = () => { document.addEventListener("DOMContentLoaded", () => { const st = document.createElement("style"); st.textContent = ".toasts{display:none!important}"; document.head.appendChild(st); }); };
 const log = (m) => console.log(`✓ ${m}`);
 const written = [];
 async function shot(page, name, opts = {}) {
@@ -37,6 +39,7 @@ try {
   // ───────────── phone layout ─────────────
   const phone = await browser.newContext({ ...PHONE, colorScheme: "light", reducedMotion: "reduce" });
   await phone.addInitScript(() => localStorage.setItem("mv.aiMode", "rules")); // the built-in rules: no AI needed for a picture
+  await phone.addInitScript(hideToasts);
   const p = await phone.newPage();
 
   // 1. the agreement studio: a flagged term, Confirm locked
@@ -80,6 +83,7 @@ try {
 
   // ───────────── desktop layout ─────────────
   const desk = await browser.newContext({ ...DESKTOP, deviceScaleFactor: 1.5, colorScheme: "light", reducedMotion: "reduce" });
+  await desk.addInitScript(hideToasts);
   const d = await desk.newPage();
 
   // 6. the dashboard, as the provider (so something is waiting on them)

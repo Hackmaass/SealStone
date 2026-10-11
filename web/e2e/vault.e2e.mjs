@@ -18,6 +18,9 @@ const page = await browser.newPage({ viewport: { width: 1366, height: 768 } });
 const errors = [];
 page.on("pageerror", (e) => errors.push(`pageerror: ${e.message}`));
 page.on("console", (m) => m.type() === "error" && !/Failed to load resource|WebSocket|\[vite\]|@vite\/client|Failed to send error to Vite/.test(m.text()) && errors.push(`console: ${m.text()}`));
+const netFailures = [];
+page.on("requestfailed", (r) => netFailures.push(`${r.url().replace(BASE, "")} ${r.failure()?.errorText ?? ""}`));
+const loads = []; page.on("load", () => loads.push(Date.now()));
 const external = new Set();
 page.on("request", (r) => {
   const u = new URL(r.url());
@@ -57,6 +60,9 @@ try {
 } catch (e) {
   await page.screenshot({ path: path.join(SHOTS, "vault-failure.png") }).catch(() => {});
   console.error("VAULT E2E FAILED:", e.message);
+  console.error(`document loads so far: ${loads.length}; page url: ${page.url()}`);
+  if (netFailures.length) console.error("FAILED NETWORK REQUESTS (refused by the environment, not an app error):\n" + netFailures.slice(0, 8).join("\n"));
+  console.error("browser errors:", errors.slice(0, 4).join(" | "));
   process.exitCode = 1;
 } finally {
   await browser.close();

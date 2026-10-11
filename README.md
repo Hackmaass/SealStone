@@ -31,7 +31,11 @@ copy .env.example .env # (macOS/Linux: cp .env.example .env)   optional; default
 npm run dev            # local chain + AI service + web app, seeds the demo vault, prints the URLs
 ```
 
-Open **http://127.0.0.1:5173**. `npm run dev` prints a short banner with the app, the demo vault and the Attack Lab. Stop everything with Ctrl+C. Reset the demo at any time with `npm run demo:reset`.
+Open **http://127.0.0.1:5173**. `npm run dev` prints a short banner with the landing page, the dashboard, the demo vault and the Attack Lab. Stop everything with Ctrl+C. Reset the demo at any time with `npm run demo:reset` (if a chain is already running, `npm run dev` resets and re-seeds it too).
+
+**Pages.** `/` is the landing page (it loads no chain code and works on its own). The app is `/dashboard` (what is locked, owed and waiting on you, read live from the chain), `/vaults` (every agreement, searchable), `/vault/:address` (milestones, ledger, activity, Verify), `/agreement` (the studio) and `/attack-lab`.
+
+**Phones and tablets.** The whole app is responsive: below 1180 px the top bar becomes a compact bar with a full-screen menu, below 768 px tables become cards and sheets slide up from the bottom, touch targets are 44 px, inputs are 16 px (no iOS zoom), and the layout respects safe areas and reduced motion. Open the app on your phone through your computer's address on the same network, or resize the window.
 
 **Optional local AI (Ollama).** Without it Sealstone uses its built-in rules extractor, and the whole demo still works.
 ```bash
@@ -48,6 +52,7 @@ ollama pull llama3.2:3b          # the default in .env.example
 | `npm run test:contracts` | the Hardhat test suite |
 | `npm run coverage` | solidity-coverage |
 | `npm run test:shared` | shared package tests (canonical JSON, hashing, validator, gate) |
+| `npm run capture:landing` | retakes the landing page's pictures from the real app (needs `npm run dev`); rerun after any UI change |
 | `npm run chain` / `server` / `web` | each service on its own |
 | `npm run eval:ai` | AI evaluation (**not built yet**, see Status) |
 
@@ -86,7 +91,7 @@ ollama pull llama3.2:3b          # the default in .env.example
 | Contracts (Hardhat) | **138 passing**, 0 failing, 0 pending |
 | Shared (vitest) | **123 passing** |
 | Server (vitest) | **42 passing** |
-| Web (vitest) | **65 passing** |
+| Web (vitest) | **69 passing** |
 | Browser walks (real Chrome) | wizard (rules, and live-LLM mode), vault (seeded and freshly created), Attack Lab ×3 in a row: all passing |
 | Coverage, `MilestoneVault.sol` | **100%** lines · **98.15%** branches · **100%** functions (the two uncovered branches are unreachable defensive underflow guards in `reconcile()`) |
 | Invariant fuzz | 5 seeds × 200 steps = 1,000 steps over 21 vaults; 401 succeeded, 599 reverted with 13 distinct custom errors; every revert decoded to a vault error (no panics, no empty reverts); invariants I1–I8 asserted after every step; failed calls left storage identical |
@@ -155,6 +160,9 @@ What we believe is new in combination: (1) the **ambiguity gate** with co-signed
 ## Status
 Built and verified: contract, tests and fuzz, shared hashing/validator/gate, AI service with fallbacks, agreement wizard, vault dashboard, Attack Lab, `npm run dev`, offline behaviour.
 **Not done yet:** the labelled AI evaluation (`npm run eval:ai`, needs the teammate's sample agreements), the stretch features, and the final judge-style audit. An optional MST testnet network entry exists in `contracts/hardhat.config.ts` (enabled only when `DEPLOYER_KEY` is set); the local chain remains the default and the offline fallback.
+
+## Design
+The look is a deliberate, documented choice (see the box at the top of `docs/08-UI-UX.md`): a lavender, rounded, Inter-set interface with two layouts, a marketing landing page and the app shell. The layout and feel of the landing page and of the dashboard were modelled on the reference lending-app site and web app the project owner pointed to; **the brand, copy, artwork, code and fonts are our own** (Inter is bundled under its open licence; nothing is loaded from the internet). Every picture on the landing page is a screenshot of this app, taken by `npm run capture:landing`, and every number on it comes from one file that a test ties to this README. State colours keep one meaning everywhere (green on-chain, amber proposed by AI, blue edited by a person, red refused) and always come with a word or icon. Text contrast is computed in the browser test (lowest measured 5.28:1; the minimum is 4.5:1).
 
 ## Repository map
 `contracts/` Solidity + Hardhat tests · `shared/` types, canonical JSON, hashing, validator, gate · `server/` AI service (never touches the chain) · `web/` the app and browser tests (`web/e2e/`) · `samples/` fictional agreements and demo files · `docs/` spec, plan, UX, progress log.

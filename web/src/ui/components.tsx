@@ -137,7 +137,7 @@ export function StateTrack({ state, disputed = false }: { state: MilestoneStateN
 export function RevertNotice({ d }: { d: DecodedRevert }) {
   return (
     <div className="revert" role="alert">
-      <b>{d.title}.</b> {d.detail ? `${d.detail} ` : ""}Nothing changed.
+      <b>{d.title}.</b> {d.detail ? `${d.detail} ` : ""}Nothing changed, and your funds haven't moved.
       <div className="raw">{formatRawError(d)}</div>
     </div>
   );

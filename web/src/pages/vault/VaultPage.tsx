@@ -336,7 +336,7 @@ function VaultView({ address, snapshot: s, refresh }: { address: string; snapsho
             )}
             {reject && reject.index === null && (
               <div className="revert" role="alert" style={{ marginTop: 10 }}>
-                <b>{reject.d.title}.</b> {reject.d.detail} Nothing changed.
+                <b>{reject.d.title}.</b> {reject.d.detail} Nothing changed, and your funds haven't moved.
                 <div className="raw">{formatRawError(reject.d)}</div>
               </div>
             )}
