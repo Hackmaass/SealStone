@@ -2,8 +2,8 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": null,
   "installCommand": "npm ci --workspace web --include-workspace-root",
-  "buildCommand": "npm run build --workspace web",
-  "outputDirectory": "web/dist",
+  "buildCommand": "npm run build --workspace web && node scripts/vercel-output.mjs",
+  "outputDirectory": "dist",
   "cleanUrls": false,
   "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }],
   "headers": [
