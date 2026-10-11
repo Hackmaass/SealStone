@@ -13,3 +13,6 @@ server/data/agreements/*.json
 docs/report/
 docs/Sealstone-Solution-Proposal-Architecture.pdf
 docs/BLOCKCHAIN-COMPETITIVE-ANALYSIS.md
+
+# Third-party design reference screenshots (review only, never committed)
+docs/design-refs/

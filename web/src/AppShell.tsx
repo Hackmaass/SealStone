@@ -8,6 +8,7 @@ import { Wizard } from "./pages/agreement/Wizard";
 import { VaultPage } from "./pages/vault/VaultPage";
 import { AttackLab } from "./pages/AttackLab";
 import deployment from "./generated/deployment.json";
+import "./ui/dashboard.css";
 
 function Banners() {
   const app = useApp();

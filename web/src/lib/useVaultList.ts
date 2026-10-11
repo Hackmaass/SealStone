@@ -11,13 +11,25 @@ export function useVaultList(): { state: VaultListState; refresh: () => void } {
   const seq = useRef(0);
   const alive = useRef(true);
   const last = useRef(0);
+  const failures = useRef(0);
 
   const refresh = useCallback(() => {
     const mine = ++seq.current;
     last.current = Date.now();
     loadVaultSummaries()
-      .then((list) => alive.current && mine === seq.current && setState({ status: "ready", list }))
-      .catch((e: Error) => alive.current && mine === seq.current && setState((cur) => (cur.status === "ready" ? cur : { status: "error", message: e.message })));
+      .then((list) => {
+        failures.current = 0;
+        if (alive.current && mine === seq.current) setState({ status: "ready", list });
+      })
+      .catch((e: Error) => {
+        if (!alive.current || mine !== seq.current) return;
+        // A single refused request is common on some machines: retry quietly (0.6 s, 1.2 s, 2.4 s) before showing an error.
+        if (++failures.current <= 3) {
+          setTimeout(refresh, 600 * 2 ** (failures.current - 1));
+          return;
+        }
+        setState((cur) => (cur.status === "ready" ? cur : { status: "error", message: e.message }));
+      });
   }, []);
 
   useEffect(() => {

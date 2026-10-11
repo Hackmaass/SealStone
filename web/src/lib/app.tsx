@@ -79,10 +79,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
   // Poll the block number about once a second; read balances only when the block changes.
   useEffect(() => {
     let alive = true;
+    // One refused request (this machine does that at random) is not "the chain is down": it takes 3 misses in a row.
+    let misses = 0;
     const tick = async () => {
       try {
         const n = await provider.getBlockNumber();
         if (!alive) return;
+        misses = 0;
         setChainOnline(true);
         setBlock(n);
         if (lastBlock.current !== n) {
@@ -91,7 +94,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
           if (alive) setBalances({ client: vals[0], provider: vals[1], arbiter: vals[2], stranger: vals[3] });
         }
       } catch {
-        if (alive) setChainOnline(false);
+        if (alive && ++misses >= 3) setChainOnline(false);
       }
     };
     void tick();

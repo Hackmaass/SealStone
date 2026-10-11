@@ -10,6 +10,25 @@
   </head>
   <body>
     <div id="root"></div>
+    <script>
+      // Some machines intermittently refuse a loopback request (net::ERR_NETWORK_ACCESS_DENIED), which leaves the page blank or
+      // unstyled. If a script or stylesheet fails to load, reload (at most 3 times); the counter clears once a page loads cleanly.
+      (function () {
+        var KEY = "sealstone-load-retries";
+        window.addEventListener("error", function (e) {
+          var t = e.target;
+          if (!t || (t.tagName !== "SCRIPT" && t.tagName !== "LINK")) return;
+          var n = 0;
+          try { n = Number(sessionStorage.getItem(KEY)) || 0; } catch (_) {}
+          if (n >= 3) return;
+          try { sessionStorage.setItem(KEY, String(n + 1)); } catch (_) {}
+          setTimeout(function () { location.reload(); }, 300 * (n + 1));
+        }, true);
+        window.addEventListener("load", function () {
+          setTimeout(function () { try { sessionStorage.removeItem(KEY); } catch (_) {} }, 3000);
+        });
+      })();
+    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

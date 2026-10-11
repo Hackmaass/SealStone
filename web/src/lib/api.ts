@@ -54,14 +54,20 @@ export class ApiRejected extends Error {
 }
 
 async function call<T>(path: string, schema: z.ZodType<T>, init?: RequestInit, timeoutMs = 10_000): Promise<T> {
-  let res: Response;
-  try {
-    const timeout = AbortSignal.timeout(timeoutMs);
-    res = await fetch(`${API_URL}${path}`, { ...init, signal: init?.signal ? AbortSignal.any([init.signal, timeout]) : timeout });
-  } catch (e) {
-    if (e instanceof DOMException && e.name === "AbortError") throw e;
-    throw new ApiOffline();
+  let res: Response | undefined;
+  // A read (GET) is safe to repeat: one refused request (some machines do that at random) must not look like "the service is down".
+  const attempts = (init?.method ?? "GET") === "GET" ? 3 : 1;
+  for (let i = 1; i <= attempts && !res; i++) {
+    try {
+      const timeout = AbortSignal.timeout(timeoutMs);
+      res = await fetch(`${API_URL}${path}`, { ...init, signal: init?.signal ? AbortSignal.any([init.signal, timeout]) : timeout });
+    } catch (e) {
+      if (e instanceof DOMException && e.name === "AbortError") throw e;
+      if (i === attempts) throw new ApiOffline();
+      await new Promise((r) => setTimeout(r, 250 * i));
+    }
   }
+  if (!res) throw new ApiOffline();
   const body: unknown = await res.json().catch(() => ({}));
   if (!res.ok) {
     const b = body as { error?: string; errors?: string[]; issues?: string[] };

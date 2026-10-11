@@ -1,0 +1,162 @@
+/*
+ * Dashboard and the top bar's fit. Loaded with the app shell (after the shared sheets), so it wins ties.
+ * Structure, top to bottom: header (who + what is next) -> the money hero (one balance equation) -> work (needs your move, vaults) | aside.
+ * State colours keep their meaning and always come with a word or glyph: amber = awaiting approval, green = settled, blue = refunded, red = disputed.
+ */
+
+.dash{display:flex;flex-direction:column;gap:24px}
+
+/* ---------- header ---------- */
+.dhead{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;flex-wrap:wrap}
+.dhead-title{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.dhead-who{display:inline-flex;align-items:center;gap:8px;margin:0;padding:4px 12px 4px 10px;border:1px solid var(--rule);border-radius:var(--r-pill);background:var(--paper-2);font-size:.8125rem;font-weight:600;color:var(--ink-2)}
+.dhead-dot{width:8px;height:8px;border-radius:50%;background:var(--accent)}
+.dhead h1{font-size:1.875rem;line-height:1.15;letter-spacing:-.025em;margin:0}
+.dhead-sub{margin:6px 0 0;font-size:1.0625rem;color:var(--ink-2)}
+.dhead-actions{display:flex;gap:10px;flex-wrap:wrap}
+
+/* ---------- the money hero ---------- */
+.hero{padding:26px 28px 24px;border:1px solid var(--rule);border-radius:var(--r-lg);background:linear-gradient(135deg,var(--accent-wash) 0%,var(--paper-2) 62%);box-shadow:var(--shadow-sm)}
+.hero-top{display:flex;justify-content:space-between;align-items:flex-start;gap:24px;flex-wrap:wrap}
+.hero-k{margin:0;font-size:.875rem;font-weight:600;color:var(--ink-2)}
+.hero-fig{margin:2px 0 0;font-family:var(--mono);font-size:clamp(2rem,4.2vw,3rem);font-weight:600;letter-spacing:-.03em;line-height:1.1;font-variant-numeric:tabular-nums}
+.hero-fig .unit{font-size:.45em;font-weight:500;letter-spacing:0;color:var(--ink-2)}
+.hero-sk{display:inline-block;width:240px;height:.9em;vertical-align:middle}
+.hero-sub{margin:8px 0 0;font-size:.9375rem;color:var(--ink-2)}
+.hero-sub b{color:var(--ink)}
+.hero-proof{display:flex;gap:12px;align-items:flex-start;max-width:400px;padding:14px 18px;border-radius:var(--r-md);background:var(--intaglio-wash);border:1px solid transparent}
+.hero-proof.bad{background:var(--revert-wash)}
+.hero-proof-ic{flex:none;display:grid;place-items:center;width:36px;height:36px;border-radius:50%;background:var(--paper-2);color:var(--intaglio)}
+.hero-proof.bad .hero-proof-ic{color:var(--revert)}
+.hero-proof-t{margin:0;font-weight:680;color:var(--intaglio)}
+.hero-proof.bad .hero-proof-t{color:var(--revert)}
+.hero-proof-s{margin:2px 0 0;font-size:.8125rem;color:var(--ink-2);line-height:1.5}
+
+.hero-bar{display:flex;height:12px;margin-top:24px;border-radius:6px;overflow:hidden;background:var(--paper-3)}
+.hero-bar .seg{height:100%;border-right:2px solid var(--paper-2)}
+.hero-bar .seg:last-child{border-right:0}
+.hero-bar .seg.escrow{background:var(--accent)}
+.hero-bar .seg.owed{background:var(--intaglio)}
+.hero-bar .seg.gone{background:var(--pending)}
+.hero-bar .seg.none{width:100%;border:0;background:repeating-linear-gradient(135deg,var(--paper-3) 0 6px,var(--paper) 6px 12px)}
+.hero-legend{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px 24px;margin:14px 0 0}
+.hero-legend>div{min-width:0}
+.hero-legend dt{display:flex;align-items:center;gap:8px;font-size:.8125rem;font-weight:600;color:var(--ink-2)}
+.hero-legend .sw{width:10px;height:10px;border-radius:3px;flex:none}
+.hero-legend .escrow .sw{background:var(--accent)}
+.hero-legend .owed .sw{background:var(--intaglio)}
+.hero-legend .gone .sw{background:var(--pending)}
+.hero-legend dd{margin:2px 0 0;font-size:1.0625rem;font-weight:600;font-variant-numeric:tabular-nums}
+.hero-legend dd.h{font-size:.8125rem;font-weight:400;color:var(--ink-2)}
+
+/* ---------- layout ---------- */
+.dgrid{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:24px;align-items:start}
+.dmain{display:flex;flex-direction:column;gap:24px;min-width:0}
+.daside{display:flex;flex-direction:column;gap:20px;position:sticky;top:84px}
+
+.dpanel{background:var(--paper-2);border:1px solid var(--rule);border-radius:var(--r-md);box-shadow:var(--shadow-sm);overflow:hidden}
+.dpanel-head{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:18px 24px 12px}
+.dpanel-head h2{display:flex;align-items:center;gap:10px;margin:0;font-size:1.0625rem}
+.dpanel-n{font-weight:500}
+.count{display:inline-grid;place-items:center;min-width:24px;height:24px;padding:0 7px;border-radius:12px;background:var(--accent);color:var(--on-accent);font-size:.8125rem;font-weight:700}
+
+/* needs your move */
+.attention{list-style:none;margin:0;padding:0}
+.attention li{display:flex;align-items:center;gap:16px;padding:14px 24px;border-top:1px solid var(--rule)}
+.att-ic{flex:none;width:36px;height:36px;border-radius:50%;display:grid;place-items:center;font-weight:700;background:var(--accent-wash);color:var(--accent)}
+.att-ic.withdraw{background:var(--intaglio-wash);color:var(--intaglio)}
+.att-body{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
+.att-title{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.allclear{display:flex;flex-wrap:wrap;align-items:center;gap:16px;padding:6px 24px 22px}
+.allclear-ic{flex:none;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;background:var(--intaglio-wash);color:var(--intaglio)}
+.allclear-t{flex:1 1 220px;min-width:0}
+.allclear-t p{margin:0}
+.empty{padding:6px 24px 24px}
+
+/* a vault, one row */
+.vrows{list-style:none;margin:0;padding:0}
+.vrow{display:grid;grid-template-columns:40px minmax(0,1.25fr) minmax(0,1fr) auto 14px;grid-template-areas:"seal id prog money go" ". next next ledger go";align-items:center;gap:6px 18px;padding:16px 24px;border-top:1px solid var(--rule);cursor:pointer;transition:background .12s}
+.vrow>.seal,.vrow>svg{grid-area:seal;align-self:start}
+.vrow-id{grid-area:id;display:flex;flex-direction:column;gap:2px;min-width:0}
+.vrow-id b{font-size:1rem;font-weight:660;letter-spacing:-.01em}
+.vrow-prog{grid-area:prog;display:flex;flex-direction:column;gap:6px;min-width:0}
+.vrow-money{grid-area:money;display:flex;flex-direction:column;align-items:flex-end;gap:1px;font-weight:600}
+.vrow-next{grid-area:next;display:flex;gap:10px;align-items:baseline;flex-wrap:wrap;margin:0;font-size:.9375rem}
+.vrow-next.mine{font-weight:600}
+.vrow-next .tag{flex:none;font-size:.75rem;font-weight:700;padding:2px 10px;border-radius:var(--r-pill);background:var(--accent);color:var(--on-accent)}
+.vrow-next .tag.quiet{background:var(--paper-3);color:var(--ink-2)}
+.vrow-ledger{grid-area:ledger;justify-self:end;font-size:.8125rem;font-weight:600;white-space:nowrap}
+.vrow-ledger.ok{color:var(--intaglio)}
+.vrow-ledger.bad{color:var(--revert)}
+.vrow-go{grid-area:go;font-size:1.5rem;line-height:1;color:var(--ink-2);transition:transform .12s,color .12s}
+@media (hover:hover){.vrow:hover{background:var(--paper)}.vrow:hover .vrow-go{color:var(--accent);transform:translateX(3px)}}
+.vrow:focus-visible{outline-offset:-3px}
+
+/* one segment per milestone: state by colour AND fill style, and always in the tooltip, the screen-reader text and the "x of y settled" line */
+.segs{display:flex;gap:4px;list-style:none;margin:0;padding:0}
+.segm{width:30px;height:8px;border-radius:4px;border:1px solid var(--ink-2);background:transparent}
+.segm.proposed{background:var(--proposed);border-color:var(--proposed)}
+.segm.onchain{background:var(--intaglio);border-color:var(--intaglio)}
+.segm.human{background:var(--human);border-color:var(--human)}
+.segm.revert{background:repeating-linear-gradient(135deg,var(--revert) 0 3px,var(--revert-wash) 3px 6px);border-color:var(--revert)}
+
+/* aside */
+.dlab{display:flex;flex-direction:column;align-items:flex-start;gap:8px;padding:20px 22px;border:1px solid var(--rule);border-radius:var(--r-md);background:linear-gradient(160deg,var(--accent-wash) 0%,var(--paper-2) 80%);box-shadow:var(--shadow-sm)}
+.dlab-art{color:var(--accent)}
+.dlab h2{margin:0;font-size:1.0625rem}
+.dlab p{margin:0}
+.dlab .btn{margin-top:6px}
+.dkeys dl{margin:0;padding:0 24px 12px}
+.dkeys dl>div{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:9px 0;border-top:1px solid var(--rule);font-size:.9375rem}
+.dkeys dl>div:first-child{border-top:0}
+.dkeys dt{color:var(--ink-2)}
+.dkeys dd{margin:0;white-space:nowrap}
+.dkeys kbd{display:inline-block;min-width:22px;text-align:center;padding:1px 6px;border:1px solid var(--rule);border-bottom-width:2px;border-radius:6px;background:var(--paper);font:500 .75rem var(--mono);color:var(--ink)}
+
+/* ---------- the top bar, so the role switcher never cuts a name in half ---------- */
+.roles{flex:none}
+.roles button{gap:1px;padding:5px 11px}
+.roles button .r{font-size:.8125rem;font-weight:650;color:var(--ink)}
+.roles button .n{font-size:.6875rem;font-weight:500;color:var(--ink-2);max-width:92px;overflow:hidden;text-overflow:ellipsis}
+.roles button[aria-pressed="true"] .r,.roles button[aria-pressed="true"] .n{color:var(--on-accent);opacity:1}
+.roles button[aria-pressed="true"] .n{opacity:.85;max-width:none}
+/* presenter mode enlarges the type by 15%: the chain block pill gives up its place so the switcher stays whole */
+@media (max-width:1499px){html.presenter .pill-block{display:none}html.presenter .nav button{padding:9px 8px}}
+/* room is tight below 1500 px: only the role you are acting as shows its name (everyone's name is in the tooltip) */
+@media (max-width:1499px){.roles button:not([aria-pressed="true"]) .n{display:none}.roles button:not([aria-pressed="true"]){justify-content:center}}
+.pill .pill-k{font-weight:600;color:var(--ink)}
+
+@media (min-width:1181px) and (max-width:1499px){.topbar{gap:10px;padding-left:20px;padding-right:20px}.nav button{padding:9px 8px}.roles button{padding:5px 9px}}
+
+@media (min-width:1181px) and (max-width:1259px){.pill-block{display:none}}
+
+/* ---------- tablet ---------- */
+@media (max-width:980px){
+  .dgrid{grid-template-columns:1fr}
+  .daside{position:static;display:grid;grid-template-columns:1fr 1fr;align-items:stretch}
+}
+
+/* ---------- phone ---------- */
+@media (max-width:768px){
+  .dash{gap:18px}
+  .dhead{align-items:stretch;flex-direction:column;gap:14px}
+  .dhead h1{font-size:1.625rem}
+  .dhead-sub{font-size:1rem}
+  .dhead-actions{flex-direction:column-reverse}
+  .dhead-actions .btn{width:100%;justify-content:center}
+  .hero{padding:20px 18px 18px;border-radius:20px}
+  .hero-proof{max-width:none;width:100%}
+  .hero-legend{grid-template-columns:1fr;gap:0}
+  .hero-legend>div{display:grid;grid-template-columns:1fr auto;column-gap:12px;padding:9px 0;border-top:1px solid var(--rule)}
+  .hero-legend>div:first-child{border-top:0}
+  .hero-legend dd.h{display:none}
+  .daside{grid-template-columns:1fr}
+  .dpanel-head,.attention li,.allclear,.empty,.dkeys dl{padding-left:16px;padding-right:16px}
+  .attention li{flex-wrap:wrap}
+  .attention li .att-body{flex-basis:calc(100% - 52px)}
+  .attention li .btn{flex:1 1 100%;justify-content:center}
+  .vrow{grid-template-columns:40px minmax(0,1fr) auto;grid-template-areas:"seal id money" "prog prog ledger" "next next next";gap:10px 12px;padding:16px}
+  .vrow-go{display:none}
+  .vrow-ledger{align-self:end}
+  .dkeys{display:none}
+}

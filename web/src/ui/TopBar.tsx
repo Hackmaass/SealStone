@@ -64,7 +64,7 @@ export function TopBar() {
         <div className="spacer" />
         <label className="pill desk-only" title={aiTitle}>
           <span className="dot amber" />
-          AI:
+          <span className="pill-k">AI</span>
           <select aria-label="AI mode" value={app.aiMode} onChange={(e) => app.setAiMode(e.target.value as Mode)} style={{ border: 0, background: "transparent", padding: 0 }}>
             {MODES.map(([m, label]) => (
               <option key={m} value={m}>
@@ -74,7 +74,7 @@ export function TopBar() {
           </select>
           {sourceLabel && <span className="muted answered">answered: {sourceLabel}</span>}
         </label>
-        <span className="pill desk-only" title="Local Hardhat chain">
+        <span className="pill pill-block desk-only" title="Local Hardhat chain">
           <span className="dot" style={app.chainOnline ? undefined : { background: "var(--revert)" }} />
           Block{" "}
           <span className="mono" id="block">
@@ -90,7 +90,7 @@ export function TopBar() {
                 data-role={r}
                 aria-pressed={app.roleIdx === i}
                 onClick={() => app.setRoleIdx(i)}
-                title={`${shortHash(accountAddress(r))}${bal !== null ? ` · ${formatWei(bal, 2)} ETH` : ""} (key ${i + 1})`}
+                title={`${app.names[r]} · ${shortHash(accountAddress(r))}${bal !== null ? ` · ${formatWei(bal, 2)} ETH` : ""} (key ${i + 1})`}
               >
                 <span className="r">{ROLE_WORD[r]}</span>
                 <span className="n">{app.names[r]}</span>

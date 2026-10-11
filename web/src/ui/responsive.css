@@ -17,9 +17,6 @@ body.menu-open{overflow:hidden}
 @media (max-width:980px){
   main{padding:20px}
   .statrow{gap:22px}
-  .dstats{grid-template-columns:repeat(2,minmax(0,1fr))}
-  .dgrid{grid-template-columns:1fr}
-  .daside{position:static;display:grid;grid-template-columns:1fr 1fr;align-items:stretch}
 }
 
 /* ---------- the compact bar + menu: tablets and phones (the full bar needs about 1180 px) ---------- */
@@ -44,23 +41,6 @@ body.menu-open{overflow:hidden}
   .statrow{display:grid;grid-template-columns:1fr 1fr;gap:14px 18px;width:100%}
   .pagehead-actions{width:100%}
   .pagehead-actions .btn{flex:1;justify-content:center}
-  .dstats{gap:10px}
-  .dstat{padding:14px;gap:10px;flex-direction:column}
-  .dstat-ic{width:36px;height:36px}
-  .dstat-v{font-size:1.125rem}
-  .daside{grid-template-columns:1fr}
-  .dash-card-head,.dcard-head,.empty,.attention li,.allclear{padding-left:16px;padding-right:16px}
-  .actas{padding:6px 16px 14px}
-  .dmoney dl,.dmoney-note{padding-left:16px;padding-right:16px}
-  .attention li{flex-wrap:wrap}
-  .attention li .att-body{flex-basis:calc(100% - 52px)}
-  .attention li .btn{flex:1 1 100%;justify-content:center}
-  .vcard{padding:16px}
-  .vcard-ms{grid-template-columns:1fr}
-  .vcard-ms li{flex-direction:row;align-items:center;justify-content:space-between;gap:8px}
-  .vcard-foot{flex-direction:column;align-items:stretch}
-  .vcard-foot dl{justify-content:space-between;gap:12px}
-  .vcard-foot .btn{width:100%;justify-content:center}
   .filters .search{max-width:none}
   .filters .select{flex:1}
 
@@ -135,7 +115,6 @@ body.menu-open{overflow:hidden}
 
 @media (max-width:520px){
   .statrow .stat .v{font-size:1.0625rem}
-  .dstat-h{display:none}
   .actas-chip{max-width:118px}
   .actas-chip .n{max-width:96px}
   .vheadbox .vhead-in{flex-direction:column;align-items:flex-start}

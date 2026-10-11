@@ -11,44 +11,10 @@
 /* ---------- dashboard ---------- */
 .pagehead-actions{display:flex;gap:10px;flex-wrap:wrap}
 
-.dstats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
-.dstat{display:flex;gap:14px;align-items:flex-start;padding:18px 20px;background:var(--paper-2);border:1px solid var(--rule);border-radius:var(--r-md);box-shadow:var(--shadow-sm);min-width:0}
-.dstat-ic{flex:none;width:42px;height:42px;border-radius:12px;display:grid;place-items:center;background:var(--accent-wash);color:var(--accent)}
-.dstat.ok .dstat-ic{background:var(--intaglio-wash);color:var(--intaglio)}
-.dstat.bad .dstat-ic{background:var(--revert-wash);color:var(--revert)}
-.dstat-k{font-size:.8125rem;font-weight:600;color:var(--ink-2)}
-.dstat-v{font-family:var(--mono);font-size:1.375rem;font-weight:550;font-variant-numeric:tabular-nums;line-height:1.25;margin-top:2px;overflow-wrap:anywhere}
-.dstat.ok .dstat-v{font-family:var(--sans);font-size:1.0625rem;font-weight:680;color:var(--intaglio);padding:3px 0}
-.dstat.bad .dstat-v{font-family:var(--sans);font-size:1.0625rem;font-weight:680;color:var(--revert);padding:3px 0}
-.dstat-h{font-size:.8125rem;color:var(--ink-2);margin-top:2px}
 
-.dgrid{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:20px;align-items:start}
-.dmain{display:flex;flex-direction:column;gap:20px;min-width:0}
-.daside{display:flex;flex-direction:column;gap:20px;position:sticky;top:84px}
 
-.dcard{padding:0;overflow:hidden}
-.dcard-head{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:18px 24px 10px}
-.dcard-head h2,.dsection-head h2{font-size:1.0625rem;display:flex;align-items:center;gap:10px}
-.count{display:inline-grid;place-items:center;min-width:24px;height:24px;padding:0 7px;border-radius:12px;background:var(--accent);color:var(--on-accent);font-size:.8125rem;font-weight:700}
 
-/* who you are acting as, with where the next move is */
-.actas{display:flex;gap:8px;padding:8px 24px 14px;overflow-x:auto;overscroll-behavior-x:contain}
-.actas button{position:relative;flex:1 1 0;min-width:112px;text-align:left;display:flex;flex-direction:column;gap:0;padding:8px 14px;border:1px solid var(--rule);border-radius:12px;background:var(--paper);cursor:pointer;line-height:1.25}
-.actas button .n{font-weight:620;font-size:.9375rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
-.actas button .r{font-size:.75rem;color:var(--ink-2)}
-@media (hover:hover){.actas button:hover{border-color:var(--accent)}}
-.actas button[aria-pressed="true"]{background:var(--accent-wash);border-color:var(--accent)}
-.actas button[aria-pressed="true"] .n{color:var(--accent)}
-.dot-count{position:absolute;top:-7px;right:-5px;min-width:20px;height:20px;padding:0 5px;border-radius:10px;background:var(--revert);color:#fff;font-size:.6875rem;font-weight:700;display:grid;place-items:center;border:2px solid var(--paper-2)}
 
-.attention{list-style:none;margin:0;padding:0 0 6px}
-.attention li{display:flex;align-items:center;gap:14px;padding:14px 24px;border-top:1px solid var(--rule)}
-.att-ic{flex:none;width:36px;height:36px;border-radius:50%;display:grid;place-items:center;font-weight:700;background:var(--accent-wash);color:var(--accent)}
-.att-ic.withdraw{background:var(--intaglio-wash);color:var(--intaglio)}
-.att-body{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
-.att-body b{font-weight:650}
-.allclear{display:flex;gap:16px;align-items:flex-start;padding:10px 24px 24px}
-.allclear-ic{flex:none;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;background:var(--intaglio-wash);color:var(--intaglio)}
 
 .empty{padding:22px 24px 26px}
 .empty p:first-child{font-weight:600}
@@ -56,43 +22,8 @@
 .dash-card-head{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:18px 24px 6px}
 .dash-card-head h2{font-size:1.0625rem}
 
-.dsection{display:flex;flex-direction:column;gap:12px}
-.dsection-head{display:flex;justify-content:space-between;align-items:center}
 
-/* a vault card */
-.vcard{display:flex;flex-direction:column;gap:14px;padding:20px 24px;background:var(--paper-2);border:1px solid var(--rule);border-radius:var(--r-md);box-shadow:var(--shadow-sm);cursor:pointer;transition:border-color .12s,box-shadow .12s}
-@media (hover:hover){.vcard:hover{border-color:var(--accent);box-shadow:var(--shadow)}}
-.vcard:focus-visible{outline-offset:2px}
-.vcard-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
-.vcard-title{display:flex;flex-direction:column;gap:2px;min-width:0}
-.vcard-title b{font-size:1.0625rem;font-weight:660;letter-spacing:-.01em}
-.vcard-next{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap;font-size:.9375rem}
-.vcard-next .tag{flex:none;font-size:.75rem;font-weight:700;padding:2px 10px;border-radius:var(--r-pill);background:var(--accent);color:var(--on-accent)}
-.vcard-next .tag.quiet{background:var(--paper-3);color:var(--ink-2)}
-.vcard-next.mine{font-weight:600}
-.vcard-ms{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
-.vcard-ms li{display:flex;flex-direction:column;align-items:flex-start;gap:4px;padding:10px 12px;border:1px solid var(--rule);border-radius:12px;background:var(--paper)}
-.vcard-foot{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;padding-top:14px;border-top:1px solid var(--rule)}
-.vcard-foot dl,.dmoney dl{margin:0;display:flex;gap:28px;flex-wrap:wrap}
-.vcard-foot dl>div{display:flex;flex-direction:column;gap:1px}
-.vcard-foot dt{font-size:.75rem;color:var(--ink-2)}
-.vcard-foot dd{margin:0;font-weight:600}
-.okc{color:var(--intaglio)}
-.vcard-foot dd.bad{color:var(--revert)}
 
-/* side column */
-.dmoney dl{flex-direction:column;gap:0;padding:0 24px}
-.dmoney dl>div{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-top:1px solid var(--rule);font-size:.9375rem}
-.dmoney dl>div:first-child{border-top:0}
-.dmoney dt{color:var(--ink-2)}
-.dmoney dd{margin:0;font-size:.875rem}
-.dmoney .sum{font-weight:650}
-.dmoney .sum dt{color:var(--ink)}
-.dmoney-note{padding:10px 24px 18px}
-.dlab{display:flex;flex-direction:column;align-items:flex-start;gap:8px;padding:22px 24px;border:1px solid var(--rule);border-radius:var(--r-md);background:linear-gradient(160deg,var(--accent-wash) 0%,var(--paper-2) 80%);box-shadow:var(--shadow-sm)}
-.dlab-art{color:var(--accent)}
-.dlab h2{font-size:1.125rem}
-.dlab .btn{margin-top:6px}
 
 /* the list of vaults */
 table.vtable{width:100%;border-collapse:collapse;font-size:.9375rem}
