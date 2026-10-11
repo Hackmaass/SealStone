@@ -1,10 +1,11 @@
 // End-to-end walk of the agreement wizard in a real browser (Chrome via playwright-core).
 // Needs: `npm run chain`, `npm run server`, `npm run web` running. Rules mode, so it is deterministic.
-// Usage: node web/e2e/wizard.e2e.mjs [shots-dir]
+// Usage: node web/e2e/wizard.e2e.mjs [shots-dir]   (AI_MODE=ollama to walk the live-LLM path: extra cards, "Proposed by Ollama")
 import { chromium } from "playwright-core";
 import { mkdirSync } from "node:fs";
 import path from "node:path";
 
+const MODE = process.env.AI_MODE ?? "rules";
 const BASE = process.env.WEB_URL ?? "http://127.0.0.1:5173";
 const SHOTS = process.argv[2] ?? path.resolve("e2e-shots");
 mkdirSync(SHOTS, { recursive: true });
@@ -33,14 +34,19 @@ try {
   await page.reload();
 
   // 1. paste: rules mode, load the KrishiLens sample
-  await page.selectOption('select[aria-label="AI mode"]', "rules");
+  await page.selectOption('select[aria-label="AI mode"]', MODE);
   await page.selectOption('select[aria-label="Load a sample"]', "krishilens.txt");
   const text = await page.inputValue('textarea[aria-label="Agreement text"]');
   if (!text.includes("KrishiLens")) fail("sample did not load");
   await shot("1-paste");
   await page.click('button:has-text("Extract")');
-  await page.waitForSelector("text=Proposed checklist");
-  log("extracted in rules mode");
+  await page.waitForSelector("text=Proposed checklist", { timeout: MODE === "rules" ? 30000 : 120000 });
+  if (MODE === "ollama") {
+    const badge = await page.locator("text=/Proposed by/").first().innerText();
+    if (!/Proposed by Ollama/.test(badge) || !/d/.test(badge)) fail(`expected an Ollama badge with latency, saw: ${badge}`);
+    log(`badge: ${badge}`);
+  }
+  log(`extracted in ${MODE} mode`);
   await shot("2-proposal");
   const flagged = await page.locator("mark.amb").count();
   if (flagged < 4) fail(`expected at least 4 highlighted terms, saw ${flagged}`);
@@ -50,7 +56,7 @@ try {
   await page.click('button:has-text("Resolve the issues")');
   await page.waitForSelector("#cards .amb-card");
   const cards = await page.locator("#cards .amb-card").count();
-  if (cards !== 5) fail(`expected 5 ambiguity cards, saw ${cards}`);
+  if (MODE === "rules" ? cards !== 5 : cards < 5) fail(`unexpected ambiguity card count ${cards}`);
   const gateBtn = page.locator('.gate button:has-text("Review confirmed terms")');
   if (!(await gateBtn.isDisabled())) fail("gate button must be locked while issues are open");
   const reason = await page.locator(".gate ul").innerText();
@@ -73,6 +79,11 @@ try {
   await chip("CONDITIONAL_AMOUNT:1:0", "Remove the conditional clause");
   await chip("SUBJECTIVE_APPROVAL:1:0", "Replace with: A live demo");
   await chip("MISSING_DEADLINE:2:0", "Acknowledge");
+  if (MODE === "ollama") {
+    // cards only a live LLM produces: the blocking one is removed, the warning is acknowledged
+    await chip("UNDEFINED_TRANSITION:2:0", "Remove this clause");
+    await chip("VAGUE_CONDITION:1:0", "Acknowledge");
+  }
   await card("AMOUNT_MISMATCH:agreement:0").waitFor();
   await chip("AMOUNT_MISMATCH:agreement:0", "Set the total to");
   if (await gateBtn.isDisabled()) fail("gate should open once everything is resolved: " + (await page.locator(".gate ul").innerText()));

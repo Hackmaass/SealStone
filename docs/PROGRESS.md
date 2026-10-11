@@ -10,7 +10,7 @@
 | P04 Deploy + seed | ✅ | shared hashing + frozen vector, deploy/seed, ABI export, idempotent reset |
 | P05 AI service | ✅ | validator V1-V11 + gate + rules + Ollama/Gemini + routes; real Ollama run recorded below |
 | P06 AI eval | ⬜ | |
-| P07 Web: agreement wizard | ⬜ | |
+| P07 Web: agreement wizard | 🟨 | wizard works end to end in rules mode, ollama mode (against a qwen-shaped fake Ollama) and with the server down; NOT yet walked against a live LLM (see P07 verification) |
 | P08 Web: milestones + ledger | ⬜ | |
 | P09 Web: Attack Lab | ⬜ | |
 | P10 Stretch | ⬜ | |
@@ -25,6 +25,7 @@ Legend: ⬜ not started · 🟨 in progress · ✅ done (acceptance checks pass)
 - Contract tests: 138 passing / 138 total (0 pending). Includes the 4 booklet-required tests by exact name.
 - Invariant fuzz (5 seeds x 200 steps = 1,000 steps, 21 vaults): 401 succeeded / 599 reverted; 13 distinct custom errors hit; every revert decoded to a vault custom error (no Panic, no empty revert); every success emitted an event; I1-I8 asserted after each step; failed calls left storage identical (I6).
 - Coverage (MilestoneVault.sol, attack/ skipped via .solcover.js): lines 100% · branches 98.15% (only two unreachable defensive underflow guards in `reconcile()` remain uncovered)
+- Web tests (vitest): 32 passing (wizard reducer/gate wiring, revert decoding). `npm run build -w web` and `tsc -b` clean. E2E `web/e2e/wizard.e2e.mjs` (real Chrome via playwright-core; `AI_MODE=ollama` for the live-LLM path): passes in both modes.
 - AI eval: see docs/EVAL-RESULTS.md
 
 ## Decisions log
@@ -70,6 +71,13 @@ Legend: ⬜ not started · 🟨 in progress · ✅ done (acceptance checks pass)
 ## P05 real-server fallback checks (2026-10-11)
 - `OLLAMA_URL=http://127.0.0.1:9` (nothing listening): `source: "rules"`, 44 ms, `fallbackReason` "Ollama is not reachable at http://127.0.0.1:9; Gemini is not configured (...)", 3 milestones, 5 flags.
 - Plain defaults from `.env.example` (`llama3.2:3b`, not installed here): `source: "rules"`, 52 ms, `fallbackReason` "Ollama model "llama3.2:3b" is not installed (installed: qwen2.5:7b-instruct, ...)", 5 flags. (A judge's machine with no Ollama gets the first message.)
+
+## P07 verification (2026-10-11)
+- Rules mode e2e: paste -> extract -> 5 cards -> Confirm locked with a reason -> acknowledging a blocking card is refused -> one-click fixes -> confirm -> deploy -> both sign -> fund -> /vault reconciles -> reload keeps the step. All requests stay on 127.0.0.1 (fonts/scripts bundled).
+- Ollama mode: the Ollama model store on this machine is EMPTY now (`ollama list` shows nothing; qwen2.5:7b-instruct from P00/P05 is gone), so the walk used a throwaway fake Ollama returning a qwen-shaped answer (rules milestones + `VAGUE_CONDITION:1:0` + `UNDEFINED_TRANSITION:2:0`). Result: badge "Proposed by Ollama · qwen2.5:7b-instruct · 1.5 s"; 7 cards; the blocking UNDEFINED_TRANSITION resolves with "Remove this clause", the VAGUE_CONDITION warning with "Acknowledge", the gate opens, and deploy/sign/fund pass. **Still to do for ✅:** one walk with a real model (`ollama pull qwen2.5:7b-instruct` or llama3.2:3b, then `AI_MODE=ollama node web/e2e/wizard.e2e.mjs`); the e2e allows 120 s for the extract.
+- Server down (killed server + Ollama): banner "The AI service isn't running. Start it with npm run server."; samples dropdown shows "No samples (server offline)"; pasted text is extracted by the in-browser rules (`lib/localExtract.ts`, "Proposed by Rules"); the gate runs locally; Confirm falls back to the shared gate in the browser and shows "Kept in this browser only: the AI service was offline." No console errors.
+- Type boundary: `deployVault(confirmed: ConfirmedChecklist, hash, signer)` re-hashes before deploying and reads back hash/total; `deploy.boundary.ts` has a `@ts-expect-error` that makes `tsc -b` fail if a `ProposedChecklist` ever becomes deployable.
+- Rough edges: (1) the wizard's one-click fixes give a different agreement hash from the pre-seeded vault (`0x19a7...`, built from the sample's resolutions); docs/06 does not assume they match. (2) A merged milestone-2 condition can read "...; A live demo shows..." (capital letter after the semicolon, from joining suggestions). (3) Production bundle is 646 kB in one chunk (Vite warning); harmless offline. (4) The ollama daemon is not auto-started; a judge without it gets the rules fallback with a reason.
 
 ## Open questions
 - P01 / spec: `escalate` computes `completedAt + reviewWindow` in uint64 with checked arithmetic. A huge `reviewWindow` (near 2^64) would make `escalate` panic (Panic 0x11) instead of a custom error. Not changed (spec is source of truth); a constructor cap on `reviewWindow` would fix it if wanted.
