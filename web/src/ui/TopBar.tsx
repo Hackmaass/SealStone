@@ -7,7 +7,7 @@ import { formatWei, shortHash } from "./copy";
 import type { Mode } from "../lib/api";
 import deployment from "../generated/deployment.json";
 
-const BRAND_HASH = id("milestonevault");
+const BRAND_HASH = id("sealstone");
 const ROLE_WORD = { client: "Client", provider: "Provider", arbiter: "Arbiter", stranger: "Anyone" } as const;
 const MODES: Array<[Mode, string]> = [
   ["auto", "Auto"],
@@ -32,7 +32,7 @@ export function TopBar() {
     <header className="topbar">
       <div className="brand">
         <HashSeal hash={BRAND_HASH} state="onchain" size={28} />
-        MilestoneVault
+        Sealstone
       </div>
       <nav className="nav" aria-label="Main">
         {nav("/agreement", "Agreement", path === "/agreement")}

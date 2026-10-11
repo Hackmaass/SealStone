@@ -2,6 +2,8 @@
 
 ## B-03 — MilestoneVault: Adversarial Smart-Contract Escrow (verbatim from the booklet)
 
+> Our product name is **Sealstone**. The booklet's title above is kept verbatim so judges can match it; the contract is still `MilestoneVault.sol`.
+
 **Problem Overview.** Milestone-based agreements are common in freelance work, construction, and grant funding: payment follows approved deliverables, and disputes are common. Escrow is usually held by an intermediary whose rules are not visible. A contract can make the conditions explicit, but code that controls money is unforgiving. A payment released twice cannot easily be recovered, a missing access check lets the wrong person take funds, and a re-entrant call can drain funds before state is updated. Agreement text, meanwhile, is written in prose with ambiguous conditions that must be resolved before any money is committed.
 
 **The Challenge.** Build a milestone-based escrow in which simulated funds are released or refunded only when the agreement's conditions are met. The agreement names a client, a provider, and an arbiter who resolves disputes, and defines each milestone's amount and approval conditions.

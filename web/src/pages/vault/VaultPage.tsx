@@ -112,7 +112,12 @@ function VaultView({ address, snapshot: s, refresh }: { address: string; snapsho
   const vaultRole: VaultRole = roleOfAddress(parties, myAddress);
 
   // ───── rejected attempts (kept per vault, shown in the timeline) ─────
-  const [attempts, setAttempts] = useState<Attempt[]>(() => loadAttempts(address));
+  const [attempts, setAttempts] = useState<Attempt[]>(() => loadAttempts(address, s.epoch));
+  useEffect(() => {
+    // The chain was reset (same address, new life): old refusals belong to a vault that no longer exists.
+    setAttempts(loadAttempts(address, s.epoch));
+    setReject(null);
+  }, [address, s.epoch]);
   const [reject, setReject] = useState<{ index: number | null; d: DecodedRevert } | null>(null);
   const [shake, setShake] = useState<number | null>(null);
   const onRejected = useCallback(
@@ -123,11 +128,11 @@ function VaultView({ address, snapshot: s, refresh }: { address: string; snapsho
       if (index !== null) setShake(index);
       setAttempts((cur) => {
         const next = [...cur, { id: `a${Date.now()}-${cur.length}`, block: s.block, seq: cur.length, role: vaultRole, actor: myAddress, action, errorName: d.name, title: d.title, raw: formatRawError(d) }];
-        saveAttempts(address, next);
+        saveAttempts(address, s.epoch, next);
         return next;
       });
     },
-    [address, myAddress, s.block, vaultRole],
+    [address, myAddress, s.block, s.epoch, vaultRole],
   );
   // A refusal belongs to whoever caused it: switching accounts must not leave it looking like the new account's error.
   useEffect(() => {

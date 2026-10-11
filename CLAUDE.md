@@ -1,6 +1,7 @@
-# MilestoneVault — Claude Code project memory
+# Sealstone — Claude Code project memory
 
-VORTEXA 3.0 (12-hour hackathon), problem **B-03 MilestoneVault: Adversarial Smart-Contract Escrow**.
+VORTEXA 3.0 (12-hour hackathon), problem **B-03 MilestoneVault: Adversarial Smart-Contract Escrow** (the booklet's title).
+The PRODUCT is called **Sealstone**. Use that name in the UI, docs, README, logs and pitch. The Solidity contract keeps the booklet's identifier `MilestoneVault` (`MilestoneVault.sol`, ABI export, tests): that is a code name, not the brand.
 Team: Omkar Rane (builder, drives Claude Code) + teammate (research, test scenarios, pitch).
 
 Read these before any non-trivial change:

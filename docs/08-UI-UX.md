@@ -83,7 +83,7 @@ The state colours mean the same thing on every screen and **always come with an 
 
 ## Information architecture
 ```
-Top bar:  MilestoneVault | Agreement | Vault | Attack Lab |  [AI: Ollama ●]  [Chain: block 128 ●]  [Acting as: ▼ Client]
+Top bar:  Sealstone | Agreement | Vault | Attack Lab |  [AI: Ollama ●]  [Chain: block 128 ●]  [Acting as: ▼ Client]
 Routes:
   /                 Start: "Draft a new agreement" or "Open the demo vault"
   /agreement        Agreement studio (6-step wizard)

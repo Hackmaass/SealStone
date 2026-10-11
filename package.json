@@ -1,8 +1,8 @@
 {
-  "name": "milestonevault",
+  "name": "sealstone",
   "private": true,
   "version": "0.0.0",
-  "description": "MilestoneVault: adversarial smart-contract escrow (VORTEXA 3.0, B-03)",
+  "description": "Sealstone: escrow that can't be tricked (VORTEXA 3.0, B-03 MilestoneVault)",
   "workspaces": [
     "shared",
     "contracts",

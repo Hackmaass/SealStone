@@ -5,7 +5,7 @@ import { DEMO_FILES, hashFile, hashText, loadDemoFile, noteHash, type HashedFile
 import { loadNote } from "../../lib/notes";
 
 /** Choose what to hash: a built-in demo file, any file from the computer (drop or browse), or pasted text such as a git commit SHA. */
-export function FilePicker({ value, onChange, allowText = false }: { value: HashedFile | null; onChange: (f: HashedFile | null) => void; allowText?: boolean }) {
+export function FilePicker({ value, onChange, allowText = false, showPicked = true }: { value: HashedFile | null; onChange: (f: HashedFile | null) => void; allowText?: boolean; showPicked?: boolean }) {
   const [demo, setDemo] = useState<Array<HashedFile & { id: string; note: string }>>([]);
   const [selected, setSelected] = useState<string | null>(null);
   const [over, setOver] = useState(false);
@@ -95,7 +95,7 @@ export function FilePicker({ value, onChange, allowText = false }: { value: Hash
         </details>
       )}
       {error && <p className="field-error" role="alert">{error}</p>}
-      {value && (
+      {value && showPicked && (
         <div className="picked" aria-live="polite">
           <HashSeal hash={value.hash} state="submitted" size={44} />
           <div>
@@ -110,7 +110,7 @@ export function FilePicker({ value, onChange, allowText = false }: { value: Hash
 }
 
 function Foot({ children }: { children: ReactNode }) {
-  return <div className="foot" style={{ marginTop: 14 }}>{children}</div>;
+  return <div className="foot">{children}</div>;
 }
 
 // ───────────────────────── provider: submit work ─────────────────────────
@@ -150,7 +150,8 @@ export function ApproveSheet({
     <ActionSheet open={open} onClose={onClose}>
       <h2>Approve milestone {index + 1}</h2>
       <p className="muted">Choose the file you reviewed. An approval only applies to the exact file the provider submitted.</p>
-      <FilePicker value={file} onChange={setFile} />
+      {/* The chosen file's seal is shown in the comparison below, so the picker doesn't repeat it. */}
+      <FilePicker value={file} onChange={setFile} showPicked={false} />
       <div className="compare" data-testid="compare">
         <div className="side">
           <HashSeal hash={submittedHash} state="submitted" size={76} />

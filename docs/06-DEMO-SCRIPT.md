@@ -1,7 +1,7 @@
 # 06 — Demo script, pitch and judge Q&A
 
 ## 30-second pitch
-"Milestone escrow fails in three ways: unclear terms, swapped deliverables and buggy money code. Most escrow projects fix only the last one. MilestoneVault closes all three:
+"Milestone escrow fails in three ways: unclear terms, swapped deliverables and buggy money code. Most escrow projects fix only the last one. Sealstone closes all three:
 1. AI flags every ambiguity in the agreement, and money can't be locked until a human resolves each one and both sides sign the same hash.
 2. Approval binds to the exact deliverable hash, so a swapped file can't be paid for.
 3. The contract survives real attacks while its books visibly balance. Click any attack yourself."

@@ -10,5 +10,5 @@ const { createApp } = await import("./app");
 
 const port = Number(process.env.SERVER_PORT ?? 8787);
 createApp().listen(port, "127.0.0.1", () => {
-  console.log(`MilestoneVault server listening on http://127.0.0.1:${port}`);
+  console.log(`Sealstone server listening on http://127.0.0.1:${port}`);
 });

@@ -1,7 +1,7 @@
 # 02 — Implementation plan
 
 ## The idea in one paragraph
-Most teams will build one trust layer, safe funds. MilestoneVault builds three, and every one can be broken live by a judge.
+Most teams will build one trust layer, safe funds. Sealstone builds three, and every one can be broken live by a judge.
 - **Agreement integrity:** money can't be committed until the terms are unambiguous and both sides have signed the same hash.
 - **Deliverable integrity:** approval binds to the exact file that was reviewed.
 - **Fund integrity:** the contract survives real attacks while its books visibly balance.

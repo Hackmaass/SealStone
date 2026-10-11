@@ -108,7 +108,7 @@ export async function walkVault(page, { seeded, shot = async () => {}, log = con
   await role(3);
   const ctx = await row(1).innerText();
   if (!/Client's reason/.test(ctx) || !/only recognised 1 of the 3/.test(ctx)) fail(`the arbiter must see the client's reason next to the milestone:\n${ctx}`);
-  if (!(await row(1).locator("details.conditions").getAttribute("open")) === null) fail("conditions should be open for the arbiter");
+  if ((await row(1).locator("details.conditions").getAttribute("open")) === null) fail("what was agreed should be open for the arbiter on a disputed milestone");
   await row(1).locator('[data-action="refund"]').click();
   await page.fill('.sheet textarea[aria-label]', "The prototype did not meet the three-disease condition, so the money goes back.");
   await page.click('.sheet button:has-text("Refund 2.500 ETH")');

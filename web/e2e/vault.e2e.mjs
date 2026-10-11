@@ -3,6 +3,8 @@
 import { chromium } from "playwright-core";
 import { mkdirSync, readFileSync } from "node:fs";
 import path from "node:path";
+import { execSync } from "node:child_process";
+import { fileURLToPath } from "node:url";
 import { walkVault } from "./vaultWalk.mjs";
 
 const BASE = process.env.WEB_URL ?? "http://127.0.0.1:5173";
@@ -31,6 +33,18 @@ try {
     shot: (name) => page.screenshot({ path: path.join(SHOTS, `${name}.png`) }),
     log: (m) => console.log(`✓ ${m}`),
   });
+  // A demo reset redeploys the vault at the SAME address. Refusals rehearsed before it must not reappear afterwards,
+  // and sessionStorage is deliberately NOT cleared here (a real rehearsal tab keeps it).
+  const rejectedBefore = await page.locator(".activity li.bad").count();
+  if (rejectedBefore < 1) throw new Error("the rehearsal should have left rejected attempts in the activity list");
+  execSync("npm run demo:reset", { cwd: fileURLToPath(new URL("../../", import.meta.url)), stdio: "ignore" });
+  await page.reload();
+  await page.waitForSelector('[data-milestone="0"][data-state="Completed"]', { timeout: 20000 });
+  await page.waitForTimeout(600);
+  const rejectedAfter = await page.locator(".activity li.bad").count();
+  if (rejectedAfter !== 0) throw new Error(`a reset vault must open clean, but ${rejectedAfter} old rejected attempts reappeared`);
+  console.log(`✓ after a demo reset the vault opens clean (${rejectedBefore} rehearsal refusals did not come back)`);
+
   if (external.size) throw new Error(`requests left the machine:\n${[...external].join("\n")}`);
   if (errors.length) throw new Error(`browser errors:\n${errors.join("\n")}`);
   console.log("VAULT E2E PASSED");

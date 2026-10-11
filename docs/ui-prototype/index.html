@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>MilestoneVault prototype</title>
+<title>Sealstone prototype</title>
 <!-- Prototype only. The real app bundles these fonts via @fontsource so it works offline. -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -280,7 +280,7 @@ tr.contrast td{background:var(--revert-wash)}
 </head>
 <body>
 <header class="topbar">
-  <div class="brand"><span id="brandSeal"></span>MilestoneVault</div>
+  <div class="brand"><span id="brandSeal"></span>Sealstone</div>
   <nav class="nav" aria-label="Main">
     <button data-go="studio" aria-current="page">Agreement</button>
     <button data-go="vault">Vault</button>
@@ -489,7 +489,7 @@ document.addEventListener("keydown", e => {
   if (e.key === "t" || e.key === "T") $("#theme").click();
   if (e.key === "Escape") closeSheet();
 });
-$("#brandSeal").innerHTML = seal(fakeHash("milestonevault"), "onchain", 28);
+$("#brandSeal").innerHTML = seal(fakeHash("sealstone"), "onchain", 28);
 
 /* ---------- studio: ambiguities ---------- */
 const AMB = [

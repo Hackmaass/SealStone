@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-    MilestoneVault Auto-Commit & Auto-Push Watcher (PowerShell)
+    Sealstone Auto-Commit & Auto-Push Watcher (PowerShell)
     Monitors the git repository and commits & pushes changes every 1 hour.
 
 .DESCRIPTION
@@ -126,7 +126,7 @@ function Check-And-Commit {
 
 $remoteUrl = try { (git remote get-url origin 2>$null) } catch { "none" }
 Write-Host "==================================================" -ForegroundColor Cyan
-Write-Host "  MilestoneVault Auto-Commit & Push (PowerShell)  " -ForegroundColor Cyan
+Write-Host "  Sealstone Auto-Commit & Push (PowerShell)  " -ForegroundColor Cyan
 Write-Host "==================================================" -ForegroundColor Cyan
 Write-Host "Remote:        $remoteUrl"
 Write-Host "Interval:      $IntervalMinutes minute(s)"

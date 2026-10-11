@@ -1,10 +1,15 @@
 import type { Contract } from "ethers";
-import { provider, vaultContract, hasCode, revertInterface } from "./chain";
+import { deployment, provider, vaultContract, hasCode, revertInterface } from "./chain";
 import { MILESTONE_NAMES, type MilestoneView, type Parties, type RawEvent, type ReconcileView } from "./vaultModel";
 
 export interface VaultSnapshot {
   address: string;
   block: number;
+  /**
+   * Which "life" of the demo chain this is. Block hashes cannot tell (Hardhat replays the same history after a reset), but
+   * every deploy:demo / demo:reset rewrites deployment.json, so its generatedAt does. Per-vault browser state is keyed by it.
+   */
+  epoch: string;
   /** The chain's own clock, in seconds, as the NEXT block would see it. Never the laptop's clock. */
   chainNow: bigint;
   /** chainNow minus the laptop's clock at read time: add it to Date.now() to keep the chain's clock ticking between blocks. */
@@ -83,9 +88,10 @@ async function readEvents(address: string): Promise<RawEvent[]> {
 export async function loadVault(address: string): Promise<LoadResult> {
   if (!(await hasCode(address))) return { kind: "missing" };
   const v: Contract = vaultContract(address);
-  const [block, chainNow, client, prov, arbiter, agreementHash, reviewWindow, total, agreementState, clientSigned, providerSigned, nextMilestone, count, rec, events] =
+  const [block, epoch, chainNow, client, prov, arbiter, agreementHash, reviewWindow, total, agreementState, clientSigned, providerSigned, nextMilestone, count, rec, events] =
     await Promise.all([
       provider.getBlockNumber(),
+      Promise.resolve(deployment.generatedAt),
       chainClock(),
       v.client(),
       v.provider(),
@@ -123,6 +129,7 @@ export async function loadVault(address: string): Promise<LoadResult> {
     snapshot: {
       address,
       block,
+      epoch,
       chainNow,
       clockOffset: Number(chainNow) - Math.floor(Date.now() / 1000),
       addresses: { client, provider: prov, arbiter },

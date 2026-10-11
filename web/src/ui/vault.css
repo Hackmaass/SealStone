@@ -63,3 +63,12 @@
 .yourmove p{margin:0}
 .eq td:last-child{white-space:nowrap}
 .eq td:nth-child(2){padding-right:12px}
+
+/* A sheet taller than the screen scrolls, and its action buttons stay pinned and reachable (projector at 110% zoom clipped them). */
+.sheet{max-height:calc(100dvh - 32px);overflow-y:auto;overscroll-behavior:contain}
+.sheet .foot{position:sticky;bottom:-22px;background:var(--paper-2);padding:12px 0 22px;margin:14px 0 -22px;border-top:1px solid var(--rule);z-index:1}
+/* Presenter mode hides secondary metadata (docs/08): the parties line; the seal, total and verdict stay. */
+html.presenter .vhead-in .title .facts:first-of-type{display:none}
+.sheet .files{grid-template-columns:1fr 1fr;margin:12px 0}
+.sheet .file{align-items:flex-start}
+@media (max-width:560px){.sheet .files{grid-template-columns:1fr}}

@@ -233,7 +233,7 @@ async function main() {
   const intervalMs = intervalSeconds * 1000;
 
   console.log("==================================================");
-  console.log("  MilestoneVault Auto-Commit & Auto-Push Watcher");
+  console.log("  Sealstone Auto-Commit & Auto-Push Watcher");
   console.log("==================================================");
   console.log(`Branch:           ${getGitBranch()}`);
   console.log(`Remote:           ${getRemoteUrl()}`);
