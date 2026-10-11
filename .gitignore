@@ -1,0 +1,11 @@
+node_modules
+artifacts
+cache
+typechain-types
+coverage
+dist
+.env
+server/data/agreements/*.json
+!server/data/agreements/.gitkeep
+web/src/generated/
+*.log

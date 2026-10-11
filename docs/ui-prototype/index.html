@@ -1,0 +1,813 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MilestoneVault prototype</title>
+<!-- Prototype only. The real app bundles these fonts via @fontsource so it works offline. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#EDF0EA; --paper-2:#F7F8F4; --paper-3:#E3E8E0; --rule:#C9D0C6;
+  --ink:#18212B; --ink-2:#4A5562; --intaglio:#0D5B49; --intaglio-wash:#DCEBE4;
+  --proposed:#A86A12; --proposed-wash:#F6E7CC; --human:#2F56C9; --human-wash:#DDE5FA;
+  --revert:#B3261E; --revert-wash:#F6DCD9; --pending:#8A949E;
+  --sans:"Public Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,"Cascadia Mono",Consolas,monospace;
+  --r-sm:4px; --r-md:8px; --shadow:0 12px 32px rgba(24,33,43,.18);
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --paper:#10171F; --paper-2:#17212B; --paper-3:#1D2935; --rule:#2A3644;
+    --ink:#E4E9E2; --ink-2:#A3AFB9; --intaglio:#3FB28F; --intaglio-wash:#163A31;
+    --proposed:#E0A43C; --proposed-wash:#3A2C14; --human:#7FA1FF; --human-wash:#1D2A4D;
+    --revert:#F2756B; --revert-wash:#43201D; --pending:#6E7A86; --shadow:0 12px 32px rgba(0,0,0,.5);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#10171F; --paper-2:#17212B; --paper-3:#1D2935; --rule:#2A3644;
+  --ink:#E4E9E2; --ink-2:#A3AFB9; --intaglio:#3FB28F; --intaglio-wash:#163A31;
+  --proposed:#E0A43C; --proposed-wash:#3A2C14; --human:#7FA1FF; --human-wash:#1D2A4D;
+  --revert:#F2756B; --revert-wash:#43201D; --pending:#6E7A86; --shadow:0 12px 32px rgba(0,0,0,.5);
+  color-scheme:dark;
+}
+html.presenter{font-size:115%}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:1rem;line-height:1.5;-webkit-font-smoothing:antialiased}
+button,input,textarea,select{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--human);outline-offset:2px}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.muted{color:var(--ink-2)}
+.small{font-size:.875rem}
+h1,h2,h3{margin:0;line-height:1.2}
+h1{font-size:1.5625rem;font-weight:700;letter-spacing:-.01em}
+h2{font-size:1.25rem;font-weight:650}
+h3{font-size:1rem;font-weight:650}
+p{margin:0}
+
+/* ---------- top bar ---------- */
+.topbar{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:20px;padding:10px 24px;background:var(--paper-2);border-bottom:1px solid var(--rule)}
+.brand{display:flex;align-items:center;gap:10px;font-weight:700;letter-spacing:-.01em;white-space:nowrap}
+.brand svg{width:28px;height:28px;color:var(--intaglio)}
+.nav{display:flex;gap:4px}
+.nav button{white-space:nowrap;border:0;background:none;padding:8px 12px;border-radius:var(--r-sm);cursor:pointer;color:var(--ink-2);font-weight:500}
+.nav button[aria-current="page"]{color:var(--ink);background:var(--paper-3)}
+.nav button:hover{color:var(--ink)}
+.spacer{flex:1}
+.pill{display:inline-flex;align-items:center;gap:8px;padding:5px 10px;border:1px solid var(--rule);border-radius:999px;font-size:.8125rem;color:var(--ink-2);white-space:nowrap;background:var(--paper)}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--intaglio);flex:none}
+.dot.amber{background:var(--proposed)}
+.roles{display:flex;border:1px solid var(--rule);border-radius:var(--r-md);overflow:hidden;background:var(--paper)}
+.roles button{border:0;background:none;padding:6px 12px;cursor:pointer;display:flex;flex-direction:column;align-items:flex-start;line-height:1.2;border-right:1px solid var(--rule);white-space:nowrap}
+.roles button:last-child{border-right:0}
+.roles button .r{font-size:.75rem;color:var(--ink-2)}
+.roles button .n{font-weight:600;font-size:.875rem}
+.roles button[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+.roles button[aria-pressed="true"] .r{color:inherit;opacity:.75}
+.iconbtn{border:1px solid var(--rule);background:var(--paper);border-radius:var(--r-sm);padding:6px 9px;cursor:pointer;font-size:.8125rem;color:var(--ink-2)}
+.iconbtn[aria-pressed="true"]{color:var(--ink);border-color:var(--ink)}
+
+main{max-width:1360px;margin:0 auto;padding:24px}
+[data-view]{display:none}
+[data-view].on{display:block}
+
+/* ---------- shared bits ---------- */
+.panel{background:var(--paper-2);border:1px solid var(--rule);border-radius:var(--r-md)}
+.btn{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--ink);background:var(--ink);color:var(--paper);padding:8px 14px;border-radius:var(--r-sm);font-weight:600;cursor:pointer;min-height:36px}
+.btn:hover{filter:brightness(1.15)}
+.btn.secondary{background:transparent;color:var(--ink);border-color:var(--rule)}
+.btn.secondary:hover{border-color:var(--ink);filter:none}
+.btn.go{background:var(--intaglio);border-color:var(--intaglio);color:#fff}
+.btn:disabled{opacity:.45;cursor:not-allowed;filter:none}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:3px 9px;border-radius:999px;font-size:.8125rem;font-weight:600;border:1px solid currentColor;white-space:nowrap}
+.chip.proposed{color:var(--proposed);background:var(--proposed-wash);border-color:transparent}
+.chip.human{color:var(--human);background:var(--human-wash);border-color:transparent}
+.chip.onchain{color:var(--intaglio);background:var(--intaglio-wash);border-color:transparent}
+.chip.revert{color:var(--revert);background:var(--revert-wash);border-color:transparent}
+.chip.pending{color:var(--ink-2);background:var(--paper-3);border-color:transparent}
+.hash{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:.8125rem;color:var(--ink-2)}
+.hash button{border:0;background:none;cursor:pointer;color:var(--ink-2);padding:0 2px;font-size:.75rem;text-decoration:underline}
+
+/* ---------- seal ---------- */
+.seal{display:inline-block;flex:none;color:var(--ink)}
+.seal.proposed{color:var(--proposed)} .seal.onchain{color:var(--intaglio)} .seal.mismatch{color:var(--revert)} .seal.submitted{color:var(--ink)}
+.seal line{stroke:currentColor;stroke-linecap:round}
+.seal.draw line{stroke-dasharray:1;stroke-dashoffset:1;animation:grow .4s ease-out forwards}
+@keyframes grow{to{stroke-dashoffset:0}}
+
+/* ---------- toasts ---------- */
+.toasts{position:fixed;right:24px;bottom:24px;display:flex;flex-direction:column;gap:8px;z-index:50}
+.toast{background:var(--paper-2);border:1px solid var(--rule);border-left:4px solid var(--intaglio);border-radius:var(--r-md);padding:10px 14px;box-shadow:var(--shadow);max-width:380px;font-size:.9375rem}
+.toast.bad{border-left-color:var(--revert)}
+
+/* ---------- studio ---------- */
+.steps{display:flex;gap:0;margin:0 0 20px;padding:0;list-style:none;counter-reset:s;border:1px solid var(--rule);border-radius:var(--r-md);background:var(--paper-2);overflow:hidden}
+.steps li{flex:1;padding:10px 14px;font-size:.875rem;color:var(--ink-2);border-right:1px solid var(--rule);counter-increment:s;display:flex;gap:8px;align-items:center}
+.steps li:last-child{border-right:0}
+.steps li::before{content:counter(s);display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;border:1px solid var(--rule);font-size:.75rem;font-weight:600}
+.steps li.done{color:var(--ink)}
+.steps li.done::before{content:"✓";background:var(--intaglio);border-color:var(--intaglio);color:#fff}
+.steps li.now{color:var(--ink);font-weight:600;background:var(--paper)}
+.steps li.now::before{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.studio{display:grid;grid-template-columns:minmax(0,1fr) 400px;gap:20px;align-items:start}
+.doc{padding:28px 32px}
+.doc-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:18px}
+.doc article{max-width:68ch;font-size:1rem;line-height:1.75}
+.doc article p+p{margin-top:14px}
+.doc article h3{margin:22px 0 6px}
+mark.amb{background:var(--proposed-wash);color:inherit;border-bottom:2px solid var(--proposed);padding:1px 2px;border-radius:2px;cursor:pointer}
+mark.amb sup{font-family:var(--mono);font-size:.7rem;color:var(--proposed);font-weight:600;margin-left:2px}
+mark.amb.res{background:var(--human-wash);border-bottom-color:var(--human)}
+mark.amb.res sup{color:var(--human)}
+mark.amb.flash{outline:2px solid var(--proposed);outline-offset:2px}
+mark.amb del{color:var(--ink-2)}
+mark.amb ins{text-decoration:none;color:var(--human);font-weight:600}
+.rail{position:sticky;top:76px;max-height:calc(100vh - 180px);overflow:auto;padding:18px}
+.rail-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px}
+.meter{height:6px;background:var(--paper-3);border-radius:3px;overflow:hidden;margin-bottom:16px}
+.meter span{display:block;height:100%;background:var(--human);width:0;transition:width .3s}
+.amb-card{border-top:1px solid var(--rule);padding:14px 0}
+.amb-card:first-of-type{border-top:0}
+.amb-card .top{display:flex;justify-content:space-between;gap:8px;align-items:center;margin-bottom:6px}
+.amb-card .t{font-weight:650;display:flex;gap:8px;align-items:center}
+.amb-card .n{font-family:var(--mono);font-size:.75rem;width:20px;height:20px;border-radius:50%;display:inline-grid;place-items:center;background:var(--proposed);color:#fff}
+.amb-card.res .n{background:var(--human)}
+.amb-card blockquote{margin:6px 0;padding:4px 10px;border-left:3px solid var(--proposed);color:var(--ink-2);font-size:.9375rem}
+.amb-card.res blockquote{border-left-color:var(--human)}
+.amb-card .q{font-size:.9375rem;margin-bottom:8px}
+.fixes{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
+.fix{border:1px dashed var(--human);color:var(--human);background:transparent;border-radius:var(--r-sm);padding:4px 9px;font-size:.8125rem;cursor:pointer;text-align:left}
+.fix:hover{background:var(--human-wash)}
+.amb-card .row{display:flex;gap:8px;align-items:center}
+.amb-card input{flex:1;border:1px solid var(--rule);background:var(--paper);border-radius:var(--r-sm);padding:6px 8px;font-size:.875rem}
+.amb-card .why{font-size:.8125rem;color:var(--ink-2);margin-top:6px}
+.amb-card .done{font-size:.875rem;color:var(--human)}
+.amb-card.res .fixes,.amb-card.res .row,.amb-card.res .why{display:none}
+.gate{position:sticky;bottom:0;margin-top:20px;display:flex;align-items:center;gap:16px;padding:14px 20px;background:var(--paper-2);border:1px solid var(--rule);border-radius:var(--r-md);box-shadow:0 -8px 24px rgba(24,33,43,.06)}
+.gate ul{margin:0;padding:0;list-style:none;font-size:.875rem;color:var(--revert)}
+.gate ul li::before{content:"✕ "}
+.gate ul li.pass{color:var(--intaglio)}
+.gate ul li.pass::before{content:"✓ "}
+.confirm{display:none;grid-template-columns:minmax(0,1fr) 380px;gap:20px;margin-top:20px}
+.confirm.on{display:grid}
+.boundary{grid-column:1/-1;display:flex;gap:12px;align-items:center;padding:12px 16px;border:1px dashed var(--intaglio);border-radius:var(--r-md);color:var(--ink-2);font-size:.9375rem}
+.terms{padding:24px 28px}
+.terms table{width:100%;border-collapse:collapse;margin-top:12px;font-size:.9375rem}
+.terms th{text-align:left;font-weight:600;color:var(--ink-2);font-size:.8125rem;border-bottom:1px solid var(--rule);padding:6px 8px}
+.terms td{border-bottom:1px solid var(--rule);padding:10px 8px;vertical-align:top}
+.terms td.mono{white-space:nowrap}
+.edited{color:var(--human);font-weight:600;border-bottom:1px dotted var(--human);cursor:help}
+.sealcard{padding:24px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:12px}
+
+/* ---------- vault ---------- */
+.vhead{display:flex;align-items:center;gap:18px;padding:18px 22px;margin-bottom:20px}
+.vhead .title{flex:1}
+.vgrid{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:20px;align-items:start}
+.ms{padding:4px 0}
+.ms-row{display:grid;grid-template-columns:40px minmax(0,1fr) auto;gap:4px 16px;padding:18px 22px;border-top:1px solid var(--rule)}
+.ms-row:first-child{border-top:0}
+.ms-row .num{font-family:var(--mono);font-size:1.25rem;color:var(--ink-2);padding-top:2px}
+.ms-row .amt{font-family:var(--mono);font-weight:500;font-size:1.0625rem;text-align:right}
+.ms-row .body{display:flex;flex-direction:column;gap:10px}
+.ms-row.locked{opacity:.6}
+.ms-row.shake{animation:shake .12s linear 2}
+@keyframes shake{25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
+.track{display:flex;align-items:center;gap:0;font-size:.8125rem;color:var(--ink-2);flex-wrap:wrap;row-gap:6px}
+.track .st{display:flex;align-items:center;gap:6px}
+.track .st i{width:12px;height:12px;border-radius:50%;border:2px solid var(--pending);display:inline-block}
+.track .st.done i{background:var(--intaglio);border-color:var(--intaglio)}
+.track .st.now i{border-color:var(--ink);box-shadow:0 0 0 3px var(--paper-3)}
+.track .st.now{color:var(--ink);font-weight:600}
+.track .st.bad i{border-color:var(--revert);background:var(--revert)}
+.track .bar{width:28px;height:2px;background:var(--rule);margin:0 8px}
+.track .bar.done{background:var(--intaglio)}
+.facts{display:flex;flex-wrap:wrap;gap:8px 20px;align-items:center;font-size:.875rem;color:var(--ink-2)}
+.facts .f{display:flex;align-items:center;gap:8px}
+.waiting{font-size:.9375rem}
+.waiting b{font-weight:650}
+.actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.try{position:relative}
+.try summary{list-style:none;cursor:pointer;font-size:.875rem;color:var(--ink-2);text-decoration:underline;text-underline-offset:3px;padding:6px 4px}
+.try summary::-webkit-details-marker{display:none}
+.try .menu{position:absolute;z-index:5;top:100%;left:0;min-width:240px;background:var(--paper-2);border:1px solid var(--rule);border-radius:var(--r-md);box-shadow:var(--shadow);padding:6px}
+.try .menu button{display:block;width:100%;text-align:left;border:0;background:none;padding:8px 10px;border-radius:var(--r-sm);cursor:pointer;font-size:.875rem}
+.try .menu button:hover{background:var(--paper-3)}
+.try .menu small{display:block;color:var(--ink-2)}
+.revert{border:1px solid var(--revert);background:var(--revert-wash);border-radius:var(--r-md);padding:10px 12px;font-size:.9375rem}
+.revert b{color:var(--revert)}
+.revert .raw{font-family:var(--mono);font-size:.75rem;color:var(--ink-2);margin-top:4px;word-break:break-all}
+.ledger{padding:18px 20px;position:sticky;top:76px}
+.ledger-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.stamp{display:inline-flex;align-items:center;gap:8px;font-weight:700;color:var(--intaglio)}
+.stamp.bad{color:var(--revert)}
+.eq{width:100%;border-collapse:collapse;font-size:.9375rem}
+.eq td{padding:5px 0}
+.eq td:last-child{text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums}
+.eq tr.sum td{border-top:1px solid var(--ink);font-weight:650}
+.eq tr.gap td{padding-top:12px}
+.eq .op{width:16px;color:var(--ink-2);font-family:var(--mono)}
+.stack{display:flex;height:10px;border-radius:5px;overflow:hidden;margin:14px 0 6px;background:var(--paper-3)}
+.stack span{transition:width .3s}
+.legend{display:flex;gap:12px;font-size:.75rem;color:var(--ink-2);flex-wrap:wrap}
+.legend i{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:4px}
+.check{margin-top:12px;font-size:.8125rem;color:var(--ink-2)}
+.activity{margin-top:20px;padding:18px 20px}
+.activity ol{list-style:none;margin:10px 0 0;padding:0}
+.activity li{display:grid;grid-template-columns:18px 1fr;gap:8px;padding:8px 0;border-top:1px solid var(--rule);font-size:.875rem}
+.activity li:first-child{border-top:0}
+.activity li .ic{color:var(--intaglio);font-weight:700}
+.activity li.bad .ic{color:var(--revert)}
+.activity li .meta{color:var(--ink-2);font-size:.8125rem}
+
+/* sheet */
+.scrim{position:fixed;inset:0;background:rgba(16,23,31,.45);display:none;align-items:center;justify-content:center;z-index:40;padding:16px}
+.scrim.on{display:flex}
+.sheet{background:var(--paper-2);border-radius:var(--r-md);box-shadow:var(--shadow);width:min(640px,100%);padding:22px 24px;border:1px solid var(--rule)}
+.sheet h2{margin-bottom:4px}
+.files{display:grid;gap:8px;margin:16px 0}
+.file{display:flex;gap:12px;align-items:center;border:1px solid var(--rule);border-radius:var(--r-md);padding:10px 12px;cursor:pointer}
+.file:has(input:checked){border-color:var(--ink)}
+.compare{display:grid;grid-template-columns:1fr auto 1fr;gap:12px;align-items:center;padding:14px;border-radius:var(--r-md);background:var(--paper);border:1px solid var(--rule)}
+.compare .side{display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;font-size:.8125rem}
+.compare .verdict{font-weight:700;text-align:center;font-size:.9375rem}
+.compare .verdict.ok{color:var(--intaglio)} .compare .verdict.bad{color:var(--revert)}
+.preview{margin:14px 0;padding:12px 14px;border-left:3px solid var(--ink);background:var(--paper);font-size:.9375rem}
+.sheet .foot{display:flex;justify-content:flex-end;gap:8px;margin-top:6px}
+.sheet textarea{width:100%;min-height:80px;border:1px solid var(--rule);border-radius:var(--r-sm);background:var(--paper);padding:8px;margin-top:10px}
+
+/* ---------- attack lab ---------- */
+.lab-head{display:flex;align-items:flex-end;gap:16px;margin-bottom:16px}
+.lab-head .title{flex:1}
+.score{font-size:1.25rem;font-weight:650}
+.score .mono{font-size:1.25rem}
+table.lab{width:100%;border-collapse:collapse;font-size:.9375rem}
+table.lab th{text-align:left;font-size:.8125rem;font-weight:600;color:var(--ink-2);padding:10px 14px;border-bottom:1px solid var(--rule)}
+table.lab td{padding:12px 14px;border-bottom:1px solid var(--rule);vertical-align:top}
+table.lab tr.cur td{background:var(--paper-3)}
+table.lab .star{color:var(--proposed);font-weight:700}
+table.lab .err{font-family:var(--mono);font-size:.75rem;color:var(--ink-2);display:block}
+table.lab .verdict{font-weight:700;white-space:nowrap}
+.verdict.blocked{color:var(--intaglio)} .verdict.unsafe{color:var(--revert)} .verdict.wait{color:var(--pending);font-weight:500}
+.verdict.stampin{animation:stamp .25s ease-out}
+@keyframes stamp{from{transform:scale(1.6);opacity:0}to{transform:scale(1);opacity:1}}
+tr.contrast td{background:var(--revert-wash)}
+.lab-note{margin-top:12px;font-size:.875rem;color:var(--ink-2)}
+
+@media (max-width:1100px){
+  .studio,.vgrid,.confirm.on{grid-template-columns:1fr}
+  .rail,.ledger{position:static;max-height:none}
+  .roles button{min-width:0}
+  .roles .r{display:none}
+}
+@media (max-width:720px){
+  .topbar{flex-wrap:wrap;gap:10px;padding:10px 16px}
+  main{padding:16px}
+  .nav{order:3;width:100%}
+  .steps{flex-direction:column}
+  .steps li{border-right:0;border-bottom:1px solid var(--rule)}
+  .doc{padding:20px}
+  .ms-row{grid-template-columns:28px 1fr;padding:16px}
+  .ms-row .amt{grid-column:2;text-align:left}
+  .gate{position:static;flex-direction:column;align-items:stretch}
+  table.lab .hide-s{display:none}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.seal.draw line{stroke-dashoffset:0}}
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="brand"><span id="brandSeal"></span>MilestoneVault</div>
+  <nav class="nav" aria-label="Main">
+    <button data-go="studio" aria-current="page">Agreement</button>
+    <button data-go="vault">Vault</button>
+    <button data-go="lab">Attack Lab</button>
+  </nav>
+  <div class="spacer"></div>
+  <span class="pill" title="Which AI answered last"><span class="dot amber"></span>AI: Ollama</span>
+  <span class="pill" title="Local Hardhat chain"><span class="dot"></span>Chain: block <span class="mono" id="block">128</span></span>
+  <div class="roles" role="group" aria-label="Acting as">
+    <button data-role="client" aria-pressed="true"><span class="r">Client</span><span class="n">Incubation Cell</span></button>
+    <button data-role="provider" aria-pressed="false"><span class="r">Provider</span><span class="n">KrishiLens</span></button>
+    <button data-role="arbiter" aria-pressed="false"><span class="r">Arbiter</span><span class="n">Dr. Mehta</span></button>
+    <button data-role="stranger" aria-pressed="false"><span class="r">Anyone</span><span class="n">Stranger</span></button>
+  </div>
+  <button class="iconbtn" id="presenter" aria-pressed="false" title="Presenter mode (P)">Presenter</button>
+  <button class="iconbtn" id="theme" title="Toggle theme (T)">Theme</button>
+</header>
+
+<main>
+<!-- ===================== STUDIO ===================== -->
+<section data-view="studio" class="on">
+  <ol class="steps" id="steps">
+    <li class="done">Paste</li><li class="done">Proposal</li><li class="now">Resolve</li><li>Confirm</li><li>Deploy</li><li>Sign and fund</li>
+  </ol>
+
+  <div class="studio" id="studioMain">
+    <div class="panel doc">
+      <div class="doc-head">
+        <div>
+          <h1>KrishiLens incubation grant</h1>
+          <p class="muted small">Highlights are terms the AI or the rule checks flagged. Click one to jump to it.</p>
+        </div>
+        <span class="chip proposed">Proposed by Ollama · 4.2 s</span>
+      </div>
+      <article id="doc">
+        <p>This agreement is between the <b>Campus Incubation Cell</b> (the funder) and the <b>KrishiLens team</b> (the builders). Dr. Asha Mehta, faculty mentor, will settle any disagreement between them. The Cell commits a total grant of 5 ETH (test network) for the work below.</p>
+        <h3>Milestone 1: problem validation</h3>
+        <p>The team submits a report on interviews with at least 15 farmers about crop disease losses, due 31 October 2026. On approval the Cell pays 1 ETH.</p>
+        <h3>Milestone 2: working prototype</h3>
+        <p>The team delivers an app that identifies crop diseases from a phone photo. The second payment of 2.5 ETH is released when the prototype works <mark class="amb" data-id="a1">to the mentor's satisfaction<sup>1</sup></mark>, due 30 November 2026. <mark class="amb" data-id="a2">If the Cell does not reply within a week, the payment is considered approved.<sup>2</sup></mark></p>
+        <h3>Milestone 3: field pilot</h3>
+        <p>The team runs a pilot with 20 farmers and shares a short results report. The Cell pays <mark class="amb" data-id="a3">the remaining funds after the first two payments<sup>3</sup></mark> <mark class="amb" data-id="a4">once the pilot is done<sup>4</sup></mark>. <mark class="amb" data-id="a5">The team earns an extra 0.5 ETH if the pilot finishes before 30 November.<sup>5</sup></mark></p>
+      </article>
+    </div>
+
+    <aside class="panel rail" aria-label="Issues to resolve">
+      <div class="rail-head"><h2>Resolve before money locks</h2><span class="mono" id="count">0 / 5</span></div>
+      <div class="meter"><span id="meter"></span></div>
+      <div id="cards"></div>
+    </aside>
+  </div>
+
+  <div class="gate" id="gate">
+    <div style="flex:1">
+      <ul id="gateList"></ul>
+    </div>
+    <button class="btn go" id="confirmBtn" disabled>Confirm terms</button>
+  </div>
+
+  <div class="confirm" id="confirm">
+    <div class="boundary"><span id="bSeal"></span><span>Everything above was proposed by AI and edited by people. Below are the confirmed terms. Only this exact version can be signed and deployed.</span></div>
+    <div class="panel terms">
+      <h2>Confirmed terms</h2>
+      <p class="muted small">Client: Campus Incubation Cell. Provider: KrishiLens team. Arbiter: Dr. Asha Mehta. Review window: 7 days.</p>
+      <table>
+        <thead><tr><th>#</th><th>Milestone</th><th>Condition</th><th>Due</th><th style="text-align:right">Amount</th></tr></thead>
+        <tbody id="termsBody"></tbody>
+      </table>
+    </div>
+    <div class="panel sealcard">
+      <span id="agreeSeal"></span>
+      <h3>Agreement seal</h3>
+      <span class="hash" id="agreeHash"></span>
+      <p class="muted small">Change one character in the terms and this seal changes. Both parties sign this exact seal before any money moves.</p>
+      <button class="btn" data-go="vault">Deploy and continue</button>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== VAULT ===================== -->
+<section data-view="vault">
+  <div class="panel vhead">
+    <span id="vSeal"></span>
+    <div class="title">
+      <h1>KrishiLens incubation grant</h1>
+      <div class="facts"><span class="f">Agreement</span><span class="hash" id="vHash"></span><span class="chip onchain">✓ Terms match the confirmed file</span></div>
+    </div>
+    <span class="chip onchain">Active</span>
+  </div>
+
+  <div class="vgrid">
+    <div>
+      <div class="panel ms" id="milestones"></div>
+      <div class="panel activity">
+        <h2>Activity</h2>
+        <ol id="activity"></ol>
+      </div>
+    </div>
+    <aside class="panel ledger" aria-label="Ledger">
+      <div class="ledger-head"><h2>Ledger</h2><span class="stamp" id="stamp"></span></div>
+      <table class="eq" id="eq"></table>
+      <div class="stack" id="stack"></div>
+      <div class="legend"><span><i style="background:var(--ink-2)"></i>In escrow</span><span><i style="background:var(--human)"></i>Owed</span><span><i style="background:var(--intaglio)"></i>Paid out</span></div>
+      <p class="check" id="checks"></p>
+      <div id="withdrawBox" style="margin-top:14px"></div>
+    </aside>
+  </div>
+</section>
+
+<!-- ===================== ATTACK LAB ===================== -->
+<section data-view="lab">
+  <div class="lab-head">
+    <div class="title">
+      <h1>Attack Lab</h1>
+      <p class="muted">Every attack runs as a real transaction against a fresh sandbox vault. Starred rows are the attacks the problem statement requires.</p>
+    </div>
+    <div class="score" id="score"><span class="mono">0</span> of 12 blocked</div>
+    <button class="btn secondary" id="resetLab">Reset sandbox</button>
+    <button class="btn" id="runAll">Run all attacks</button>
+  </div>
+  <div class="panel" style="overflow:auto">
+    <table class="lab">
+      <thead><tr><th></th><th>Attack</th><th class="hide-s">Attacker</th><th>Contract's answer</th><th class="hide-s">Ledger</th><th>Verdict</th></tr></thead>
+      <tbody id="labBody"></tbody>
+    </table>
+  </div>
+  <p class="lab-note">The last row runs the same re-entrancy attacker against a deliberately naive escrow, to prove the attack is real.</p>
+</section>
+</main>
+
+<div class="scrim" id="scrim" role="dialog" aria-modal="true"><div class="sheet" id="sheet"></div></div>
+<div class="toasts" id="toasts" aria-live="polite"></div>
+
+<script>
+/* ---------- helpers ---------- */
+const $ = (s, r=document) => r.querySelector(s);
+const $$ = (s, r=document) => [...r.querySelectorAll(s)];
+// Prototype-only deterministic pseudo-hash (the real app uses SHA-256 / keccak256).
+function fakeHash(str){
+  let out = "";
+  for (let k = 0; k < 8; k++){
+    let h = 2166136261 ^ (k * 16777619);
+    for (const c of str + "#" + k){ h ^= c.charCodeAt(0); h = Math.imul(h, 16777619) >>> 0; }
+    out += h.toString(16).padStart(8, "0");
+  }
+  return "0x" + out;
+}
+const short = h => h.slice(0, 6) + "…" + h.slice(-4);
+function seal(hash, state="submitted", size=40, draw=false){
+  const hex = hash.replace(/^0x/, "");
+  let lines = "";
+  for (let i = 0; i < 64; i++){
+    const v = parseInt(hex[i], 16);
+    const a = (i / 64) * Math.PI * 2 - Math.PI / 2;
+    const r1 = 22, r2 = 26 + v * 1.25;
+    const x1 = 50 + r1 * Math.cos(a), y1 = 50 + r1 * Math.sin(a);
+    const x2 = 50 + r2 * Math.cos(a), y2 = 50 + r2 * Math.sin(a);
+    lines += `<line pathLength="1" x1="${x1.toFixed(2)}" y1="${y1.toFixed(2)}" x2="${x2.toFixed(2)}" y2="${y2.toFixed(2)}" stroke-width="1.6" style="animation-delay:${i*5}ms"/>`;
+  }
+  const b = parseInt(hex.slice(0, 2), 16);
+  const inner = `<circle cx="50" cy="50" r="17" fill="none" stroke="currentColor" stroke-width="1.2"/>
+    <circle cx="50" cy="50" r="${6 + (b % 6)}" fill="none" stroke="currentColor" stroke-width="1.2" stroke-dasharray="${2 + (b % 4)} ${2 + ((b >> 2) % 3)}"/>
+    <circle cx="50" cy="50" r="2.2" fill="currentColor"/>`;
+  return `<svg class="seal ${state} ${draw ? "draw" : ""}" width="${size}" height="${size}" viewBox="0 0 100 100" role="img" aria-label="Seal for hash ${short(hash)}">${inner}${lines}</svg>`;
+}
+const hashText = h => `<span class="hash" title="${h}">${short(h)} <button type="button" data-copy="${h}">copy</button></span>`;
+function toast(msg, bad=false){
+  const t = document.createElement("div");
+  t.className = "toast" + (bad ? " bad" : "");
+  t.innerHTML = msg;
+  $("#toasts").append(t);
+  setTimeout(() => t.remove(), 4200);
+}
+document.addEventListener("click", e => {
+  const c = e.target.closest("[data-copy]");
+  if (c){ navigator.clipboard?.writeText(c.dataset.copy); toast("Hash copied"); }
+});
+let block = 128;
+const nextBlock = () => { block++; $("#block").textContent = block; return block; };
+
+/* ---------- navigation, roles, theme ---------- */
+function go(view){
+  $$("[data-view]").forEach(v => v.classList.toggle("on", v.dataset.view === view));
+  $$(".nav button").forEach(b => b.setAttribute("aria-current", b.dataset.go === view ? "page" : "false"));
+  window.scrollTo({top:0});
+}
+document.addEventListener("click", e => { const g = e.target.closest("[data-go]"); if (g) go(g.dataset.go); });
+let role = "client";
+const ROLES = {client:"Incubation Cell", provider:"KrishiLens team", arbiter:"Dr. Mehta", stranger:"a stranger"};
+function setRole(r){ role = r; $$(".roles button").forEach(b => b.setAttribute("aria-pressed", b.dataset.role === r)); renderVault(); }
+$$(".roles button").forEach(b => b.addEventListener("click", () => setRole(b.dataset.role)));
+$("#theme").addEventListener("click", () => {
+  const root = document.documentElement;
+  const dark = root.dataset.theme ? root.dataset.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+  root.dataset.theme = dark ? "light" : "dark";
+});
+$("#presenter").addEventListener("click", () => {
+  const on = document.documentElement.classList.toggle("presenter");
+  $("#presenter").setAttribute("aria-pressed", on);
+});
+document.addEventListener("keydown", e => {
+  if (e.target.matches("input,textarea")) return;
+  const map = {"1":"client","2":"provider","3":"arbiter","4":"stranger"};
+  if (map[e.key]) setRole(map[e.key]);
+  if (e.key === "p" || e.key === "P") $("#presenter").click();
+  if (e.key === "t" || e.key === "T") $("#theme").click();
+  if (e.key === "Escape") closeSheet();
+});
+$("#brandSeal").innerHTML = seal(fakeHash("milestonevault"), "onchain", 28);
+
+/* ---------- studio: ambiguities ---------- */
+const AMB = [
+  {id:"a1", type:"Vague condition", sev:"blocking", quote:"to the mentor's satisfaction", q:"Milestone 2 has no condition anyone can check. What exactly must the prototype do?", fixes:["Identifies 3 sample diseases at 80% confidence or more, in a live demo","Passes the 10-photo test set with at most 2 errors"], field:"Milestone 2 condition"},
+  {id:"a2", type:"Undefined transition", sev:"blocking", quote:"If the Cell does not reply within a week, the payment is considered approved.", q:"The contract never pays automatically. What should happen if the Cell doesn't reply?", fixes:["After 7 days the team may escalate to the arbiter","Remove this clause"], field:"Review rule"},
+  {id:"a3", type:"Conditional amount", sev:"blocking", quote:"the remaining funds after the first two payments", q:"Milestone 3 has no fixed amount. How much is it?", fixes:["1.5 ETH"], field:"Milestone 3 amount"},
+  {id:"a4", type:"Missing deadline", sev:"warning", quote:"once the pilot is done", q:"Milestone 3 has no due date. When is it due?", fixes:["15 December 2026","31 December 2026"], field:"Milestone 3 due date"},
+  {id:"a5", type:"Conditional amount", sev:"blocking", quote:"The team earns an extra 0.5 ETH if the pilot finishes before 30 November.", q:"A bonus makes the total 5.5 ETH, not 5 ETH. Keep it, or remove it?", fixes:["Remove the bonus clause","Make it a separate 0.5 ETH milestone"], field:"Bonus clause"},
+];
+const res = {};
+function renderCards(){
+  $("#cards").innerHTML = AMB.map((a, i) => {
+    const r = res[a.id];
+    return `<div class="amb-card ${r ? "res" : ""}" id="card-${a.id}">
+      <div class="top"><span class="t"><span class="n">${i+1}</span>${a.type}</span>
+        <span class="chip ${r ? "human" : a.sev === "blocking" ? "revert" : "pending"}">${r ? "Resolved" : a.sev === "blocking" ? "Blocking" : "Warning"}</span></div>
+      <blockquote>“${a.quote}”</blockquote>
+      ${r ? `<p class="done">${a.field}: <b>${r.value}</b><br><span class="muted">Note: ${r.note}</span></p>` : `
+      <p class="q">${a.q}</p>
+      <div class="fixes">${a.fixes.map(f => `<button class="fix" data-amb="${a.id}" data-val="${f}">${f}</button>`).join("")}</div>
+      <div class="row"><input aria-label="Your own fix for ${a.field}" placeholder="Or write your own fix…" data-own="${a.id}"><button class="btn secondary" data-ownbtn="${a.id}">Apply</button></div>
+      ${a.sev === "blocking" ? `<p class="why">Blocking issues must be fixed, not just acknowledged.</p>` : `<p class="why"><button class="fix" data-amb="${a.id}" data-val="No deadline (acknowledged)">Acknowledge without a date</button></p>`}`}
+    </div>`;
+  }).join("");
+  const n = Object.keys(res).length;
+  $("#count").textContent = `${n} / ${AMB.length}`;
+  $("#meter").style.width = (n / AMB.length * 100) + "%";
+  const open = AMB.filter(a => !res[a.id]);
+  const blocking = open.filter(a => a.sev === "blocking").length;
+  const lines = [];
+  if (blocking) lines.push(`<li>Confirm is locked: ${blocking} blocking ${blocking === 1 ? "issue is" : "issues are"} still open</li>`);
+  if (open.length - blocking) lines.push(`<li>${open.length - blocking} warning still needs a decision</li>`);
+  lines.push(open.length
+    ? `<li class="pass">Wallets assigned to client, provider and arbiter</li>`
+    : `<li class="pass">Every issue resolved and re-checked. The terms add up to 5.000 ETH.</li>`);
+  $("#gateList").innerHTML = lines.join("");
+  $("#confirmBtn").disabled = open.length > 0;
+}
+function resolve(id, value){
+  const a = AMB.find(x => x.id === id);
+  res[id] = {value, note: value.startsWith("Remove") ? "Clause removed by both parties" : "Agreed in review"};
+  const m = $(`mark[data-id="${id}"]`);
+  m.classList.add("res");
+  const sup = m.querySelector("sup").outerHTML;
+  m.innerHTML = `<del>${a.quote}</del> <ins>${value}</ins>${sup}`;
+  renderCards();
+  toast(`Resolved: ${a.type.toLowerCase()} in ${a.field.toLowerCase()}`);
+}
+$("#cards").addEventListener("click", e => {
+  const f = e.target.closest("[data-amb]");
+  if (f) return resolve(f.dataset.amb, f.dataset.val);
+  const o = e.target.closest("[data-ownbtn]");
+  if (o){ const v = $(`[data-own="${o.dataset.ownbtn}"]`).value.trim(); if (v.length >= 3) resolve(o.dataset.ownbtn, v); else toast("Write the fix first (at least a few words).", true); }
+});
+$("#doc").addEventListener("click", e => {
+  const m = e.target.closest("mark.amb"); if (!m) return;
+  const card = $(`#card-${m.dataset.id}`);
+  card.scrollIntoView({behavior:"smooth", block:"center"});
+});
+$("#cards").addEventListener("mouseover", e => {
+  const c = e.target.closest(".amb-card"); $$("mark.amb").forEach(m => m.classList.remove("flash"));
+  if (c) $(`mark[data-id="${c.id.replace("card-","")}"]`)?.classList.add("flash");
+});
+$("#confirmBtn").addEventListener("click", () => {
+  const steps = $$("#steps li"); steps[2].className = "done"; steps[3].className = "now";
+  const h = fakeHash(JSON.stringify(res));
+  agreementHash = h;
+  const rows = [
+    ["1","Problem validation","Report on interviews with 15+ farmers","31 Oct 2026","1.000"],
+    ["2","Working prototype",`<span class="edited" title="AI proposed: to the mentor's satisfaction">${res.a1.value}</span>`,"30 Nov 2026","2.500"],
+    ["3","Field pilot","Pilot with 20 farmers and a results report",`<span class="edited" title="AI proposed: no date">${res.a4.value}</span>`,`<span class="edited" title="AI proposed: the remaining funds">1.500</span>`],
+  ];
+  $("#termsBody").innerHTML = rows.map(r => `<tr><td class="mono">${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td><td class="mono" style="text-align:right">${r[4]} ETH</td></tr>`).join("")
+    + `<tr><td></td><td colspan="3"><b>Total</b></td><td class="mono" style="text-align:right"><b>5.000 ETH</b></td></tr>`;
+  $("#agreeSeal").innerHTML = seal(h, "onchain", 132, true);
+  $("#bSeal").innerHTML = seal(h, "onchain", 28);
+  $("#agreeHash").innerHTML = hashText(h);
+  $("#confirm").classList.add("on");
+  $("#gate").style.display = "none";
+  $("#confirm").scrollIntoView({behavior:"smooth"});
+  toast("Terms confirmed. Agreement seal created.");
+  renderVault();
+});
+
+/* ---------- vault ---------- */
+const E = n => n.toFixed(3);
+let agreementHash = fakeHash("krishilens-confirmed-terms");
+const FILES = {v1:{name:"krishilens-prototype-v1.zip", note:"The build the team submitted"}, v2:{name:"krishilens-prototype-v2.zip", note:"A newer build, never submitted"}};
+FILES.v1.hash = fakeHash(FILES.v1.name); FILES.v2.hash = fakeHash(FILES.v2.name);
+const V = {
+  deposited:5, withdrawn:0, owedProvider:1, owedClient:0,
+  ms:[
+    {t:"Problem validation report", amt:1, state:"Released", deliverable:fakeHash("m1-report.pdf"), note:"Approved by the client in block 52"},
+    {t:"Working prototype", amt:2.5, state:"Completed", deliverable:FILES.v1.hash, note:"Submitted by the team in block 127"},
+    {t:"Field pilot with 20 farmers", amt:1.5, state:"Pending"},
+  ],
+  log:[
+    {ok:true, t:"Milestone 2 marked complete", m:"KrishiLens team, block 127"},
+    {ok:false, t:"Rejected: approve milestone 1 again", m:"Already paid out. Nothing changed. Block 61"},
+    {ok:true, t:"Released 1.000 ETH for milestone 1", m:"Incubation Cell, block 52"},
+    {ok:true, t:"Escrow funded with 5.000 ETH", m:"Incubation Cell, block 44"},
+    {ok:true, t:"Terms signed by both parties", m:"Blocks 42 and 43"},
+  ],
+  rejects:{},
+};
+const released = () => V.ms.filter(m => m.state === "Released").reduce((s, m) => s + m.amt, 0);
+const refunded = () => V.ms.filter(m => m.state === "Refunded").reduce((s, m) => s + m.amt, 0);
+const nextIdx = () => V.ms.findIndex(m => !["Released","Refunded"].includes(m.state));
+function track(m, i){
+  const order = ["Pending","Completed","Released"];
+  if (m.state === "Disputed" || m.state === "Refunded" || m.disputed){
+    const s = m.state;
+    return `<div class="track">
+      <span class="st done"><i></i>Pending</span><span class="bar done"></span>
+      <span class="st done"><i></i>Completed</span><span class="bar done"></span>
+      <span class="st ${s === "Disputed" ? "now" : "done"}"><i></i>Disputed</span><span class="bar ${s !== "Disputed" ? "done" : ""}"></span>
+      <span class="st ${s === "Refunded" ? "done" : s === "Released" ? "done" : ""}"><i></i>${s === "Refunded" ? "Refunded" : s === "Released" ? "Released by arbiter" : "Arbiter decides"}</span></div>`;
+  }
+  const k = order.indexOf(m.state);
+  return `<div class="track">${order.map((o, j) => `${j ? `<span class="bar ${j <= k ? "done" : ""}"></span>` : ""}<span class="st ${j < k || (j === k && m.state === "Released") ? "done" : j === k ? "now" : ""}"><i></i>${o}</span>`).join("")}</div>`;
+}
+function actionsFor(m, i){
+  const ni = nextIdx();
+  const btn = (label, act, cls="btn") => `<button class="${cls}" data-act="${act}" data-i="${i}">${label}</button>`;
+  const tryMenu = items => `<details class="try"><summary>Try anyway</summary><div class="menu">${items.map(([l, a, why]) => `<button data-act="${a}" data-i="${i}">${l}<small>${why}</small></button>`).join("")}</div></details>`;
+  if (["Released","Refunded"].includes(m.state)) return "";
+  if (i !== ni){
+    return `<p class="muted small">Unlocks after milestone ${ni + 1} is settled.</p>` + (role === "provider" ? `<div class="actions">${tryMenu([["Mark complete now","complete-early","Milestones go in order"]])}</div>` : "");
+  }
+  let main = "", wait = "", tries = [];
+  if (m.state === "Pending"){
+    wait = `Waiting for: <b>KrishiLens team</b> to submit the work.`;
+    if (role === "provider") main = btn("Submit work…", "complete");
+    else tries.push(["Mark complete", "complete-wrong", "Only the provider can do this"]);
+  } else if (m.state === "Completed"){
+    wait = `Waiting for: <b>Incubation Cell</b> to approve or dispute. Review window: 6 days 23 h left.`;
+    if (role === "client"){ main = btn("Approve with file…", "approve") + btn("Dispute…", "dispute", "btn secondary"); }
+    else {
+      tries.push(["Approve this milestone", "approve-wrong", "Only the client can approve"]);
+      if (role === "provider") main = `<button class="btn secondary" disabled title="Available after the review window">Escalate to arbiter</button><span class="muted small">Available in 6 days 23 h</span>`;
+    }
+    tries.push(["Refund to the client", "refund-wrong", "Only the arbiter can refund, and only after a dispute"]);
+  } else if (m.state === "Disputed"){
+    wait = `Waiting for: <b>Dr. Mehta</b> to settle the dispute.`;
+    if (role === "arbiter") main = btn("Release to the team", "rel") + btn("Refund the Cell", "ref", "btn secondary");
+    else tries.push(["Settle the dispute", "settle-wrong", "Only the arbiter can do this"]);
+  }
+  return `<p class="waiting">${wait}</p><div class="actions">${main}${tries.length ? tryMenu(tries) : ""}</div>`;
+}
+function renderVault(){
+  $("#vSeal").innerHTML = seal(agreementHash, "onchain", 48);
+  $("#vHash").innerHTML = hashText(agreementHash);
+  $("#milestones").innerHTML = V.ms.map((m, i) => {
+    const locked = i > nextIdx() && nextIdx() !== -1;
+    return `<div class="ms-row ${locked ? "locked" : ""}" id="ms-${i}">
+      <div class="num">${i+1}</div>
+      <div class="body">
+        <h3>${m.t}</h3>
+        ${track(m, i)}
+        ${m.deliverable ? `<div class="facts"><span class="f">${seal(m.deliverable, m.state === "Released" ? "onchain" : "submitted", 28)} Submitted file ${hashText(m.deliverable)}</span>${m.note ? `<span>${m.note}</span>` : ""}</div>` : ""}
+        ${V.rejects[i] ? `<div class="revert">${V.rejects[i]}</div>` : ""}
+        ${actionsFor(m, i)}
+      </div>
+      <div class="amt">${E(m.amt)} ETH</div>
+    </div>`;
+  }).join("");
+  // ledger
+  const rel = released(), ref = refunded(), escrow = V.deposited - rel - ref;
+  const owed = V.owedProvider + V.owedClient, balance = V.deposited - V.withdrawn;
+  const ok = Math.abs(escrow - V.ms.filter(m => !["Released","Refunded"].includes(m.state)).reduce((s, m) => s + m.amt, 0)) < 1e-9 && Math.abs(owed - (rel + ref - V.withdrawn)) < 1e-9;
+  $("#stamp").className = "stamp" + (ok ? "" : " bad");
+  $("#stamp").innerHTML = ok ? seal(fakeHash("ok" + block), "onchain", 22) + "Reconciled" : "Not reconciled";
+  $("#eq").innerHTML = `
+    <tr><td class="op"></td><td>Deposited</td><td>${E(V.deposited)} ETH</td></tr>
+    <tr><td class="op">−</td><td>Released to the team</td><td>${E(rel)}</td></tr>
+    <tr><td class="op">−</td><td>Refunded to the Cell</td><td>${E(ref)}</td></tr>
+    <tr class="sum"><td class="op">=</td><td>Still in escrow</td><td>${E(escrow)}</td></tr>
+    <tr class="gap"><td class="op"></td><td>Owed, not yet withdrawn</td><td>${E(owed)}</td></tr>
+    <tr><td class="op"></td><td>Withdrawn</td><td>${E(V.withdrawn)}</td></tr>
+    <tr class="sum"><td class="op"></td><td>Contract balance</td><td>${E(balance)} ${ok ? "✓" : "✕"}</td></tr>
+    <tr><td class="op"></td><td class="muted">Surplus from forced ETH</td><td class="muted">0.000</td></tr>`;
+  const T = V.deposited;
+  $("#stack").innerHTML = `<span style="width:${escrow/T*100}%;background:var(--ink-2)"></span><span style="width:${owed/T*100}%;background:var(--human)"></span><span style="width:${V.withdrawn/T*100}%;background:var(--intaglio)"></span>`;
+  $("#checks").textContent = `Checked after block ${block}: escrow equals unsettled milestones, owed equals paid out minus withdrawn, balance equals deposits minus withdrawals.`;
+  const mine = role === "provider" ? V.owedProvider : role === "client" ? V.owedClient : 0;
+  $("#withdrawBox").innerHTML = role === "arbiter" || role === "stranger"
+    ? `<p class="muted small">${role === "arbiter" ? "The arbiter can never be paid from this vault." : "Nothing is owed to you."}</p><details class="try"><summary>Try anyway</summary><div class="menu"><button data-act="withdraw-wrong" data-i="0">Withdraw<small>Nothing owed to you</small></button></div></details>`
+    : `<button class="btn ${mine ? "go" : "secondary"}" data-act="withdraw" data-i="0" ${mine ? "" : "disabled title=\"Nothing owed to you yet\""}>Withdraw ${E(mine)} ETH</button>`;
+  $("#activity").innerHTML = V.log.map(l => `<li class="${l.ok ? "" : "bad"}"><span class="ic">${l.ok ? "✓" : "✕"}</span><div>${l.t}<div class="meta">${l.m}</div></div></li>`).join("");
+}
+function reject(i, title, detail, raw){
+  const b = nextBlock();
+  V.rejects[i] = `<b>${title}</b> ${detail} Nothing changed.<div class="raw">${raw}</div>`;
+  V.log.unshift({ok:false, t:`Rejected: ${title.toLowerCase()}`, m:`Tried by ${ROLES[role]}. Nothing changed. Block ${b}`});
+  renderVault();
+  const row = $(`#ms-${i}`); row.classList.add("shake"); row.addEventListener("animationend", () => row.classList.remove("shake"), {once:true});
+  toast(`<b>${title}.</b> Nothing changed.`, true);
+}
+function ok(msg, logline){ const b = nextBlock(); V.log.unshift({ok:true, t:logline || msg, m:`${ROLES[role]}, block ${b}`}); V.rejects = {}; renderVault(); toast(msg); }
+$("#milestones").addEventListener("click", vaultAct);
+$("#withdrawBox").addEventListener("click", vaultAct);
+function vaultAct(e){
+  const b = e.target.closest("[data-act]"); if (!b) return;
+  b.closest("details")?.removeAttribute("open");
+  const i = +b.dataset.i, m = V.ms[i], act = b.dataset.act;
+  const roleErr = {client:"NotClient", provider:"NotProvider", arbiter:"NotArbiter"};
+  switch (act){
+    case "approve": return openApprove(i);
+    case "dispute": return openDispute(i);
+    case "complete": return openSubmit(i);
+    case "approve-wrong": return reject(i, "Only the client can approve", `You're acting as ${ROLES[role]}.`, "NotClient()");
+    case "refund-wrong": return role === "arbiter"
+      ? reject(i, "That step isn't allowed now", `Milestone ${i+1} is Completed, not disputed. Refunds only follow a dispute.`, `InvalidMilestoneState(index: ${i}, actual: Completed)`)
+      : reject(i, "Only the arbiter can refund", "Refunds happen only through the arbiter's ruling.", "NotArbiter()");
+    case "complete-wrong": return reject(i, "Only the provider can do this", "Marking work complete belongs to the KrishiLens team.", "NotProvider()");
+    case "complete-early": return reject(i, `Finish milestone ${nextIdx()+1} first`, "Milestones are completed in order.", `MilestoneOutOfOrder(index: ${i}, expectedIndex: ${nextIdx()})`);
+    case "settle-wrong": return reject(i, "Only the arbiter can settle disputes", `You're acting as ${ROLES[role]}.`, "NotArbiter()");
+    case "rel": m.state = "Released"; m.note = "Released by the arbiter"; V.owedProvider += m.amt; return ok(`Released ${E(m.amt)} ETH to the KrishiLens team`);
+    case "ref": m.state = "Refunded"; m.note = "Refunded by the arbiter"; V.owedClient += m.amt; return ok(`Refunded ${E(m.amt)} ETH to the Incubation Cell`);
+    case "withdraw": {
+      const amt = role === "provider" ? V.owedProvider : V.owedClient;
+      if (role === "provider") V.owedProvider = 0; else V.owedClient = 0;
+      V.withdrawn += amt; return ok(`Withdrew ${E(amt)} ETH`, `${ROLES[role]} withdrew ${E(amt)} ETH`);
+    }
+    case "withdraw-wrong": return reject(0, "Nothing owed to you", role === "arbiter" ? "The arbiter can never receive funds." : "Only the client and provider can be owed money.", "NothingToWithdraw()");
+  }
+}
+/* sheets */
+function openSheet(html){ $("#sheet").innerHTML = html; $("#scrim").classList.add("on"); $("#sheet").querySelector("button,input,textarea")?.focus(); }
+function closeSheet(){ $("#scrim").classList.remove("on"); }
+$("#scrim").addEventListener("click", e => { if (e.target.id === "scrim" || e.target.closest("[data-close]")) closeSheet(); });
+function openApprove(i){
+  const m = V.ms[i];
+  openSheet(`<h2>Approve milestone ${i+1}</h2>
+    <p class="muted">Choose the file you reviewed. Approval only applies to the exact file the team submitted.</p>
+    <div class="files">${Object.entries(FILES).map(([k, f]) => `<label class="file"><input type="radio" name="f" value="${k}" ${k === "v1" ? "checked" : ""}>${seal(f.hash, "submitted", 30)}<span><b>${f.name}</b><br><span class="muted small">${f.note}</span></span></label>`).join("")}</div>
+    <div class="compare" id="cmp"></div>
+    <div class="preview" id="pv"></div>
+    <div class="foot"><button class="btn secondary" data-close>Cancel</button><button class="btn go" id="doApprove">Approve and release ${E(m.amt)} ETH</button></div>`);
+  const upd = () => {
+    const k = $("input[name=f]:checked").value, f = FILES[k], match = f.hash === m.deliverable;
+    $("#cmp").innerHTML = `<div class="side">${seal(m.deliverable, "submitted", 76)}<span>Submitted by the team</span>${hashText(m.deliverable)}</div>
+      <div class="verdict ${match ? "ok" : "bad"}">${match ? "Seals match" : "Different files"}</div>
+      <div class="side">${seal(f.hash, match ? "onchain" : "mismatch", 76)}<span>Your file</span>${hashText(f.hash)}</div>`;
+    $("#pv").innerHTML = match ? `This releases <b>${E(m.amt)} ETH</b> to the KrishiLens team. It can't be undone.`
+      : `<b style="color:var(--revert)">This isn't the submitted file.</b> You can still send it. The contract will refuse it.`;
+    $("#doApprove").textContent = match ? `Approve and release ${E(m.amt)} ETH` : "Send anyway (the contract decides)";
+    $("#doApprove").className = match ? "btn go" : "btn";
+  };
+  $$("input[name=f]").forEach(r => r.addEventListener("change", upd)); upd();
+  $("#doApprove").addEventListener("click", () => {
+    const f = FILES[$("input[name=f]:checked").value]; closeSheet();
+    if (f.hash !== m.deliverable) return reject(i, "This isn't the file that was submitted", `Submitted ${short(m.deliverable)}, yours ${short(f.hash)}. Approval only applies to the exact file under review.`, `DeliverableHashMismatch(expected: ${short(m.deliverable)}, provided: ${short(f.hash)})`);
+    m.state = "Released"; m.note = "Approved by the client"; V.owedProvider += m.amt;
+    ok(`Released ${E(m.amt)} ETH to the KrishiLens team`);
+  });
+}
+function openDispute(i){
+  openSheet(`<h2>Dispute milestone ${i+1}</h2><p class="muted">Dr. Mehta, the arbiter, will decide whether to release the funds or refund them. Your reason is sealed and recorded.</p>
+    <textarea id="why" placeholder="What's wrong with the delivery?">The app only recognised 1 of the 3 sample diseases in our test.</textarea>
+    <div class="foot" style="margin-top:12px"><button class="btn secondary" data-close>Cancel</button><button class="btn" id="doDispute">Send to arbiter</button></div>`);
+  $("#doDispute").addEventListener("click", () => { V.ms[i].state = "Disputed"; V.ms[i].disputed = true; V.ms[i].note = "Disputed by the client"; closeSheet(); ok("Sent to the arbiter", `Milestone ${i+1} disputed`); });
+}
+function openSubmit(i){
+  openSheet(`<h2>Submit milestone ${i+1}</h2><p class="muted">Choose the file to submit. Its seal is recorded on-chain, and the client must approve this exact file.</p>
+    <label class="file"><input type="radio" checked>${seal(fakeHash("pilot-report.pdf"), "submitted", 30)}<span><b>pilot-report.pdf</b><br><span class="muted small">Seal ${short(fakeHash("pilot-report.pdf"))}</span></span></label>
+    <div class="foot" style="margin-top:14px"><button class="btn secondary" data-close>Cancel</button><button class="btn" id="doSubmit">Submit work</button></div>`);
+  $("#doSubmit").addEventListener("click", () => { const m = V.ms[i]; m.state = "Completed"; m.deliverable = fakeHash("pilot-report.pdf"); m.note = "Submitted by the team"; closeSheet(); ok("Work submitted. The client can now review it.", `Milestone ${i+1} marked complete`); });
+}
+
+/* ---------- attack lab ---------- */
+const ATT = [
+  {s:1, a:"Release the same milestone twice", who:"Client", ans:"Already paid out", err:"InvalidMilestoneState(0, Released)"},
+  {s:1, a:"Refund without being the arbiter", who:"Client", ans:"Only the arbiter can refund", err:"NotArbiter()"},
+  {s:1, a:"Approve before the work is submitted", who:"Client", ans:"That step isn't allowed now", err:"InvalidMilestoneState(1, Pending)"},
+  {s:1, a:"Re-enter withdraw from a malicious contract", who:"Attacker contract", ans:"3 re-entries tried, 0 succeeded. Paid exactly what was owed.", err:"ReentrancyGuardReentrantCall() ×3"},
+  {a:"Approve a swapped deliverable", who:"Client", ans:"This isn't the file that was submitted", err:"DeliverableHashMismatch(…)"},
+  {a:"Provider approves their own work", who:"Provider", ans:"Only the client can approve", err:"NotClient()"},
+  {a:"Skip ahead to milestone 2", who:"Provider", ans:"Finish milestone 1 first", err:"MilestoneOutOfOrder(1, 0)"},
+  {a:"Fund with less than the total", who:"Client", ans:"Fund the exact total", err:"WrongFundingAmount(3e18, 2e18)"},
+  {a:"Send ETH straight to the vault", who:"Stranger", ans:"Send money through Fund escrow", err:"DirectPaymentNotAccepted()"},
+  {a:"Force ETH in with selfdestruct", who:"Stranger", ans:"Counted as surplus, can't be withdrawn", err:"surplus = 0.300 ETH, reconciled"},
+  {a:"Escalate before the review window ends", who:"Provider", ans:"The client still has time to respond", err:"ReviewWindowOpen(…)"},
+  {a:"Withdraw with nothing owed", who:"Stranger", ans:"Nothing owed to you", err:"NothingToWithdraw()"},
+];
+let labDone = 0, running = false;
+function renderLab(){
+  $("#labBody").innerHTML = ATT.map((x, i) => `<tr id="at-${i}">
+    <td>${x.s ? `<span class="star" title="Required by the problem statement">★</span>` : ""}</td>
+    <td>${x.a}</td><td class="hide-s">${x.who}</td>
+    <td><span class="ans">—</span><span class="err"></span></td>
+    <td class="hide-s led">—</td><td><span class="verdict wait">Not run</span></td></tr>`).join("")
+  + `<tr class="contrast" id="at-c"><td></td><td><b>Contrast:</b> the same re-entrancy attack against a naive escrow</td><td class="hide-s">Attacker contract</td>
+    <td><span class="ans">—</span><span class="err"></span></td><td class="hide-s led">—</td><td><span class="verdict wait">Not run</span></td></tr>`;
+  labDone = 0; $("#score").innerHTML = `<span class="mono">0</span> of 12 blocked`;
+}
+function runRow(i){
+  const contrast = i === ATT.length, row = contrast ? $("#at-c") : $(`#at-${i}`);
+  $$("table.lab tr").forEach(r => r.classList.remove("cur")); row.classList.add("cur");
+  row.querySelector(".ans").textContent = contrast ? "Drained 3.000 ETH that belonged to other users" : ATT[i].ans;
+  row.querySelector(".err").textContent = contrast ? "no guard, transfer before update" : ATT[i].err;
+  row.querySelector(".led").innerHTML = contrast ? `<span style="color:var(--revert)">✕ short 3.000</span>` : `<span style="color:var(--intaglio)">✓ reconciled</span>`;
+  const v = row.querySelector(".verdict");
+  v.className = "verdict stampin " + (contrast ? "unsafe" : "blocked");
+  v.textContent = contrast ? "Unsafe" : (i === 9 ? "Absorbed" : "Blocked");
+  if (!contrast){ labDone++; $("#score").innerHTML = `<span class="mono">${labDone}</span> of 12 blocked`; }
+  nextBlock();
+}
+$("#runAll").addEventListener("click", async () => {
+  if (running) return; running = true; renderLab(); $("#runAll").disabled = true;
+  for (let i = 0; i <= ATT.length; i++){ await new Promise(r => setTimeout(r, 420)); runRow(i); }
+  $$("table.lab tr").forEach(r => r.classList.remove("cur"));
+  toast("12 of 12 attacks blocked. The ledger reconciled after each one.");
+  running = false; $("#runAll").disabled = false;
+});
+$("#resetLab").addEventListener("click", () => { renderLab(); toast("Fresh sandbox vault deployed"); });
+
+renderCards(); renderVault(); renderLab();
+</script>
+</body>
+</html>
