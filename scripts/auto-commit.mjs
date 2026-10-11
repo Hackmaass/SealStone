@@ -1,19 +1,18 @@
 #!/usr/bin/env node
 
 /**
- * Auto-Commit Watcher
+ * Auto-Commit & Auto-Push Watcher
  * 
- * Periodically checks for modified, added, or deleted files in the git repository.
- * If any changes are detected, it stages and commits them.
+ * Periodically checks for:
+ * 1. Uncommitted working tree changes (modified, added, untracked, deleted files) -> stages, commits, and pushes.
+ * 2. Unpushed local commits -> pushes to the remote repository.
  * 
  * Default interval: 1 hour (60 minutes).
+ * Default push: ENABLED (pushes automatically to remote).
  * 
  * Usage:
  *   node scripts/auto-commit.mjs
- *   node scripts/auto-commit.mjs --interval 60
- *   node scripts/auto-commit.mjs --interval 30 --push
- *   node scripts/auto-commit.mjs --once
- *   node scripts/auto-commit.mjs --dry-run
+ *   npm run auto-commit
  */
 
 import { execFileSync } from "node:child_process";
@@ -21,7 +20,7 @@ import process from "node:process";
 
 function printHelp() {
   console.log(`
-Auto-Commit Watcher (1-Hour Interval Git Monitor)
+Auto-Commit & Auto-Push Watcher (1-Hour Interval Git Monitor)
 
 Usage:
   node scripts/auto-commit.mjs [options]
@@ -31,8 +30,8 @@ Options:
   -i, --interval <minutes>    Interval in minutes between checks (default: 60)
   -s, --seconds <seconds>     Interval in seconds (convenient for testing)
   -o, --once                  Run a single check and exit immediately
-  -d, --dry-run               Check and show changes without committing
-  -p, --push                  Push to git remote after committing (if remote exists)
+  -d, --dry-run               Check and show changes/unpushed commits without committing or pushing
+      --no-push               Disable automatic git push
   -m, --message <prefix>      Commit message prefix (default: "auto(checkpoint)")
   -w, --wait-first            Wait the interval before the first check (default: runs immediately)
   -h, --help                  Show this help text
@@ -46,7 +45,7 @@ function parseArgs() {
     intervalSeconds: null,
     once: false,
     dryRun: false,
-    push: false,
+    push: true, // Enabled by default as requested
     waitFirst: false,
     messagePrefix: "auto(checkpoint)",
   };
@@ -63,6 +62,8 @@ function parseArgs() {
       options.once = true;
     } else if (arg === "--dry-run" || arg === "-d") {
       options.dryRun = true;
+    } else if (arg === "--no-push") {
+      options.push = false;
     } else if (arg === "--push" || arg === "-p") {
       options.push = true;
     } else if (arg === "--wait-first" || arg === "-w") {
@@ -108,8 +109,25 @@ function hasGitRemote() {
   }
 }
 
+function getRemoteUrl() {
+  try {
+    return runGit(["remote", "get-url", "origin"]);
+  } catch {
+    return "none";
+  }
+}
+
 function getGitStatus() {
   return runGit(["status", "--porcelain"]);
+}
+
+function getUnpushedCommitsCount() {
+  try {
+    const count = runGit(["rev-list", "@{u}..HEAD", "--count"], { ignoreError: true });
+    return count ? parseInt(count, 10) : 0;
+  } catch {
+    return 0;
+  }
 }
 
 function formatTimestamp(date = new Date()) {
@@ -123,62 +141,86 @@ function formatTimestamp(date = new Date()) {
   return `${yyyy}-${mm}-${dd} ${hh}:${min}:${ss}`;
 }
 
-function checkAndCommit(options) {
-  const nowStr = formatTimestamp();
-  const statusOutput = getGitStatus();
-
-  if (!statusOutput) {
-    console.log(`[${nowStr}] Status: Clean. No uncommitted changes detected.`);
+function pushToRemote(nowStr, branch) {
+  if (!hasGitRemote()) {
+    console.log(`[${nowStr}] [NOTE] Push skipped: no git remote is configured.`);
     return false;
   }
 
-  const lines = statusOutput.split(/\r?\n/).map((l) => l.trimEnd()).filter(Boolean);
-  const count = lines.length;
-  console.log(`\n[${nowStr}] [!] Detected ${count} modified/untracked file${count === 1 ? "" : "s"}:`);
-  for (const line of lines.slice(0, 10)) {
-    console.log(`    ${line}`);
-  }
-  if (lines.length > 10) {
-    console.log(`    ... and ${lines.length - 10} more files`);
-  }
-
-  if (options.dryRun) {
-    console.log(`[${nowStr}] [DRY-RUN] Changes sensed, but dry-run mode is enabled. Skipping commit.\n`);
+  console.log(`[${nowStr}] [+] Running: git push`);
+  try {
+    runGit(["push"]);
+    console.log(`[${nowStr}] [SUCCESS] Pushed commits to remote repository.`);
     return true;
-  }
-
-  // Stage changes
-  console.log(`[${nowStr}] [+] Running: git add -A`);
-  runGit(["add", "-A"]);
-
-  // Build commit message
-  const title = `${options.messagePrefix}: ${nowStr} (${count} file${count === 1 ? "" : "s"} updated)`;
-  const fileList = lines.slice(0, 20).map((l) => `  * ${l}`).join("\n");
-  const overflow = lines.length > 20 ? `\n  * ... and ${lines.length - 20} more files` : "";
-  const body = `Automated checkpoint commit.\nChanged files:\n${fileList}${overflow}`;
-
-  console.log(`[${nowStr}] [+] Running: git commit -m "${title}"`);
-  runGit(["commit", "-m", title, "-m", body]);
-
-  const commitHash = runGit(["rev-parse", "--short", "HEAD"]);
-  console.log(`[${nowStr}] [SUCCESS] Committed as ${commitHash} on branch [${getGitBranch()}].`);
-
-  // Push if requested
-  if (options.push) {
-    if (hasGitRemote()) {
-      console.log(`[${nowStr}] [+] Running: git push`);
-      try {
-        runGit(["push"]);
-        console.log(`[${nowStr}] [SUCCESS] Pushed to remote.`);
-      } catch (pushErr) {
-        console.error(`[${nowStr}] [WARNING] git push failed: ${pushErr.message}`);
-      }
-    } else {
-      console.log(`[${nowStr}] [NOTE] Push requested, but no git remote is configured.`);
+  } catch {
+    // If upstream branch is not set, set it automatically
+    try {
+      console.log(`[${nowStr}] [*] Setting upstream: git push -u origin ${branch}`);
+      runGit(["push", "-u", "origin", branch]);
+      console.log(`[${nowStr}] [SUCCESS] Pushed and set upstream branch origin/${branch}.`);
+      return true;
+    } catch (pushErr) {
+      console.error(`[${nowStr}] [WARNING] git push failed: ${pushErr.message}`);
+      return false;
     }
   }
+}
 
-  return true;
+function checkAndCommit(options) {
+  const nowStr = formatTimestamp();
+  const branch = getGitBranch();
+  const statusOutput = getGitStatus();
+  const unpushedBefore = getUnpushedCommitsCount();
+
+  let committed = false;
+
+  // 1. Check for working tree changes
+  if (statusOutput) {
+    const lines = statusOutput.split(/\r?\n/).map((l) => l.trimEnd()).filter(Boolean);
+    const count = lines.length;
+    console.log(`\n[${nowStr}] [!] Detected ${count} modified/untracked file${count === 1 ? "" : "s"}:`);
+    for (const line of lines.slice(0, 10)) {
+      console.log(`    ${line}`);
+    }
+    if (lines.length > 10) {
+      console.log(`    ... and ${lines.length - 10} more files`);
+    }
+
+    if (options.dryRun) {
+      console.log(`[${nowStr}] [DRY-RUN] Changes sensed, but dry-run mode is enabled. Skipping commit & push.\n`);
+      return;
+    }
+
+    // Stage changes
+    console.log(`[${nowStr}] [+] Running: git add -A`);
+    runGit(["add", "-A"]);
+
+    // Build commit message
+    const title = `${options.messagePrefix}: ${nowStr} (${count} file${count === 1 ? "" : "s"} updated)`;
+    const fileList = lines.slice(0, 20).map((l) => `  * ${l}`).join("\n");
+    const overflow = lines.length > 20 ? `\n  * ... and ${lines.length - 20} more files` : "";
+    const body = `Automated checkpoint commit.\nChanged files:\n${fileList}${overflow}`;
+
+    console.log(`[${nowStr}] [+] Running: git commit -m "${title}"`);
+    runGit(["commit", "-m", title, "-m", body]);
+
+    const commitHash = runGit(["rev-parse", "--short", "HEAD"]);
+    console.log(`[${nowStr}] [SUCCESS] Committed as ${commitHash} on branch [${branch}].`);
+    committed = true;
+  }
+
+  // 2. Push if changes were just committed OR if unpushed commits exist
+  const unpushedNow = getUnpushedCommitsCount();
+  if (options.push && (committed || unpushedNow > 0)) {
+    if (options.dryRun) {
+      console.log(`[${nowStr}] [DRY-RUN] Would push ${unpushedNow} commit(s) to remote.`);
+    } else {
+      console.log(`[${nowStr}] [!] Pushing ${unpushedNow} commit(s) to remote...`);
+      pushToRemote(nowStr, branch);
+    }
+  } else if (!committed && unpushedNow === 0) {
+    console.log(`[${nowStr}] Status: Clean. No uncommitted changes or unpushed commits.`);
+  }
 }
 
 function sleep(ms) {
@@ -191,12 +233,13 @@ async function main() {
   const intervalMs = intervalSeconds * 1000;
 
   console.log("==================================================");
-  console.log("  MilestoneVault Auto-Commit Watcher");
+  console.log("  MilestoneVault Auto-Commit & Auto-Push Watcher");
   console.log("==================================================");
   console.log(`Branch:           ${getGitBranch()}`);
+  console.log(`Remote:           ${getRemoteUrl()}`);
   console.log(`Check Interval:   ${intervalSeconds >= 60 ? (intervalSeconds / 60) + " minute(s)" : intervalSeconds + " second(s)"}`);
   console.log(`Commit Prefix:    "${options.messagePrefix}"`);
-  console.log(`Auto-Push:        ${options.push ? "Enabled" : "Disabled"}`);
+  console.log(`Auto-Push:        ${options.push ? "Enabled (commits + pushes)" : "Disabled"}`);
   console.log(`Dry-Run Mode:     ${options.dryRun ? "Enabled" : "Disabled"}`);
   console.log(`Single Check:     ${options.once ? "Yes" : "No"}`);
   console.log("==================================================");
