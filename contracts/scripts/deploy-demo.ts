@@ -2,7 +2,7 @@ import { ethers, network } from "hardhat";
 import { copyFileSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 // Relative import on purpose: ts-node (CommonJS) can't compile TS from node_modules (CLAUDE.md).
-import { agreementHash, canonicalJSON, confirmedChecklistSchema, fileSha256, textHash } from "../../shared/src/index";
+import { agreementHash, canonicalJSON, confirmedChecklistSchema, fileSha256, normalizeSourceText, textHash } from "../../shared/src/index";
 
 const ROOT = path.resolve(__dirname, "../..");
 const CONFIRMED_PATH = path.join(ROOT, "samples", "krishilens.confirmed.json");

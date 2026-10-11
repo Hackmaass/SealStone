@@ -1,0 +1,42 @@
+/* Design tokens (light, dark, presenter) copied from docs/ui-prototype/index.html. Fonts are bundled via @fontsource (offline). */
+:root{
+  --paper:#EDF0EA; --paper-2:#F7F8F4; --paper-3:#E3E8E0; --rule:#C9D0C6;
+  --ink:#18212B; --ink-2:#4A5562; --intaglio:#0D5B49; --intaglio-wash:#DCEBE4;
+  --proposed:#A86A12; --proposed-wash:#F6E7CC; --human:#2F56C9; --human-wash:#DDE5FA;
+  --revert:#B3261E; --revert-wash:#F6DCD9; --pending:#8A949E;
+  --sans:"Public Sans Variable","Public Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,"Cascadia Mono",Consolas,monospace;
+  --r-sm:4px; --r-md:8px; --shadow:0 12px 32px rgba(24,33,43,.18);
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --paper:#10171F; --paper-2:#17212B; --paper-3:#1D2935; --rule:#2A3644;
+    --ink:#E4E9E2; --ink-2:#A3AFB9; --intaglio:#3FB28F; --intaglio-wash:#163A31;
+    --proposed:#E0A43C; --proposed-wash:#3A2C14; --human:#7FA1FF; --human-wash:#1D2A4D;
+    --revert:#F2756B; --revert-wash:#43201D; --pending:#6E7A86; --shadow:0 12px 32px rgba(0,0,0,.5);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#10171F; --paper-2:#17212B; --paper-3:#1D2935; --rule:#2A3644;
+  --ink:#E4E9E2; --ink-2:#A3AFB9; --intaglio:#3FB28F; --intaglio-wash:#163A31;
+  --proposed:#E0A43C; --proposed-wash:#3A2C14; --human:#7FA1FF; --human-wash:#1D2A4D;
+  --revert:#F2756B; --revert-wash:#43201D; --pending:#6E7A86; --shadow:0 12px 32px rgba(0,0,0,.5);
+  color-scheme:dark;
+}
+html.presenter{font-size:115%}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:1rem;line-height:1.5;-webkit-font-smoothing:antialiased}
+button,input,textarea,select{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--human);outline-offset:2px}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.muted{color:var(--ink-2)}
+.small{font-size:.875rem}
+h1,h2,h3{margin:0;line-height:1.2}
+h1{font-size:1.5625rem;font-weight:700;letter-spacing:-.01em}
+h2{font-size:1.25rem;font-weight:650}
+h3{font-size:1rem;font-weight:650}
+p{margin:0}
+
+

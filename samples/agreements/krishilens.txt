@@ -1,5 +1,10 @@
 KRISHILENS INCUBATION GRANT AGREEMENT
 
+Client: Campus Incubation Cell
+Provider: KrishiLens student team
+Arbiter: Prof. Anita Verma (faculty mentor)
+Total: 5 ETH
+
 This agreement is between the Campus Incubation Cell ("the Cell"), which funds the project, and the KrishiLens student team ("the Team"), which builds it. Prof. Anita Verma, faculty mentor, acts as arbiter if the Cell and the Team disagree.
 
 KrishiLens is a mobile app that identifies crop diseases from photos of leaves. The Cell will fund the project with a total of 5 ETH (test funds), paid out in three milestones.
