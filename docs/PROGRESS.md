@@ -14,21 +14,22 @@
 | P08 Web: milestones + ledger | ✅ | /vault/:address: milestone rows, role-aware actions, sheets, timeline, ledger, verify; e2e on the seeded AND a wizard-created vault |
 | P09 Web: Attack Lab | ✅ | 12 real attacks + a naive-escrow contrast; "Run all" passes 3x in a row without a reload; demo vault proven untouched |
 | P10 Stretch | ⬜ | |
-| P11 Integration + README | ⬜ | |
+| P11 Integration + README | 🟨 | rehearsals (online + offline) pass, `npm run dev`, offline audit, demo files, README done. Open: the AI eval numbers (P06) and the `v1.0-demo` tag |
 | P12 Judge-proof audit | ⬜ | |
 
 Legend: ⬜ not started · 🟨 in progress · ✅ done (acceptance checks pass) · ✂️ cut
 
 ## Latest numbers
-- Shared tests (vitest): 115 passing (canonical JSON, frozen hash vector, strict schema, fileSha256, validator V1-V11, merge, gate rules 1-4, sample consistency)
+- Shared tests (vitest): 123 passing (canonical JSON, frozen hash vector, strict schema, fileSha256, validator V1-V11, merge, gate rules 1-4, sample consistency)
 - Server tests (vitest): 42 passing (rules extractor, extract/fallback/retry/grounding via fake Ollama+Gemini, validate, gate-check, confirm 422/200, agreements route hardening, samples, no-chain grep)
 - Contract tests: 138 passing / 138 total (0 pending). Includes the 4 booklet-required tests by exact name.
 - Invariant fuzz (5 seeds x 200 steps = 1,000 steps, 21 vaults): 401 succeeded / 599 reverted; 13 distinct custom errors hit; every revert decoded to a vault custom error (no Panic, no empty revert); every success emitted an event; I1-I8 asserted after each step; failed calls left storage identical (I6).
 - Coverage (MilestoneVault.sol, attack/ skipped via .solcover.js): lines 100% · branches 98.15% (only two unreachable defensive underflow guards in `reconcile()` remain uncovered)
-- Web tests (vitest): 62 passing (wizard reducer/gate wiring, revert decoding, vault model table: 5 states x 4 roles x in/out of order, timeline grouping, reconcile diagnosis, nextStep, terms verification). `tsc -b` and `vite build` clean. E2E (real Chrome via playwright-core): `web/e2e/wizard.e2e.mjs` (+ `AI_MODE=ollama`, + the full vault walk on the fresh vault unless `WALK_VAULT=0`) `web/e2e/vault.e2e.mjs` (pre-seeded vault; run `npm run demo:reset` first) and `web/e2e/lab.e2e.mjs` (Attack Lab x3 + demo vault untouched; reset first). All pass.
+- Web tests (vitest): 65 passing (wizard reducer/gate wiring, revert decoding, vault model table: 5 states x 4 roles x in/out of order, timeline grouping, reconcile diagnosis, nextStep, terms verification). `tsc -b` and `vite build` clean. E2E (real Chrome via playwright-core): `web/e2e/wizard.e2e.mjs` (+ `AI_MODE=ollama`, + the full vault walk on the fresh vault unless `WALK_VAULT=0`) `web/e2e/vault.e2e.mjs` (pre-seeded vault; run `npm run demo:reset` first) and `web/e2e/lab.e2e.mjs` (Attack Lab x3 + demo vault untouched; reset first). All pass.
 - AI eval: see docs/EVAL-RESULTS.md
 
 ## Decisions log
+- 2026-10-11 Backlog: added `docs/MORE-IDEAS.md` (positioning + idea cards A-I: preflight/free-form attack, deliverable manifest, seal receipt + verifier, measured AI, mutation testing, Slither, copy pass). IDEAS ONLY, not approved scope; nothing in it changes the contract or docs/04. Spec check done for the receipt card: the two parties "sign" with on-chain `sign(hash)` transactions (event `AgreementSigned`), not off-chain signatures. Order stays P06 → P11 → P12 first; P10 is gated on P00-P09 all done, and P06 is still open.
 - 2026-10-11 Rules provenance: re-checked the booklet PDF against docs/01-PROBLEM.md; the B-03 text and Common Rules match. CLAUDE.md and docs/01 now tag each rule **[Booklet]** or **[Team]**. Corrections: "Wi-Fi off" and "no public networks" are OUR stricter rules (the booklet requires only a local fallback and says public deployment is not *required*); the booklet has no judging rubric (the 35/30/20/15 weights quoted in chat came from a different hackathon, APU). Brand casing still open: "Sealstone" (CLAUDE.md) vs "SealStone" (user message). Rename sweep of remaining "MilestoneVault" UI/doc text not done yet. **Open question for the user/organizers:** does an MST testnet deploy count as a "live third-party system"? Optional arbiter-timeout path (ArbitrAI-style circuit breaker) would change docs/04; not added.
 - 2026-10-11 MST testnet: `contracts/hardhat.config.ts` registers `--network mst` (chainId 91562037, token tMSTC, RPC `MST_RPC`, default https://testnetrpc.mstblockchain.com) ONLY when `DEPLOYER_KEY` is set in the repo-root `.env` (gitignored; `.env.example` has blank placeholders). Compiler already matched the MST rules (solc 0.8.24, evm cancun, optimizer 200). Verified: with a key the network exists, without one it is HH100 "Network mst doesn't exist"; `hardhat test` 138 passing either way. Mainnet (4646) is deliberately NOT configured. The TEAM runs any deploy; Claude never signs with a real key. NOT done yet: a single-key `deploy-mst` script (deploy-demo needs 7 Hardhat accounts), `deployments/mst-testnet.json`, web/server pointing at MST (the web app uses unlocked Hardhat accounts, which a public testnet does not have). **Conflict to resolve:** CLAUDE.md says "no public networks"; MST is a hackathon testnet, and the local Hardhat node stays the default and the mandatory offline fallback.
 - 2026-10-11 P00: removed `"type": "module"` from `shared/package.json` (the P00 prompt asked for it). Hardhat's ts-node (CJS) failed to load `../../shared/src/index.ts` with `ERR_REQUIRE_ESM` ("is a .ts file whose nearest parent package.json contains type: module"). Without the flag, Hardhat scripts (ts-node), server (tsx) and web (Vite) all import shared fine. Use extensionless relative imports inside `shared/`.
@@ -107,6 +108,30 @@ Legend: ⬜ not started · 🟨 in progress · ✅ done (acceptance checks pass)
 - Raw errors now name states: `InvalidMilestoneState(index: 0, actual: Released)` instead of `actual: 3` (also on the vault screen).
 - Verified: lab e2e 3 consecutive "Run all" without reload: 12 of 12 blocked, 12 reconciled ledgers, contrast drained 3.000 ETH, 4 stars + badges + test names, no console errors, no external requests. Wizard, vault and lab e2e all pass from clean resets.
 - **Environment note (not the app):** in this Windows sandbox, loopback connections are intermittently refused (`net::ERR_NETWORK_ACCESS_DENIED` in Chrome, `connect EACCES 127.0.0.1:8545` in Node, the Vite HMR socket). It affects roughly every second new connection at times. `lab.e2e.mjs` retries the page load and its read-backs and ignores the dev-only HMR socket noise; a failure in the other two e2e scripts that disappears on rerun is this, so rerun before debugging. The e2e commands were run with the shell sandbox override for that reason (local servers only).
+
+## P11 integration (2026-10-11)
+- **`npm run dev`** (`scripts/dev.mjs`, plain Node, no new dependency): starts chain + AI service + web, reuses anything already on its port, waits for the chain, seeds the demo (`deploy:demo` on a fresh chain, `demo:reset` if one was already running), turns Hardhat's per-request logging off (the UI polls every second and would bury the screen), and prints one banner with the app, demo vault and Attack Lab URLs and whether Ollama is available. Cold start verified. Ctrl+C stops the whole tree (taskkill /T on Windows).
+- **Bug found by the rehearsal:** `demo:reset` rewrites `web/src/generated/*`, and Vite's hot update then re-ran a chain of modules under a live page ("useApp outside AppProvider"), breaking an open tab. `web/vite.config.ts` now full-reloads on any change under `src/generated/`, and `vault.e2e.mjs` leaves the page open across a reset and requires it to recover on its own.
+- **Offline audit:** the only non-local URLs in runtime source are the optional Gemini endpoint (`server/src/ai/gemini.ts`, fails closed without a key) and the key-gated MST testnet RPC in `hardhat.config.ts` (tooling only, not the app). The built bundle contains no CDN, font host or analytics string. The browser walks also fail if any request leaves 127.0.0.1.
+- **Demo assets:** `samples/demo-files/m1-report.pdf` + `m1-report-v2.pdf` (+ README); identical copies ship in `web/public/demo/`; `web/src/lib/files.test.ts` checks they match and that `m1-report.pdf` is exactly the 20 bytes the seeded vault hashes.
+- **README.md** written from the real runs (counts, coverage, fuzz summary, attack table with the exact test names, honest Status section).
+- Final numbers (re-run today): contracts 138 passing; shared 123; server 42; web 65 (6 test files); coverage `MilestoneVault.sol` 100% lines / 98.15% branches / 100% functions; fuzz 1,000 steps. `npm run eval:ai` still prints "not implemented" (P06 is blocked on the teammate's samples), so the README says the evaluation is not done.
+
+### Demo-script rehearsal (docs/06), scripted in real Chrome from a clean `demo:reset`
+| Step | What | Online (Ollama running, qwen2.5:7b) | Offline (Ollama stopped, rules) |
+|---|---|---|---|
+| 1-2 | paste, extract, five flagged ambiguities, Confirm locked | PASS (live qwen run, 25.3 s) | PASS |
+| 3 | switch to rules / offline and extract again | PASS | PASS (this is the mode) |
+| 4 | resolve each, validator turns green, Confirm | PASS | PASS |
+| 5 | deploy, both sign the hash, fund | PASS | PASS |
+| 6 | provider submits a file (real SHA-256) | PASS | PASS |
+| 7 | swapped file refused with DeliverableHashMismatch | PASS | PASS |
+| 8 | approve the right file, provider withdraws, ledger green | PASS | PASS |
+| 9 | dispute, arbiter refunds with a rationale (+ escalation via the time control) | PASS | PASS |
+| 10-11 | Attack Lab run-all x3, naive contrast drains 3.000 ETH | PASS | PASS |
+| 12 | contract tests + coverage | PASS | PASS (no network needed) |
+The online column was recorded earlier today for steps 1-5 (live LLM) and by the same vault/lab walks, which do not depend on AI; the offline column is the full set re-run with Ollama stopped. Note: Wi-Fi itself was not switched off (all traffic is verified to stay on 127.0.0.1 by the browser walks).
+- **Flaky environment, not the app:** this Windows sandbox intermittently refuses loopback connections (Chrome `ERR_NETWORK_ACCESS_DENIED`, Node `connect EACCES`), so a browser walk sometimes fails at an arbitrary step and passes on rerun. Rerun before debugging.
 
 ## Open questions
 - P01 / spec: `escalate` computes `completedAt + reviewWindow` in uint64 with checked arithmetic. A huge `reviewWindow` (near 2^64) would make `escalate` panic (Panic 0x11) instead of a custom error. Not changed (spec is source of truth); a constructor cap on `reviewWindow` would fix it if wanted.

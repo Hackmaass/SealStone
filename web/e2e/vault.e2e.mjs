@@ -37,7 +37,13 @@ try {
   // and sessionStorage is deliberately NOT cleared here (a real rehearsal tab keeps it).
   const rejectedBefore = await page.locator(".activity li.bad").count();
   if (rejectedBefore < 1) throw new Error("the rehearsal should have left rejected attempts in the activity list");
+  const errorsBeforeReset = errors.length;
   execSync("npm run demo:reset", { cwd: fileURLToPath(new URL("../../", import.meta.url)), stdio: "ignore" });
+  // A reset while the page is open must not break it: the dev server reloads the page by itself (no manual reload yet).
+  await page.waitForSelector('[data-milestone="0"][data-state="Completed"]', { timeout: 30000 });
+  const brokeOnReset = errors.slice(errorsBeforeReset).filter((e) => e.startsWith("pageerror:"));
+  if (brokeOnReset.length) throw new Error(`the open page broke when the demo was reset: ${brokeOnReset.join(" | ")}`);
+  console.log("✓ the open page recovered by itself when the demo was reset");
   await page.reload();
   await page.waitForSelector('[data-milestone="0"][data-state="Completed"]', { timeout: 20000 });
   await page.waitForTimeout(600);
