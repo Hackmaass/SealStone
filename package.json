@@ -17,7 +17,7 @@
     "coverage": "npm run coverage --workspace contracts",
     "server": "npm run dev --workspace server",
     "web": "npm run dev --workspace web",
-    "dev": "node scripts/todo.mjs P11",
+    "dev": "node scripts/dev.mjs",
     "eval:ai": "node scripts/todo.mjs P06",
     "demo:reset": "npm run reset --workspace contracts",
     "test:shared": "npm run test --workspace shared",
