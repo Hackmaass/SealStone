@@ -5,7 +5,7 @@ import path from "node:path";
 import type { Server } from "node:http";
 import type { AddressInfo } from "node:net";
 import { fileURLToPath } from "node:url";
-import { agreementHash, canonicalJSON, normalizeSourceText, type LlmChecklist } from "@mv/shared";
+import { agreementHash, canonicalJSON, normalizeSourceText, textHash, type LlmChecklist } from "@mv/shared";
 import { createApp } from "../src/app";
 import type { AiConfig } from "../src/ai";
 import { extractWithRules } from "../src/ai/rules";
@@ -375,5 +375,28 @@ describe("the server never touches the chain", () => {
       const code = readFileSync(f, "utf8").split("\n").filter((l) => !/^\s*(\/\/|\*|\/\*)/.test(l)).join("\n");
       expect(forbidden.test(code), f).toBe(false);
     }
+  });
+});
+
+describe("notes (evidence and rationale texts, filed by their keccak256)", () => {
+  it("stores a note only under the hash of its own text and returns it", async () => {
+    const s = await serve({ fetchImpl: unreachable().impl });
+    const text = "The app only recognised 1 of the 3 sample diseases.";
+    const hash = textHash(text);
+    expect((await s.post("/api/notes", { hash, text })).status).toBe(201);
+    expect(await (await s.get(`/api/notes/${hash}`)).json()).toEqual({ hash, text });
+    await s.close();
+  });
+
+  it("refuses a text that does not hash to the given hash, and an unknown or malformed hash is a 404", async () => {
+    const s = await serve({ fetchImpl: unreachable().impl });
+    const hash = textHash("the real reason");
+    const r = await s.post("/api/notes", { hash, text: "a different reason" });
+    expect(r.status).toBe(422);
+    expect((await s.get(`/api/notes/${hash}`)).status).toBe(404);
+    expect((await s.get("/api/notes/not-a-hash")).status).toBe(404);
+    expect((await s.post("/api/notes", { hash, text: "" })).status).toBe(400);
+    expect((await s.post("/api/notes", { hash, text: "x".repeat(5001) })).status).toBe(400);
+    await s.close();
   });
 });

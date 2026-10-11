@@ -4,6 +4,7 @@
 import { chromium } from "playwright-core";
 import { mkdirSync } from "node:fs";
 import path from "node:path";
+import { walkVault } from "./vaultWalk.mjs";
 
 const MODE = process.env.AI_MODE ?? "rules";
 const BASE = process.env.WEB_URL ?? "http://127.0.0.1:5173";
@@ -117,11 +118,16 @@ try {
   await shot("7-signed");
   await fundBtn.click();
   await page.waitForURL(/\/vault\/0x[0-9a-fA-F]{40}/, { timeout: 30000 });
-  await page.waitForSelector("text=Reconciled");
-  const body = await page.locator(".vault-note").innerText();
-  if (!/Reconciled: yes/.test(body)) fail(`vault should reconcile: ${body}`);
+  await page.waitForSelector(".ledger .stamp:has-text(\"Reconciled\")");
+  if (!/5.000/.test(await page.locator(".ledger").innerText())) fail("the ledger should show the 5.000 ETH deposit");
   await shot("8-vault");
   log("deployed, signed by both, funded, and the vault reconciles");
+
+  // 4b. the same vault-screen walk (demo steps 6-9 + Verify) on this freshly created vault. WALK_VAULT=0 skips it.
+  if (process.env.WALK_VAULT !== "0") {
+    await walkVault(page, { seeded: false, shot: (name) => page.screenshot({ path: path.join(SHOTS, `fresh-${name}.png`) }), log });
+    log("the full vault walk passed on the wizard-created vault");
+  }
 
   // 5. a refresh mid-flow keeps the place
   await page.goto(`${BASE}/agreement`);

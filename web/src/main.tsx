@@ -7,6 +7,7 @@ import "@fontsource/ibm-plex-mono/latin-500.css";
 import "./ui/tokens.css";
 import "./ui/app.css";
 import "./ui/extra.css";
+import "./ui/vault.css";
 import App from "./App";
 
 createRoot(document.getElementById("root")!).render(

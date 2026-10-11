@@ -1,47 +1,13 @@
 import { useCallback, useEffect, useState, type Dispatch, type ReactNode } from "react";
+import { useTx } from "../../lib/useTx";
 import { navigate } from "../../lib/router";
 import { useApp } from "../../lib/app";
-import { explain, hasCode, signerAt, vaultContract } from "../../lib/chain";
+import { hasCode, signerAt, vaultContract } from "../../lib/chain";
 import { deployVault } from "../../lib/deploy";
-import type { DecodedRevert } from "../../lib/revert";
 import type { WizardAction, WizardState } from "../../lib/wizard";
 import { Amount, HashSeal, HashText, RevertNotice } from "../../ui/components";
 import { formatWei } from "../../ui/copy";
 import { useToast } from "../../ui/toast";
-
-/** Runs a transaction, locks the button while pending, and turns a revert into the plain-English notice. */
-function useTx(role: string) {
-  const { toast } = useToast();
-  const [busy, setBusy] = useState<string | null>(null);
-  const [notice, setNotice] = useState<DecodedRevert | null>(null);
-  const run = useCallback(
-    async (label: string, fn: () => Promise<void>) => {
-      setBusy(label);
-      setNotice(null);
-      try {
-        await fn();
-      } catch (e) {
-        const d = explain(e, role);
-        if (d.reverted) {
-          setNotice(d);
-          toast(
-            <>
-              <b>{d.title}.</b> Nothing changed.
-            </>,
-            true,
-          );
-        } else {
-          // A timeout or network failure may still have been mined, so never claim "Nothing changed" here.
-          toast(<>That didn't complete: {d.message.slice(0, 140)}. Check the vault before trying again.</>, true);
-        }
-      } finally {
-        setBusy(null);
-      }
-    },
-    [role, toast],
-  );
-  return { busy, notice, run, setNotice };
-}
 
 export function StepChain({ state, dispatch, startOver }: { state: WizardState; dispatch: Dispatch<WizardAction>; startOver: ReactNode }) {
   const app = useApp();

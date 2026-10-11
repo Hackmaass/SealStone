@@ -83,6 +83,10 @@ export const api = {
   /** Extraction can take ~60 s with a cold local model plus one retry, so the client waits 75 s. */
   extract: (text: string, mode: Mode, signal?: AbortSignal) => call("/api/extract", extractSchema, post({ text, mode }, signal), 75_000),
   confirm: (input: Omit<GateInput, "confirmedAt">) => call("/api/confirm", confirmSchema, post(input), 20_000),
+  /** The stored confirmed JSON for a hash. Returned unparsed on purpose: the caller re-hashes it and never trusts the server's copy. */
+  agreement: (hash: string) => call(`/api/agreements/${hash}`, z.unknown(), undefined, 6_000),
+  saveNote: (hash: string, text: string) => call("/api/notes", z.object({ hash: z.string() }), post({ hash, text }), 6_000),
+  note: (hash: string) => call(`/api/notes/${hash}`, z.object({ hash: z.string(), text: z.string() }), undefined, 6_000),
 };
 
 export type { ConfirmedChecklist, Resolution };

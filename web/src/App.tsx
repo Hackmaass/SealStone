@@ -4,7 +4,7 @@ import { ToastProvider } from "./ui/toast";
 import { TopBar } from "./ui/TopBar";
 import { Home } from "./pages/Home";
 import { Wizard } from "./pages/agreement/Wizard";
-import { VaultPage } from "./pages/Vault";
+import { VaultPage } from "./pages/vault/VaultPage";
 import { AttackLab } from "./pages/AttackLab";
 import deployment from "./generated/deployment.json";
 
@@ -34,7 +34,7 @@ function Routes() {
     case "agreement":
       return <Wizard />;
     case "vault":
-      return <VaultPage address={route.address} />;
+      return <VaultPage key={route.address} address={route.address} />;
     case "lab":
       return <AttackLab />;
     default:

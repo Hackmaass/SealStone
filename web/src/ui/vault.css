@@ -1,0 +1,65 @@
+/* Vault screen additions. Same tokens and rules as app.css; nothing here introduces a new colour. */
+.vault-page{display:block}
+.vault-page .vhead{flex-wrap:wrap}
+.vhead h1{font-size:1.5625rem;line-height:1.25;margin:0 0 4px}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+.yourmove{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 22px;margin-bottom:20px;border-left:4px solid var(--rule)}
+.yourmove.mine{border-left-color:var(--intaglio);background:var(--intaglio-wash)}
+.yourmove-head{font-size:1.0625rem;font-weight:650;margin:0 0 2px}
+.kbd{display:inline-block;min-width:20px;text-align:center;border:1px solid var(--rule);border-radius:4px;padding:0 5px;font-family:var(--mono);font-size:.75rem;background:var(--paper)}
+.banner.done{background:var(--intaglio-wash);border:1px solid var(--rule)}
+.linklike{border:0;background:none;padding:0;color:inherit;font:inherit;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.linklike:disabled{opacity:.45;cursor:not-allowed}
+
+.rail-col{position:sticky;top:76px;display:flex;flex-direction:column;gap:16px;align-self:start}
+.rail-col .ledger{position:static}
+.withdraw{padding:16px 20px}
+.withdraw h2{margin:0 0 6px;font-size:1.0625rem}
+.ledger.bad{border-color:var(--revert);background:var(--revert-wash)}
+.ledger-fail{margin:12px 0 0;padding-left:18px;color:var(--revert);font-size:.875rem}
+
+.ms-title{display:flex;align-items:baseline;flex-wrap:wrap;gap:6px 12px}
+.ms-title h3{margin:0;font-size:1.0625rem}
+.conditions{font-size:.9375rem}
+.conditions summary{cursor:pointer;color:var(--ink-2);font-size:.875rem}
+.conditions ul{margin:6px 0 0;padding-left:20px;display:grid;gap:3px}
+.note-line{display:flex;gap:10px;align-items:flex-start;font-size:.9375rem}
+.note-line q{quotes:"\201C" "\201D"}
+.act-disabled{display:inline-flex;flex-direction:column;gap:2px}
+.time-control{display:flex;flex-wrap:wrap;gap:4px 12px;align-items:baseline;font-size:.8125rem;color:var(--ink-2)}
+.raw-details{margin-top:4px}
+.raw-details summary{cursor:pointer;color:var(--ink-2);font-size:.8125rem}
+.raw-details div{word-break:break-all;color:var(--ink-2)}
+
+.compare.bad{border-color:var(--revert)}
+.compare.mini{padding:10px;gap:8px}
+.seal-empty{width:64px;height:64px;border:1px dashed var(--rule);border-radius:50%}
+
+.picker{display:grid;gap:10px}
+.drop{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;border:1px dashed var(--rule);border-radius:var(--r-md);padding:12px}
+.drop.over{border-color:var(--human);background:var(--human-wash)}
+.drop.has{border-style:solid}
+.paste summary{cursor:pointer;color:var(--ink-2);font-size:.875rem}
+.paste textarea{width:100%;min-height:60px;border:1px solid var(--rule);border-radius:var(--r-sm);background:var(--paper);padding:8px;margin:8px 0}
+.picked{display:flex;gap:12px;align-items:center}
+.field-error{color:var(--revert);font-size:.875rem;margin:0}
+.dispute-context{margin-top:10px;padding:10px 12px;border:1px solid var(--rule);border-radius:var(--r-md);background:var(--paper)}
+.dispute-context ul{margin:4px 0 8px;padding-left:20px}
+
+.terms-panel{margin:-4px 0 20px;padding:12px 22px;border:1px solid var(--rule);border-radius:var(--r-md);background:var(--paper-2)}
+.terms-panel summary{cursor:pointer;font-weight:600}
+.terms-json{width:100%;min-height:160px;margin-top:10px;border:1px solid var(--rule);border-radius:var(--r-sm);background:var(--paper);padding:8px;font-size:.75rem;line-height:1.5}
+.terms-panel .compare{margin-top:12px}
+
+@media (max-width:1100px){.rail-col{position:static}}
+@media (max-width:720px){.yourmove{flex-direction:column;align-items:stretch}}
+
+.vheadbox{margin-bottom:16px}
+.vhead-in{display:flex;align-items:center;gap:18px;padding:16px 22px 10px;flex-wrap:wrap}
+.vhead-in .title{flex:1;min-width:260px}
+.vheadbox .terms-panel{margin:0;border:0;border-top:1px solid var(--rule);border-radius:0 0 var(--r-md) var(--r-md);background:none;padding:8px 22px}
+.yourmove{padding:10px 22px;margin-bottom:16px}
+.yourmove p{margin:0}
+.eq td:last-child{white-space:nowrap}
+.eq td:nth-child(2){padding-right:12px}

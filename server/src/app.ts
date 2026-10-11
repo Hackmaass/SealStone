@@ -12,6 +12,7 @@ import {
   checkGate,
   proposedChecklistSchema,
   resolutionSchema,
+  textHash,
   validate,
   normalizeSourceText,
 } from "@mv/shared";
@@ -30,6 +31,8 @@ export interface AppOptions {
 
 const modeSchema = z.enum(["auto", "ollama", "gemini", "rules"]);
 const MAX_TEXT = 100_000;
+const MAX_NOTE = 5_000;
+const MAX_NOTES = 500;
 
 const extractBody = z.object({ text: z.string().min(1).max(MAX_TEXT), mode: modeSchema.default("auto") });
 const validateBody = z.object({
@@ -48,6 +51,7 @@ const confirmBody = z.object({
 });
 
 const HASH_RE = /^0x[0-9a-f]{64}$/;
+const noteBody = z.object({ hash: z.string().regex(HASH_RE), text: z.string().min(1).max(MAX_NOTE) });
 
 /**
  * HARD RULE: this server NEVER touches the chain. There is no route or function here that sends a transaction,
@@ -131,6 +135,26 @@ export function createApp(options: AppOptions = {}) {
     } catch {
       res.status(404).json({ error: "No stored agreement with that hash" });
     }
+  });
+
+  // Evidence and rationale texts: the chain stores only their hash, so the readable text lives here (in memory, demo only).
+  // A note is accepted only if keccak256(text) equals the hash it is filed under, so nobody can attach a different text to a hash.
+  const notes = new Map<string, string>();
+  app.post("/api/notes", (req, res) => {
+    const body = parse(noteBody, req.body, res);
+    if (!body) return;
+    if (textHash(body.text) !== body.hash) {
+      res.status(422).json({ error: "The text does not hash to the given hash" });
+      return;
+    }
+    if (!notes.has(body.hash) && notes.size >= MAX_NOTES) notes.delete(notes.keys().next().value as string);
+    notes.set(body.hash, body.text);
+    res.status(201).json({ hash: body.hash });
+  });
+  app.get("/api/notes/:hash", (req, res) => {
+    const text = HASH_RE.test(req.params.hash) ? notes.get(req.params.hash) : undefined;
+    if (text === undefined) res.status(404).json({ error: "No stored note with that hash" });
+    else res.json({ hash: req.params.hash, text });
   });
 
   app.get("/api/samples", (_req, res) => {
