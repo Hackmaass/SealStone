@@ -1,0 +1,13 @@
+KRISHILENS INCUBATION GRANT AGREEMENT
+
+This agreement is between the Campus Incubation Cell ("the Cell"), which funds the project, and the KrishiLens student team ("the Team"), which builds it. Prof. Anita Verma, faculty mentor, acts as arbiter if the Cell and the Team disagree.
+
+KrishiLens is a mobile app that identifies crop diseases from photos of leaves. The Cell will fund the project with a total of 5 ETH (test funds), paid out in three milestones.
+
+Milestone 1 - Problem validation report. The Team delivers a written report of at least 8 pages covering interviews with at least 10 farmers and a ranking of the five most common crop diseases in the pilot region. Due 31 October 2026. Payment: 1 ETH.
+
+Milestone 2 - Working prototype. The Team delivers a working prototype of the app, identified by a git commit hash, that classifies photos of at least three crop diseases. The prototype must be approved to the mentor's satisfaction. Due 15 December 2026. Payment: 2.5 ETH. The Team will receive 0.5 ETH extra if this prototype is delivered before 30 Nov.
+
+Milestone 3 - Pilot with farmers. The Team runs a pilot with 20 farmers and delivers a pilot report with the usage results. Payment: the remaining funds after Milestone 1 and Milestone 2.
+
+If the Cell disputes any milestone, Prof. Verma decides whether the payment is released to the Team or refunded to the Cell.

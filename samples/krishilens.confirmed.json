@@ -1,0 +1,85 @@
+{
+  "schemaVersion": 1,
+  "title": "KrishiLens incubation grant",
+  "parties": {
+    "client": { "name": "Campus Incubation Cell", "address": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266" },
+    "provider": { "name": "KrishiLens student team", "address": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8" },
+    "arbiter": { "name": "Prof. Anita Verma (faculty mentor)", "address": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC" }
+  },
+  "milestones": [
+    {
+      "index": 0,
+      "title": "Problem validation report",
+      "amountWei": "1000000000000000000",
+      "conditions": [
+        "Written report of at least 8 pages is delivered",
+        "Report covers interviews with at least 10 farmers",
+        "Report ranks the five most common crop diseases in the pilot region"
+      ],
+      "deadline": "2026-10-31",
+      "deliverableType": "document"
+    },
+    {
+      "index": 1,
+      "title": "Working prototype",
+      "amountWei": "2500000000000000000",
+      "conditions": [
+        "Prototype is delivered as a git commit hash",
+        "Prototype classifies photos of at least three crop diseases",
+        "Prototype runs on the mentor's demo device with the three test photos supplied by the Cell"
+      ],
+      "deadline": "2026-12-15",
+      "deliverableType": "code"
+    },
+    {
+      "index": 2,
+      "title": "Pilot with farmers",
+      "amountWei": "1500000000000000000",
+      "conditions": [
+        "Pilot is run with 20 farmers",
+        "Pilot report with the usage results is delivered"
+      ],
+      "deadline": null,
+      "deliverableType": "document"
+    }
+  ],
+  "reviewWindowSeconds": 120,
+  "resolutions": [
+    {
+      "ambiguityId": "AMOUNT_MISMATCH:agreement:0",
+      "action": "edited",
+      "note": "Total confirmed at 5 ETH; the 0.5 ETH bonus is excluded so the milestones add up exactly.",
+      "resolvedBy": "client"
+    },
+    {
+      "ambiguityId": "CONDITIONAL_AMOUNT:1:0",
+      "action": "clause-removed",
+      "note": "Early-delivery bonus clause removed by agreement; M2 pays a fixed 2.5 ETH.",
+      "resolvedBy": "client"
+    },
+    {
+      "ambiguityId": "CONDITIONAL_AMOUNT:2:0",
+      "action": "edited",
+      "note": "'Remaining funds' replaced with the explicit figure 1.5 ETH (5 - 1 - 2.5).",
+      "resolvedBy": "provider"
+    },
+    {
+      "ambiguityId": "SUBJECTIVE_APPROVAL:1:0",
+      "action": "edited",
+      "note": "'To the mentor's satisfaction' replaced by an objective check on the mentor's demo device.",
+      "resolvedBy": "client"
+    },
+    {
+      "ambiguityId": "MISSING_DEADLINE:2:0",
+      "action": "acknowledged",
+      "note": "No deadline for M3 by mutual agreement; the review window still limits the client's response time.",
+      "resolvedBy": "provider"
+    }
+  ],
+  "extraction": {
+    "source": "rules",
+    "model": null,
+    "sourceTextHash": "0x3e356a860041a9003fc49f1248c18a62691f868b9a8f72149a8912733b6537cd"
+  },
+  "confirmedAt": "2026-10-11T09:00:00.000Z"
+}

@@ -6,7 +6,10 @@
     "compile": "hardhat compile",
     "test": "hardhat test",
     "coverage": "hardhat coverage",
-    "node": "hardhat node"
+    "node": "hardhat node",
+    "export-abi": "hardhat run scripts/export-abi.ts",
+    "deploy:demo": "hardhat compile && hardhat run scripts/export-abi.ts && hardhat run scripts/deploy-demo.ts --network localhost",
+    "reset": "hardhat run scripts/reset.ts --network localhost"
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox": "^5.0.0",

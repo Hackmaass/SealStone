@@ -1,0 +1,60 @@
+{
+  "checklist": {
+    "title": "Café app — ₹ pricing pilot",
+    "schemaVersion": 1,
+    "milestones": [
+      {
+        "deliverableType": "document",
+        "deadline": "2026-11-30",
+        "conditions": [
+          "Report ≥ 8 pages",
+          "Includes 10 interviews"
+        ],
+        "amountWei": "1000000000000000000",
+        "title": "Research — phase 1",
+        "index": 0
+      },
+      {
+        "index": 1,
+        "title": "Prototype",
+        "amountWei": "2500000000000000000",
+        "conditions": [
+          "Git commit hash delivered"
+        ],
+        "deadline": null,
+        "deliverableType": "code"
+      }
+    ],
+    "parties": {
+      "provider": {
+        "address": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+        "name": "Provider Ltd"
+      },
+      "arbiter": {
+        "name": "Arbiter",
+        "address": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC"
+      },
+      "client": {
+        "name": "Client Pvt",
+        "address": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+      }
+    },
+    "reviewWindowSeconds": 3600,
+    "extraction": {
+      "sourceTextHash": "0xabababababababababababababababababababababababababababababababab",
+      "model": null,
+      "source": "rules"
+    },
+    "resolutions": [
+      {
+        "resolvedBy": "client",
+        "note": "Fixed at 1 ETH",
+        "action": "edited",
+        "ambiguityId": "MISSING_AMOUNT:0:0"
+      }
+    ],
+    "confirmedAt": "2026-10-11T09:00:00.000Z"
+  },
+  "canonical": "{\"confirmedAt\":\"2026-10-11T09:00:00.000Z\",\"extraction\":{\"model\":null,\"source\":\"rules\",\"sourceTextHash\":\"0xabababababababababababababababababababababababababababababababab\"},\"milestones\":[{\"amountWei\":\"1000000000000000000\",\"conditions\":[\"Report ≥ 8 pages\",\"Includes 10 interviews\"],\"deadline\":\"2026-11-30\",\"deliverableType\":\"document\",\"index\":0,\"title\":\"Research — phase 1\"},{\"amountWei\":\"2500000000000000000\",\"conditions\":[\"Git commit hash delivered\"],\"deadline\":null,\"deliverableType\":\"code\",\"index\":1,\"title\":\"Prototype\"}],\"parties\":{\"arbiter\":{\"address\":\"0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC\",\"name\":\"Arbiter\"},\"client\":{\"address\":\"0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266\",\"name\":\"Client Pvt\"},\"provider\":{\"address\":\"0x70997970C51812dc3A010C7d01b50e0d17dc79C8\",\"name\":\"Provider Ltd\"}},\"resolutions\":[{\"action\":\"edited\",\"ambiguityId\":\"MISSING_AMOUNT:0:0\",\"note\":\"Fixed at 1 ETH\",\"resolvedBy\":\"client\"}],\"reviewWindowSeconds\":3600,\"schemaVersion\":1,\"title\":\"Café app — ₹ pricing pilot\"}",
+  "hash": "0xc085f01fad307b21a42f55ab0f8343425f7ddf13239f7feb03f950cae66a0cec"
+}

@@ -7,5 +7,4 @@ dist
 .env
 server/data/agreements/*.json
 !server/data/agreements/.gitkeep
-web/src/generated/
 *.log
