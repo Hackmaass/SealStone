@@ -125,9 +125,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
     const root = document.documentElement;
     if (theme) root.dataset.theme = theme;
     else delete root.dataset.theme;
+    // leaving the app (for the landing page) must not leave the app's theme behind
+    return () => {
+      delete root.dataset.theme;
+    };
   }, [theme]);
   useEffect(() => {
     document.documentElement.classList.toggle("presenter", presenter);
+    return () => document.documentElement.classList.remove("presenter");
   }, [presenter]);
 
   const toggleTheme = useCallback(() => {

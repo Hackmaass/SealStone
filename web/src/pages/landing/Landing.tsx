@@ -291,7 +291,7 @@ function LabSection() {
       <Reveal className="lp-center">
         <div className="lp-eyebrow dark"><span className="lp-chip-icon dark"><SealMark size={22} /></span>Attack Lab</div>
         <h2 id="lab-h" className="lp-h1">Try to <span className="lp-grad">break it</span></h2>
-        <p className="lp-lede dark">Twelve real attacks, one click. Each is sent as a real transaction from an attacker's account, and each is refused.</p>
+        <p className="lp-lede dark">Twelve real attacks, one click. Each one is a real transaction, and none of them gets money it isn't owed.</p>
         <div className="lp-cta-row">
           <Cta to="/attack-lab" kind="light">Open the Attack Lab</Cta>
           <Cta to="/vaults" kind="ghost">See the vaults</Cta>

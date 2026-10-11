@@ -35,7 +35,7 @@ Open **http://127.0.0.1:5173**. `npm run dev` prints a short banner with the lan
 
 **Pages.** `/` is the landing page (it loads no chain code and works on its own). The app is `/dashboard` (what is locked, owed and waiting on you, read live from the chain), `/vaults` (every agreement, searchable), `/vault/:address` (milestones, ledger, activity, Verify), `/agreement` (the studio) and `/attack-lab`.
 
-**Phones and tablets.** The whole app is responsive: below 1180 px the top bar becomes a compact bar with a full-screen menu, below 768 px tables become cards and sheets slide up from the bottom, touch targets are 44 px, inputs are 16 px (no iOS zoom), and the layout respects safe areas and reduced motion. Open the app on your phone through your computer's address on the same network, or resize the window.
+**Phones and tablets.** The whole app is responsive: below 1180 px the top bar becomes a compact bar with a full-screen menu, below 768 px tables become cards and sheets slide up from the bottom, touch targets are 44 px, inputs are 16 px (no iOS zoom), and the layout respects safe areas and reduced motion. It was checked in Chrome at 390 px with touch emulation (resize the window to see it). Opening it on a real phone over the network is not supported: the app talks to the chain and the AI service on the machine that runs `npm run dev`.
 
 **Optional local AI (Ollama).** Without it Sealstone uses its built-in rules extractor, and the whole demo still works.
 ```bash
