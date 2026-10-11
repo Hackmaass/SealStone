@@ -1,35 +1,56 @@
-/* Design tokens (light, dark, presenter) copied from docs/ui-prototype/index.html. Fonts are bundled via @fontsource (offline). */
+/*
+ * Design tokens: the "Lavender" visual language (docs/08, "Superseded" box). Light, dark and presenter.
+ * Existing variable names are kept so every component keeps working; the new accent set is added.
+ * STATE COLOURS keep their meaning everywhere and always come with an icon or a word:
+ *   green (--intaglio) = on-chain / confirmed   amber (--proposed) = proposed by AI   blue (--human) = edited by a person
+ *   red (--revert) = reverted / blocked          grey (--pending) = not yet
+ * --accent is for text, links and primary buttons (>= 4.5:1 on white). --accent-fill / --accent-wash are FILL colours only.
+ */
 :root{
-  --paper:#EDF0EA; --paper-2:#F7F8F4; --paper-3:#E3E8E0; --rule:#C9D0C6;
-  --ink:#18212B; --ink-2:#4A5562; --intaglio:#0D5B49; --intaglio-wash:#DCEBE4;
-  --proposed:#A86A12; --proposed-wash:#F6E7CC; --human:#2F56C9; --human-wash:#DDE5FA;
-  --revert:#B3261E; --revert-wash:#F6DCD9; --pending:#8A949E;
-  --sans:"Public Sans Variable","Public Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --paper:#F6F5FB; --paper-2:#FFFFFF; --paper-3:#EEECF8; --rule:#E4E2F0;
+  --ink:#221F2D; --ink-2:#5F5C70;
+  --accent:#5B45E6; --accent-2:#7C69F5; --accent-fill:#A99CFF; --accent-wash:#EFEBFF; --on-accent:#FFFFFF;
+  --intaglio:#0B7A5B; --intaglio-wash:#DDF3EA;
+  --proposed:#9A5B0A; --proposed-wash:#FBEBCF;
+  --human:#2F56C9; --human-wash:#E0E8FB;
+  --revert:#C0342B; --revert-wash:#FBE1DE; --pending:#8A8798;
+  --sans:"Inter Variable","Inter",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   --mono:"IBM Plex Mono",ui-monospace,"Cascadia Mono",Consolas,monospace;
-  --r-sm:4px; --r-md:8px; --shadow:0 12px 32px rgba(24,33,43,.18);
+  --r-sm:10px; --r-md:16px; --r-lg:28px; --r-pill:999px;
+  --shadow:0 18px 44px rgba(53,41,120,.16); --shadow-sm:0 2px 12px rgba(53,41,120,.07);
+  --glow-1:#E6E0FF; --glow-2:#F3EFFF;
   color-scheme:light;
 }
 @media (prefers-color-scheme:dark){
   :root:not([data-theme="light"]){
-    --paper:#10171F; --paper-2:#17212B; --paper-3:#1D2935; --rule:#2A3644;
-    --ink:#E4E9E2; --ink-2:#A3AFB9; --intaglio:#3FB28F; --intaglio-wash:#163A31;
-    --proposed:#E0A43C; --proposed-wash:#3A2C14; --human:#7FA1FF; --human-wash:#1D2A4D;
-    --revert:#F2756B; --revert-wash:#43201D; --pending:#6E7A86; --shadow:0 12px 32px rgba(0,0,0,.5);
+    --paper:#0E0D14; --paper-2:#17161F; --paper-3:#211F2D; --rule:#2D2B3C;
+    --ink:#F2F1F8; --ink-2:#AAA7BD;
+    --accent:#B3A8FF; --accent-2:#C7BFFF; --accent-fill:#8D7BFF; --accent-wash:#27234A; --on-accent:#16132E;
+    --intaglio:#46C39B; --intaglio-wash:#12372D;
+    --proposed:#E3A645; --proposed-wash:#3A2C14;
+    --human:#8EAAFF; --human-wash:#1D2A4D;
+    --revert:#F4776D; --revert-wash:#43201D; --pending:#7C7A8D;
+    --shadow:0 18px 44px rgba(0,0,0,.55); --shadow-sm:0 2px 12px rgba(0,0,0,.4);
+    --glow-1:#241F4D; --glow-2:#16142B;
     color-scheme:dark;
   }
 }
 :root[data-theme="dark"]{
-  --paper:#10171F; --paper-2:#17212B; --paper-3:#1D2935; --rule:#2A3644;
-  --ink:#E4E9E2; --ink-2:#A3AFB9; --intaglio:#3FB28F; --intaglio-wash:#163A31;
-  --proposed:#E0A43C; --proposed-wash:#3A2C14; --human:#7FA1FF; --human-wash:#1D2A4D;
-  --revert:#F2756B; --revert-wash:#43201D; --pending:#6E7A86; --shadow:0 12px 32px rgba(0,0,0,.5);
+  --paper:#0E0D14; --paper-2:#17161F; --paper-3:#211F2D; --rule:#2D2B3C;
+  --ink:#F2F1F8; --ink-2:#AAA7BD;
+  --accent:#B3A8FF; --accent-2:#C7BFFF; --accent-fill:#8D7BFF; --accent-wash:#27234A; --on-accent:#16132E;
+  --intaglio:#46C39B; --intaglio-wash:#12372D;
+  --proposed:#E3A645; --proposed-wash:#3A2C14;
+  --human:#8EAAFF; --human-wash:#1D2A4D;
+  --revert:#F4776D; --revert-wash:#43201D; --pending:#7C7A8D;
+  --shadow:0 18px 44px rgba(0,0,0,.55); --shadow-sm:0 2px 12px rgba(0,0,0,.4);
+  --glow-1:#241F4D; --glow-2:#16142B;
   color-scheme:dark;
 }
 html.presenter{font-size:115%}
 *{box-sizing:border-box}
 body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:1rem;line-height:1.5;-webkit-font-smoothing:antialiased}
 button,input,textarea,select{font:inherit;color:inherit}
-:focus-visible{outline:2px solid var(--human);outline-offset:2px}
 .mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
 .muted{color:var(--ink-2)}
 .small{font-size:.875rem}
@@ -38,5 +59,3 @@ h1{font-size:1.5625rem;font-weight:700;letter-spacing:-.01em}
 h2{font-size:1.25rem;font-weight:650}
 h3{font-size:1rem;font-weight:650}
 p{margin:0}
-
-

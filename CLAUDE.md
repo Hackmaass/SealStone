@@ -10,6 +10,7 @@ Read these before any non-trivial change:
 - `docs/04-CONTRACT-SPEC.md` — the contract's states, functions, errors and invariants (source of truth)
 - `docs/05-AI-SPEC.md` — the checklist schema, ambiguity types and fallback rules
 - `docs/08-UI-UX.md` + `docs/ui-prototype/index.html` — the UI spec and the clickable visual reference (read before any web/ work)
+  **The user later changed the visual language** (see the "Superseded" box at the top of docs/08: lavender, Inter, landing page + app shell). The prototype html is the OLD look; follow docs/08's box and the live app. Do not "restore" the security-paper look.
 - `docs/PROGRESS.md` — what is done, what is next. **Update it at the end of every prompt.**
 Read only the docs a prompt names. Don't re-read everything each time.
 

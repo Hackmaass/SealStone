@@ -1,0 +1,56 @@
+/* Dashboard, Vaults list and the shared vault table (desktop). The phone versions live in responsive.css. */
+.boot{min-height:100vh}
+.phone-only{display:none}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+.dash,.vaults-page{display:flex;flex-direction:column;gap:20px}
+.pagehead{margin-bottom:0}
+.statrow .stat .v.okc{color:var(--intaglio);font-family:var(--sans);font-weight:650;font-size:1rem;padding-top:4px}
+.statrow .stat .v.bad{color:var(--revert);font-family:var(--sans);font-weight:650;font-size:1rem;padding-top:4px}
+
+/* promo banner: the same job the reference app's feature banner does */
+.promo{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:20px;padding:18px 24px;border:1px solid var(--rule);border-radius:var(--r-md);background:linear-gradient(100deg,var(--accent-wash) 0%,var(--paper-2) 62%);box-shadow:var(--shadow-sm)}
+.promo-art{color:var(--accent);display:grid;place-items:center}
+.promo h2{font-size:1.125rem}
+.promo-text .muted{max-width:60ch}
+
+.dash-card{padding:0;overflow:hidden}
+.dash-card-head{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:18px 24px 6px}
+.dash-card-head h2{font-size:1.0625rem}
+.empty{padding:22px 24px 26px}
+.empty p:first-child{font-weight:600}
+.attention{list-style:none;margin:0;padding:6px 0 10px}
+.attention li{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:12px 24px;border-top:1px solid var(--rule)}
+.attention li:first-child{border-top:0}
+.dash-actions{display:flex;gap:10px;flex-wrap:wrap}
+
+/* the list of vaults */
+table.vtable{width:100%;border-collapse:collapse;font-size:.9375rem}
+.vtable th{text-align:left;font-size:.8125rem;font-weight:600;color:var(--ink-2);padding:10px 24px;border-bottom:1px solid var(--rule);white-space:nowrap}
+.vtable td{padding:14px 24px;border-top:1px solid var(--rule);vertical-align:middle}
+.vtable thead th{border-top:0}
+.vtable .num{text-align:right}
+.vtable tbody tr{cursor:pointer}
+@media (hover:hover){.vtable tbody tr:hover td{background:var(--paper)}}
+.vtable tbody tr:focus-visible{outline-offset:-2px}
+.vt-name{display:flex;flex-direction:column;gap:2px;min-width:200px}
+.vt-progress{height:6px;border-radius:3px;background:var(--paper-3);overflow:hidden;min-width:96px;margin-bottom:4px}
+.vt-progress span{display:block;height:100%;background:var(--intaglio);border-radius:3px}
+.vt-ledger{font-weight:600;white-space:nowrap}
+.vt-ledger.ok{color:var(--intaglio)}
+.vt-ledger.bad{color:var(--revert)}
+.vt-open{text-align:right}
+
+.vt-skeleton{padding:6px 24px 18px}
+.sk-row{display:flex;gap:28px;align-items:center;padding:16px 0;border-top:1px solid var(--rule)}
+.sk-row:first-child{border-top:0}
+.sk{display:block;height:16px;border-radius:8px;background:linear-gradient(90deg,var(--paper-3) 25%,var(--paper) 50%,var(--paper-3) 75%);background-size:200% 100%;animation:sk 1.4s linear infinite}
+
+.filters{display:flex;gap:12px;flex-wrap:wrap}
+.filters .search{flex:1;min-width:220px;max-width:460px}
+.filters input,.filters select{width:100%;border:1px solid var(--rule);background:var(--paper-2);border-radius:var(--r-pill);padding:10px 16px;min-height:42px}
+.filters .select{min-width:190px}
+
+/* shown only if a page chunk cannot be loaded at all */
+.boot-error{max-width:520px;margin:18vh auto 0;padding:0 20px;text-align:center;display:flex;flex-direction:column;gap:12px;align-items:center}
+.boot-error code{font-family:var(--mono)}

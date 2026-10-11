@@ -18,5 +18,8 @@ const reloadOnGeneratedChange = (): Plugin => ({
 
 export default defineConfig({
   plugins: [react(), reloadOnGeneratedChange()],
+  // Pre-bundle every dependency up front. Discovering one lazily (the app code-splits its pages) makes the dev server re-run its
+  // optimiser and reload the page, which broke the first load after a demo reset.
+  optimizeDeps: { include: ['react', 'react-dom', 'react-dom/client', 'react/jsx-dev-runtime', 'ethers', 'zod'] },
   server: { port: 5173, strictPort: true, host: '127.0.0.1' },
 })

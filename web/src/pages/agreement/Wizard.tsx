@@ -174,7 +174,7 @@ export function Wizard() {
             <button className="btn go" type="button" disabled={state.text.trim().length < 20 || busy !== null} onClick={() => void runExtract()}>
               Extract
             </button>
-            <span className="muted small">Mode: {app.aiMode === "rules" ? "built-in rules (works offline)" : app.aiMode}. Change it in the top bar.</span>
+            <span className="muted small">Mode: {app.aiMode === "rules" ? "built-in rules (works offline)" : app.aiMode}. Change it in the AI setting (top bar or menu).</span>
             {state.extraction && (
               <button className="btn secondary" type="button" onClick={() => goto(2)}>
                 Back to the proposal

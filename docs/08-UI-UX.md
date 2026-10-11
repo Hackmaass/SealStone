@@ -1,5 +1,26 @@
 # 08 — UI/UX specification
 
+> ## Superseded in part by the user's direction (2026-10-11): the "Lavender" visual language
+> The user asked for the landing page to follow the layout and feel of a reference lending-app marketing site, and the dashboard/app to follow the layout of that product's web app (both only as *design references*: our own brand, copy, artwork and code; no third-party logos, fonts, images or CSS are used).
+> **Where this section disagrees with the rest of this document, THIS section wins.** It replaces the "security paper" look, including its "Don'ts" (no gradients, no glass, soft shadows are now allowed).
+>
+> **What changed**
+> - Surfaces: near-white cards on a faint lavender-grey page, large radii (16 px cards, 28 px hero panels, pill buttons), soft shadows, gentle lavender gradients on the landing page, one dark section.
+> - Type: Inter (variable, bundled via `@fontsource-variable/inter`, OFL), tight bold display headings; IBM Plex Mono stays for hashes, addresses and amounts.
+> - Accent: violet (`--accent`) for primary actions and links; light lavender (`--accent-wash`) for fills. The light violet is a FILL colour only; text uses the darker `--accent` so contrast stays >= 4.5:1.
+> - Two layouts: the marketing landing page (`/`) and the app shell (everything else: top nav with Dashboard / Vaults / Agreement studio / Attack Lab, the "Acting as" switcher, the chain and AI pills).
+> - The landing page's product visuals are real screenshots of this app (`npm run capture:landing`), never mock-ups.
+>
+> **What did NOT change (judges check these)**
+> - State colours keep their meaning on every screen and always come with an icon or a word: green = on-chain / confirmed, amber = proposed by AI, blue = edited by a person, red = reverted / blocked, grey = not yet. **Never show an AI-proposed value in green.**
+> - Hash seals stay the signature element (`HashSeal`); the hex is always shown beside them.
+> - Text contrast >= 4.5:1, visible focus ring, minimum 36 px hit targets, `prefers-reduced-motion` respected, works at 1366x768 / 110% zoom and in presenter mode.
+> - Everything works offline: no external fonts, images, scripts or links at runtime.
+> - Only checkable facts on the landing page (counts that come from the test runs), fictional data only, no invented partners, testimonials, user counts or TVL.
+>
+> The sections below describe the OLD tokens and look; keep them for the information architecture, role journeys, states and copy deck, which still apply.
+
+
 Build target for P07–P09. The clickable reference is `docs/ui-prototype/index.html`. Open it in a browser and match it.
 
 ## The brief in one line

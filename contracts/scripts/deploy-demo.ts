@@ -22,6 +22,36 @@ export interface DeployResult {
 }
 
 /** Deploys and seeds the KrishiLens demo vault. Exported so reset.ts can call it. */
+/**
+ * If the Vite dev server is running it reloads open pages when src/generated changes (web/vite.config.ts), but its file
+ * watcher can be several seconds late. Wait until it SERVES the new file (so the change is processed), plus a beat for the
+ * reload to go out, so that whatever runs next (a script, a browser, a judge) is not reloaded under its feet.
+ * No dev server (tests, a production build) means nothing to wait for.
+ */
+async function waitForDevServer(stamp: string): Promise<void> {
+  const web = process.env.WEB_URL ?? "http://127.0.0.1:5173";
+  const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+  try {
+    await fetch(web, { signal: AbortSignal.timeout(800) });
+  } catch {
+    return;
+  }
+  const end = Date.now() + 10_000;
+  while (Date.now() < end) {
+    try {
+      const text = await (await fetch(`${web}/src/generated/deployment.json`, { signal: AbortSignal.timeout(1500) })).text();
+      if (text.includes(stamp)) {
+        await sleep(900);
+        return;
+      }
+    } catch {
+      /* try again */
+    }
+    await sleep(250);
+  }
+  console.warn("The dev server did not pick up the new demo files within 10 s: reload the page.");
+}
+
 export async function deployDemo(): Promise<DeployResult> {
   // 0. The ts-node/CommonJS path must hash exactly like vitest does.
   const vector = JSON.parse(readFileSync(VECTOR_PATH, "utf8"));
@@ -71,6 +101,7 @@ export async function deployDemo(): Promise<DeployResult> {
   const net = await ethers.provider.getNetwork();
   const accounts = Object.fromEntries(Object.entries(ROLE_INDEX).map(([role, i]) => [role, { index: i, address: signers[i].address }]));
   mkdirSync(GENERATED_DIR, { recursive: true });
+  const generatedAt = new Date().toISOString();
   writeFileSync(
     path.join(GENERATED_DIR, "deployment.json"),
     JSON.stringify(
@@ -79,12 +110,14 @@ export async function deployDemo(): Promise<DeployResult> {
         rpcUrl: RPC_URL,
         accounts,
         preseededVault: { address, agreementHash: hash },
-        generatedAt: new Date().toISOString(),
+        generatedAt,
       },
       null,
       2,
     ) + "\n",
   );
+
+  await waitForDevServer(generatedAt);
 
   const result = { address, agreementHash: hash, reconcileOk: rec.ok };
   console.log(`Vault: ${address}`);

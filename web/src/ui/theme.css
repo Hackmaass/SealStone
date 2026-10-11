@@ -1,0 +1,93 @@
+/*
+ * "Lavender" theme layer (docs/08, "Superseded" box). Loaded AFTER the component CSS: it restyles the app shell and the
+ * shared components through tokens and a handful of overrides, without changing any markup.
+ * Reference sites were used for layout and feel only; nothing here is copied from them.
+ */
+body{
+  background:radial-gradient(1100px 380px at 50% -140px,var(--glow-1),transparent 72%),var(--paper);
+  background-repeat:no-repeat;
+  font-feature-settings:"cv11","ss03";
+}
+h1{font-size:1.875rem;font-weight:720;letter-spacing:-.03em;line-height:1.15}
+h2{font-weight:660;letter-spacing:-.018em}
+h3{font-weight:650;letter-spacing:-.01em}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+::selection{background:var(--accent-wash)}
+
+/* ---------- top bar (app shell) ---------- */
+.topbar{
+  background:color-mix(in srgb,var(--paper-2) 86%,transparent);
+  -webkit-backdrop-filter:saturate(1.4) blur(12px);backdrop-filter:saturate(1.4) blur(12px);
+  border-bottom:1px solid var(--rule);gap:22px;
+}
+.brand{text-decoration:none;font-weight:760;font-size:1.0625rem;letter-spacing:-.025em;color:var(--ink)}
+.brand svg{color:var(--accent)}
+.nav{gap:2px}
+.nav button{position:relative;border-radius:var(--r-sm);padding:9px 12px;font-weight:560}
+.nav button[aria-current="page"]{background:none;color:var(--ink)}
+.nav button[aria-current="page"]::after{content:"";position:absolute;left:12px;right:12px;bottom:-12px;height:2px;border-radius:2px;background:var(--accent)}
+.pill{background:var(--paper-2);box-shadow:var(--shadow-sm)}
+.roles{border-radius:14px;box-shadow:var(--shadow-sm);background:var(--paper-2)}
+.roles button[aria-pressed="true"]{background:var(--accent);color:var(--on-accent)}
+.iconbtn{border-radius:var(--r-pill);background:var(--paper-2);padding:7px 12px}
+.iconbtn[aria-pressed="true"]{color:var(--accent);border-color:var(--accent)}
+
+/* ---------- shared components ---------- */
+.panel{background:var(--paper-2);border:1px solid var(--rule);border-radius:var(--r-md);box-shadow:var(--shadow-sm)}
+.btn{border-radius:var(--r-pill);padding:9px 20px;background:var(--ink);border-color:var(--ink);color:var(--paper-2);font-weight:620;letter-spacing:-.005em;transition:transform .12s,filter .12s}
+@media (hover:hover){.btn:hover{filter:none;transform:translateY(-1px)}}
+.btn:active{transform:none}
+.btn.secondary{background:var(--accent-wash);border-color:transparent;color:var(--accent)}
+@media (hover:hover){.btn.secondary:hover{border-color:transparent;filter:brightness(.97)}}
+.btn.go{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+.btn:disabled{transform:none}
+.chip{letter-spacing:-.005em}
+.hash{color:var(--ink-2)}
+.toast{border-radius:var(--r-md);box-shadow:var(--shadow)}
+.scrim{background:rgba(28,20,64,.42);-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px)}
+.sheet{border-radius:24px}
+.file:has(input:checked){border-color:var(--accent);background:var(--accent-wash)}
+.compare{background:var(--paper)}
+.preview{border-left-color:var(--accent);border-radius:0 var(--r-sm) var(--r-sm) 0}
+.fix{border-radius:var(--r-pill);padding:4px 11px}
+.steps{border-radius:var(--r-md);box-shadow:var(--shadow-sm)}
+.steps li.now{background:var(--accent-wash)}
+.steps li.now::before{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+.meter{height:8px;border-radius:4px}
+.meter span{background:var(--accent)}
+.gate{border-radius:var(--r-md);box-shadow:var(--shadow)}
+.try .menu{border-radius:var(--r-md)}
+.ms-row:first-child{border-top:0}
+.track .st.now i{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-wash)}
+.stamp{letter-spacing:-.01em}
+@media (hover:hover){table.lab tr:hover td{background:var(--paper)}}
+table.lab tr.cur td{background:var(--accent-wash)}
+table.lab th{text-transform:none;letter-spacing:0}
+a{color:var(--accent)}
+
+/* ---------- page header used by the dashboard and list pages ---------- */
+.pagehead{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;margin-bottom:22px;flex-wrap:wrap}
+.pagehead .lede{margin-top:6px;max-width:62ch}
+.statrow{display:flex;gap:34px;flex-wrap:wrap}
+.statrow .stat{display:flex;flex-direction:column;gap:2px}
+.statrow .stat .k{font-size:.8125rem;color:var(--ink-2)}
+.statrow .stat .v{font-family:var(--mono);font-size:1.25rem;font-weight:500;font-variant-numeric:tabular-nums}
+
+@media (max-width:720px){
+  h1{font-size:1.5rem}
+  .nav button[aria-current="page"]::after{bottom:-4px}
+}
+
+/* a compact bar that fits 1366 px: icon buttons, capped names, no "answered" text until there is room */
+.topbar{gap:14px}
+.iconbtn.round{width:38px;height:38px;padding:0;display:inline-grid;place-items:center;border-radius:50%}
+.roles button{padding:6px 10px}
+.roles button .n{max-width:94px;overflow:hidden;text-overflow:ellipsis}
+.pill .answered{display:none}
+@media (min-width:1500px){.pill .answered{display:inline}}
+@media (min-width:1181px){
+  .topbar{gap:12px;flex-wrap:nowrap}
+  .nav button{padding:9px 9px}
+  .roles button{padding:6px 8px}
+  .roles button .n{max-width:78px}
+}

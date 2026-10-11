@@ -1,62 +1,57 @@
-import { AppProvider, useApp } from "./lib/app";
+import { Component, lazy, Suspense, type ComponentType, type ReactNode } from "react";
 import { matchRoute, usePath } from "./lib/router";
-import { ToastProvider } from "./ui/toast";
-import { TopBar } from "./ui/TopBar";
-import { Home } from "./pages/Home";
-import { Wizard } from "./pages/agreement/Wizard";
-import { VaultPage } from "./pages/vault/VaultPage";
-import { AttackLab } from "./pages/AttackLab";
-import deployment from "./generated/deployment.json";
 
-function Banners() {
-  const app = useApp();
-  return (
-    <>
-      {!app.chainOnline && (
-        <div className="banner bad" role="alert">
-          Can't reach the local chain at {deployment.rpcUrl.replace("http://", "")}. Start it with <code>npm run chain</code>.
-        </div>
-      )}
-      {app.serverOnline === false && (
-        <div className="banner" role="status">
-          The AI service isn't running. Start it with <code>npm run server</code>. You can still use the built-in rules.
-        </div>
-      )}
-    </>
-  );
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+/** A lazy page that retries a couple of times if its file cannot be fetched (a dropped connection, a dev server restarting). */
+function lazyRetry<T extends ComponentType<object>>(load: () => Promise<{ default: T }>) {
+  return lazy(async () => {
+    let last: unknown;
+    for (let i = 0; i < 3; i++) {
+      try {
+        return await load();
+      } catch (e) {
+        last = e;
+        await sleep(400 * (i + 1));
+      }
+    }
+    throw last;
+  });
 }
 
-function Routes() {
-  const route = matchRoute(usePath());
-  switch (route.name) {
-    case "home":
-      return <Home />;
-    case "agreement":
-      return <Wizard />;
-    case "vault":
-      return <VaultPage key={route.address} address={route.address} />;
-    case "lab":
-      return <AttackLab />;
-    default:
-      return (
-        <div className="panel" style={{ padding: 24 }}>
-          <h1>Page not found</h1>
-          <p className="muted">Use the top bar to open the Agreement studio, the Vault or the Attack Lab.</p>
-        </div>
-      );
+// Two layouts, loaded separately: the marketing landing page (no chain, no providers, no ethers) and the app.
+const Landing = lazyRetry(() => import("./pages/landing/Landing"));
+const AppShell = lazyRetry(() => import("./AppShell"));
+
+function Loading() {
+  return <div className="boot" role="status" aria-label="Loading" />;
+}
+
+/** If a part of the app cannot be loaded at all, say so in plain words instead of leaving a blank page. */
+class LoadBoundary extends Component<{ children: ReactNode }, { failed: boolean }> {
+  state = { failed: false };
+  static getDerivedStateFromError() {
+    return { failed: true };
+  }
+  render() {
+    if (!this.state.failed) return this.props.children;
+    return (
+      <div className="boot-error" role="alert">
+        <h1>Sealstone couldn't load this page</h1>
+        <p>Part of the app didn't arrive. If you are running it yourself, check that <code>npm run dev</code> is still running, then reload.</p>
+        <button className="btn go" type="button" onClick={() => location.reload()}>
+          Reload
+        </button>
+      </div>
+    );
   }
 }
 
 export default function App() {
+  const route = matchRoute(usePath());
   return (
-    <AppProvider>
-      <ToastProvider>
-        <TopBar />
-        <Banners />
-        <main>
-          <Routes />
-        </main>
-      </ToastProvider>
-    </AppProvider>
+    <LoadBoundary>
+      <Suspense fallback={<Loading />}>{route.name === "landing" ? <Landing /> : <AppShell />}</Suspense>
+    </LoadBoundary>
   );
 }

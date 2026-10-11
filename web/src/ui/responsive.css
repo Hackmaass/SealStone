@@ -1,0 +1,153 @@
+/*
+ * Phone layouts. The behaviour follows the reference sites' settings: one main breakpoint at 768 px (with smaller steps),
+ * a compact top bar + full-screen menu, hover effects only where hover exists, tap highlight off, overscroll contained in
+ * menus and sheets, reduced motion respected, 44 px touch targets, 16 px inputs (iOS does not zoom), safe-area padding.
+ */
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%;-webkit-tap-highlight-color:transparent}
+body.menu-open{overflow:hidden}
+
+/* touch devices: comfortable hit targets everywhere */
+@media (pointer:coarse){
+  .btn,.iconbtn,.fix,.try summary,.filters input,.filters select,.menu-btn,.pm-link,.pm-role,.pm-row{min-height:44px}
+  .try .menu button{min-height:44px}
+  .nav button{min-height:44px}
+}
+
+/* ---------- tablet and below ---------- */
+@media (max-width:980px){
+  main{padding:20px}
+  .promo{grid-template-columns:auto 1fr}
+  .promo-cta{grid-column:1/-1}
+  .statrow{gap:22px}
+}
+
+/* ---------- the compact bar + menu: tablets and phones (the full bar needs about 1180 px) ---------- */
+@media (max-width:1180px){
+  .desk-only{display:none!important}
+  .phone-only{display:inline-flex}
+  .topbar{padding:max(10px,env(safe-area-inset-top)) 14px 10px;gap:10px;flex-wrap:nowrap}
+  .brand{font-size:1.0625rem}
+  .actas-chip{display:inline-flex;flex-direction:column;align-items:flex-start;line-height:1.15;border:1px solid var(--rule);border-radius:14px;background:var(--paper-2);padding:5px 12px;max-width:190px;min-height:44px;justify-content:center;cursor:pointer;box-shadow:var(--shadow-sm)}
+  .actas-chip .r{font-size:.6875rem;color:var(--ink-2)}
+  .actas-chip .n{font-size:.8125rem;font-weight:620;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .menu-btn{display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;border:0;border-radius:50%;background:var(--paper-3);color:var(--ink);cursor:pointer}
+}
+
+/* ---------- phone ---------- */
+@media (max-width:768px){
+  input,select,textarea{font-size:16px}
+
+  main{padding:16px 14px max(24px,env(safe-area-inset-bottom))}
+  h1{font-size:1.5rem}
+  .pagehead{align-items:flex-start;flex-direction:column;gap:14px}
+  .statrow{display:grid;grid-template-columns:1fr 1fr;gap:14px 18px;width:100%}
+  .promo{grid-template-columns:1fr;padding:16px}
+  .promo-art{display:none}
+  .promo-cta .btn{width:100%;justify-content:center}
+  .dash-card-head,.empty,.attention li{padding-left:16px;padding-right:16px}
+  .attention li{flex-direction:column;align-items:stretch}
+  .attention li .btn{justify-content:center}
+  .dash-actions .btn{flex:1;justify-content:center}
+  .filters .search{max-width:none}
+  .filters .select{flex:1}
+
+  /* the vault table becomes a stack of cards */
+  table.vtable,.vtable tbody,.vtable tr,.vtable td{display:block}
+  .vtable thead{display:none}
+  .vtable tbody tr{padding:14px 16px;border-top:1px solid var(--rule);display:grid;grid-template-columns:1fr 1fr;gap:6px 12px}
+  .vtable tbody tr:first-child{border-top:0}
+  .vtable td{padding:0;border:0}
+  .vtable td::before{content:attr(data-label);display:block;font-size:.75rem;color:var(--ink-2);margin-bottom:2px}
+  .vtable td.vt-name{grid-column:1/-1;min-width:0;display:flex;flex-direction:column;gap:2px}
+  .vtable td.vt-name::before,.vtable td.vt-open::before{display:none}
+  .vtable td[data-label="Progress"]{grid-column:1/-1}
+  .vtable td.num{text-align:left}
+  .vtable td.vt-open{grid-column:1/-1}
+  .vtable td.vt-open .btn{width:100%;justify-content:center}
+
+  /* vault screen */
+  .vhead-in{padding:14px 16px 8px;gap:12px}
+  .vhead-in .title{min-width:0}
+  .vheadbox .terms-panel{padding:8px 16px}
+  .yourmove{padding:12px 16px}
+  .yourmove .btn{width:100%;justify-content:center}
+  .ms-row{padding:16px}
+  .ms-row .body{gap:12px}
+  .actions .btn{flex:1 1 140px;justify-content:center}
+  .time-control{flex-direction:column;gap:2px}
+  .rail-col{position:static}
+  .terms-json{font-size:.6875rem}
+
+  /* sheets slide up from the bottom, like a phone expects */
+  .scrim{align-items:flex-end;padding:0}
+  .sheet{width:100%;max-height:92dvh;border-radius:24px 24px 0 0;padding:20px 16px;overscroll-behavior:contain;padding-bottom:max(16px,env(safe-area-inset-bottom))}
+  .sheet .foot{bottom:-20px;padding-bottom:max(16px,env(safe-area-inset-bottom));margin-bottom:-20px}
+  .sheet .foot .btn{flex:1;justify-content:center}
+  .compare{grid-template-columns:1fr 1fr;gap:10px}
+  .compare .verdict{grid-column:1/-1;order:3}
+  .toasts{left:12px;right:12px;bottom:max(12px,env(safe-area-inset-bottom))}
+  .toast{max-width:none}
+
+  /* agreement studio: a compact stepper that names only the current step */
+  .steps{flex-direction:row;overflow-x:auto;overscroll-behavior-x:contain}
+  .steps li{flex:0 0 auto;border-right:1px solid var(--rule);border-bottom:0;padding:10px 12px}
+  .steps li:not(.now){font-size:0;gap:0}
+  .steps li::before{font-size:.75rem}
+  .doc{padding:18px 16px}
+  .doc-head{flex-wrap:wrap;align-items:flex-start}
+  .doc-head>*{min-width:0;max-width:100%}
+  .doc-head label,.doc-head select{width:100%}
+  .doc-head select{max-width:100%}
+  .studio .doc{overflow:hidden}
+  table.lab tr[data-status="idle"] td[data-testid="answer"],table.lab tr[data-status="idle"] td.led{display:none}
+  .gate{bottom:max(0px,env(safe-area-inset-bottom))}
+
+  /* attack lab: each attack is a card */
+  .lab-head{flex-wrap:wrap;align-items:flex-start}
+  .lab-head .btn{flex:1;justify-content:center}
+  .lab-page .score{width:100%;text-align:left}
+  table.lab,table.lab tbody,table.lab tr,table.lab td{display:block}
+  table.lab thead{display:none}
+  table.lab tr[data-attack]{position:relative;padding:14px 14px 14px 38px;border-bottom:1px solid var(--rule)}
+  table.lab td{padding:3px 0;border:0}
+  table.lab td:first-child{position:absolute;left:14px;top:14px;padding:0}
+  table.lab .hide-s:not(.led){display:none}
+  table.lab .led{display:block}
+  table.lab td.lab-actions{display:flex;gap:12px;align-items:center;margin-top:8px}
+  table.lab td.lab-actions .btn{flex:1;justify-content:center}
+  table.lab tr.lab-detail{padding:4px 14px 14px}
+  table.lab tr.lab-detail td:first-child{display:none}
+  table.lab tr.lab-detail td{padding:0}
+}
+
+@media (max-width:520px){
+  .statrow .stat .v{font-size:1.0625rem}
+  .actas-chip{max-width:118px}
+  .actas-chip .n{max-width:96px}
+  .vheadbox .vhead-in{flex-direction:column;align-items:flex-start}
+  .brand{font-size:1rem}
+}
+
+/* ---------- the full-screen phone menu ---------- */
+.phone-menu{position:fixed;inset:0;z-index:70;background:var(--paper-2);display:flex;flex-direction:column;animation:pm-in .18s ease-out}
+@keyframes pm-in{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:none}}
+.pm-head{display:flex;align-items:center;justify-content:space-between;padding:max(10px,env(safe-area-inset-top)) 14px 10px;border-bottom:1px solid var(--rule)}
+.pm-body{flex:1;overflow-y:auto;overscroll-behavior:contain;padding:8px 0 16px}
+.pm-link{display:block;width:100%;text-align:left;border:0;background:none;cursor:pointer;padding:15px 24px;font-size:1.1875rem;font-weight:560;color:var(--ink);position:relative}
+.pm-link.on::before{content:"";position:absolute;left:0;top:12px;bottom:12px;width:4px;border-radius:0 4px 4px 0;background:var(--accent)}
+.pm-group{margin:10px 0 0;padding:10px 0 0;border-top:1px solid var(--rule)}
+.pm-label{padding:6px 24px;font-size:.8125rem;color:var(--ink-2);font-weight:600}
+.pm-role,.pm-row{display:flex;justify-content:space-between;align-items:center;gap:12px;width:100%;border:0;background:none;text-align:left;cursor:pointer;padding:13px 24px;font-size:1rem;color:var(--ink)}
+.pm-role.on{background:var(--accent-wash)}
+.pm-role.on b{color:var(--accent)}
+.pm-row select{border:0;background:transparent;text-align:right;color:var(--ink-2);max-width:60%}
+.switch{width:46px;height:26px;border-radius:13px;background:var(--paper-3);border:1px solid var(--rule);position:relative;flex:none;transition:background .15s}
+.switch::after{content:"";position:absolute;top:2px;left:2px;width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.3);transition:transform .15s}
+.switch.on{background:var(--accent);border-color:var(--accent)}
+.switch.on::after{transform:translateX(20px)}
+.pm-foot{display:flex;flex-direction:column;gap:10px;padding:12px 16px max(16px,env(safe-area-inset-bottom));border-top:1px solid var(--rule)}
+.pm-foot .btn{width:100%;justify-content:center}
+.pm-foot .pill{align-self:flex-start}
+@media (min-width:1181px){.phone-menu{display:none}}
+
+@media (prefers-reduced-motion:reduce){.phone-menu{animation:none}.switch,.switch::after{transition:none}}

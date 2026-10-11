@@ -83,7 +83,7 @@ export function AttackLab() {
         <div className="title">
           <h1>Attack Lab</h1>
           <p className="muted">
-            Every attack is a real transaction sent from an attacker's account to a fresh sandbox vault that Sealstone builds just for it. Starred rows are the attacks the problem statement requires. The lab uses its own sandbox accounts, so the role switcher in the top bar doesn't apply here, and your demo vaults are never touched.
+            Every attack is a real transaction sent from an attacker's account to a fresh sandbox vault that Sealstone builds just for it. Starred rows are the attacks the problem statement requires. The lab uses its own sandbox accounts, so the "Acting as" switcher doesn't apply here, and your demo vaults are never touched.
           </p>
         </div>
         <div className="score" aria-live="polite" data-testid="score">
