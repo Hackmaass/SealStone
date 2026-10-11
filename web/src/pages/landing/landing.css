@@ -4,7 +4,7 @@
  * It has its own fixed light palette so it looks the same whatever the visitor's system theme is.
  */
 .lp{
-  --lp-ink:#2A2633; --lp-ink-2:#625E70; --lp-ink-3:#8A8697;
+  --lp-ink:#2A2633; --lp-ink-2:#4F4B60; --lp-ink-3:#6A6678;
   --lp-accent:#8E7CFF; --lp-accent-d:#5B45E6; --lp-wash:#F0ECFF; --lp-rule:#E9E6F4; --lp-card:#FFFFFF;
   --lp-radius:32px;
   background:#fff;color:var(--lp-ink);font-family:var(--sans);min-height:100vh;overflow-x:clip;
@@ -19,7 +19,7 @@ body:has(.lp){background:#fff}
 .lp-skip:focus{left:12px}
 
 /* ---------- navigation ---------- */
-.lp-nav{position:sticky;top:0;z-index:30;display:flex;align-items:center;gap:28px;max-width:1180px;margin:0 auto;padding:16px 24px;background:rgba(255,255,255,.82);-webkit-backdrop-filter:saturate(1.5) blur(14px);backdrop-filter:saturate(1.5) blur(14px)}
+.lp-nav{position:sticky;top:0;z-index:30;display:flex;align-items:center;gap:28px;padding:16px max(24px,calc((100vw - 1180px) / 2 + 24px));background:rgba(255,255,255,.82);-webkit-backdrop-filter:saturate(1.5) blur(14px);backdrop-filter:saturate(1.5) blur(14px)}
 .lp-logo{display:inline-flex;align-items:center;gap:10px;font-weight:760;font-size:1.3rem;letter-spacing:-.03em;text-decoration:none;color:var(--lp-ink)}
 .lp-logo svg{color:var(--lp-accent-d)}
 .lp-links{display:flex;gap:6px;margin-left:auto}
@@ -53,8 +53,8 @@ main{max-width:none;padding:0}
 .lp-chip-icon{display:inline-grid;place-items:center;width:40px;height:40px;border-radius:12px;background:var(--lp-accent);color:#fff}
 .lp-chip-icon.dark{background:rgba(255,255,255,.14)}
 .lp-eyebrow.dark{color:#d9d4ee}
-.lp-h1{font-size:clamp(2.4rem,6.4vw,4.5rem);line-height:1.04;font-weight:700;letter-spacing:-.045em;color:var(--lp-ink);margin-top:22px}
-.lp h1{font-size:clamp(2.6rem,7.4vw,5rem);line-height:1.02;font-weight:700;letter-spacing:-.05em;color:var(--lp-ink);margin-top:22px}
+.lp-h1{text-wrap:balance;font-size:clamp(2.2rem,5.6vw,4rem);line-height:1.04;font-weight:700;letter-spacing:-.045em;color:var(--lp-ink);margin-top:22px}
+.lp h1{text-wrap:balance;font-size:clamp(2.5rem,6.6vw,4.5rem);line-height:1.02;font-weight:700;letter-spacing:-.05em;color:var(--lp-ink);margin-top:22px}
 .lp-h2{font-size:clamp(1.7rem,3.6vw,2.5rem);line-height:1.1;font-weight:660;letter-spacing:-.035em}
 .lp-h3{font-size:1.5rem;line-height:1.2;font-weight:620;letter-spacing:-.025em}
 .lp-h4{font-size:1.25rem;font-weight:620;letter-spacing:-.02em}
@@ -76,9 +76,9 @@ main{max-width:none;padding:0}
 .lp-hero-copy{display:flex;flex-direction:column;align-items:center;text-align:center;max-width:860px;margin:0 auto}
 .lp-phones{position:relative;display:flex;align-items:flex-end;justify-content:center;gap:0;margin:64px auto 0;max-width:1000px;height:540px;overflow:hidden}
 .lp-phone{margin:0;flex:none;width:290px;border-radius:44px 44px 0 0;background:#14121b;padding:10px 10px 0;box-shadow:0 0 0 2px #3a3744 inset,0 30px 70px rgba(70,50,170,.28);position:relative;align-self:flex-end}
-.lp-phone-screen{border-radius:34px 34px 0 0;overflow:hidden;background:#fff;aspect-ratio:390/700;position:relative}
+.lp-phone-screen{border-radius:34px 34px 0 0;overflow:hidden;background:#fff;height:100%;padding-top:30px;position:relative}
 .lp-phone-screen::before{content:"";position:absolute;top:8px;left:50%;width:84px;height:24px;border-radius:14px;background:#0c0b10;transform:translateX(-50%);z-index:2}
-.lp-phone img{display:block;width:100%;height:auto}
+.lp-phone img{display:block;width:100%;height:auto;border-top:1px solid #eeeaf8}
 .lp-phone.mid{width:320px;z-index:2;height:520px;margin:0 -22px}
 .lp-phone.side{height:470px;opacity:.97}
 .lp-phone.l{transform:translateY(34px) rotate(-1.5deg)}
