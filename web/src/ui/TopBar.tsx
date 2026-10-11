@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { id } from "ethers";
 import { useApp } from "../lib/app";
 import { ACCOUNT_ROLES, accountAddress } from "../lib/chain";
@@ -22,6 +22,19 @@ const NAV: Array<{ to: string; label: string; active: (p: string) => boolean }> 
   { to: "/vaults", label: "Vaults", active: (p) => p === "/vaults" || p.startsWith("/vault/") },
   { to: "/agreement", label: "Agreement studio", active: (p) => p === "/agreement" },
   { to: "/attack-lab", label: "Attack Lab", active: (p) => p === "/attack-lab" },
+];
+
+/** The sidebar groups the same four places by what you do there. Line icons are our own. */
+const SIDE_GROUPS: Array<{ label: string | null; items: Array<(typeof NAV)[number] & { icon: ReactNode }> }> = [
+  {
+    label: null,
+    items: [
+      { ...NAV[0], icon: <><rect x="3" y="3" width="7" height="9" rx="1.5" /><rect x="14" y="3" width="7" height="5" rx="1.5" /><rect x="14" y="12" width="7" height="9" rx="1.5" /><rect x="3" y="16" width="7" height="5" rx="1.5" /></> },
+      { ...NAV[1], icon: <><path d="M4 7l8-4 8 4v10l-8 4-8-4z" /><path d="M4 7l8 4 8-4M12 11v10" /></> },
+    ],
+  },
+  { label: "Create", items: [{ ...NAV[2], icon: <><path d="M6 3h8l4 4v14H6z" /><path d="M14 3v4h4M9 12h6M9 16h6" /></> }] },
+  { label: "Verify", items: [{ ...NAV[3], icon: <><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z" /><path d="M8.5 12l2.5 2.5L16 9.5" /></> }] },
 ];
 
 export function TopBar() {
@@ -50,18 +63,54 @@ export function TopBar() {
 
   return (
     <>
-      <header className="topbar">
+      {/* the sidebar (wide screens): where you are going, and who you are acting as */}
+      <aside className="sidebar desk-only" aria-label="Sealstone">
         <a className="brand" href="/" onClick={link("/")} aria-label="Sealstone home">
           <HashSeal hash={BRAND_HASH} state="onchain" size={28} />
           Sealstone
         </a>
-        <nav className="nav desk-only" aria-label="Main">
-          {NAV.map((n) => (
-            <button key={n.to} aria-current={n.active(path) ? "page" : "false"} onClick={() => navigate(n.to)}>
-              {n.label}
-            </button>
+        <nav className="side-nav" aria-label="Main">
+          {SIDE_GROUPS.map((g) => (
+            <div className="side-group" key={g.label ?? "main"}>
+              {g.label && <div className="side-label">{g.label}</div>}
+              {g.items.map((n) => (
+                <button key={n.to} className="side-link" aria-current={n.active(path) ? "page" : "false"} onClick={() => navigate(n.to)}>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{n.icon}</svg>
+                  {n.label}
+                </button>
+              ))}
+            </div>
           ))}
         </nav>
+        <div className="side-group side-acting">
+          <div className="side-label">Acting as</div>
+          <div className="side-roles" role="group" aria-label="Acting as">
+            {ACCOUNT_ROLES.map((r, i) => {
+              const bal = app.balances[r];
+              return (
+                <button
+                  key={r}
+                  data-role={r}
+                  aria-pressed={app.roleIdx === i}
+                  onClick={() => app.setRoleIdx(i)}
+                  title={`${app.names[r]} · ${shortHash(accountAddress(r))}${bal !== null ? ` · ${formatWei(bal, 2)} ETH` : ""} (key ${i + 1})`}
+                >
+                  <span className="side-role-t">
+                    <span className="r">{ROLE_WORD[r]}</span>
+                    <span className="n">{app.names[r]}</span>
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </aside>
+
+      <header className="topbar">
+        <a className="brand phone-only" href="/" onClick={link("/")} aria-label="Sealstone home">
+          <HashSeal hash={BRAND_HASH} state="onchain" size={28} />
+          Sealstone
+        </a>
         <div className="spacer" />
         <label className="pill desk-only" title={aiTitle}>
           <span className="dot amber" />
@@ -82,26 +131,6 @@ export function TopBar() {
             {app.block ?? "—"}
           </span>
         </span>
-        <div className="roles desk-only" role="group" aria-label="Acting as">
-          {ACCOUNT_ROLES.map((r, i) => {
-            const bal = app.balances[r];
-            return (
-              <button
-                key={r}
-                data-role={r}
-                aria-pressed={app.roleIdx === i}
-                onClick={() => app.setRoleIdx(i)}
-                title={`${app.names[r]} · ${shortHash(accountAddress(r))}${bal !== null ? ` · ${formatWei(bal, 2)} ETH` : ""} (key ${i + 1})`}
-              >
-                <span className="r">{ROLE_WORD[r]}</span>
-                <span className="n">{app.names[r]}</span>
-              </button>
-            );
-          })}
-        </div>
-        <button className="iconbtn round desk-only" aria-pressed={app.presenter} aria-label="Presenter mode" onClick={app.togglePresenter} title="Presenter mode (P)">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="2" /><path d="M8 20h8M12 16v4" /></svg>
-        </button>
         <button className="iconbtn round desk-only" aria-label={dark ? "Switch to the light theme" : "Switch to the dark theme"} onClick={app.toggleTheme} title={`${dark ? "Light" : "Dark"} theme (T)`}>
           {dark ? (
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4" /><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" /></svg>

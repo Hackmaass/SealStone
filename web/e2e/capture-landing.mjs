@@ -92,7 +92,7 @@ try {
   await openReady(d, `${BASE}/dashboard`, '[data-testid="dash-stats"]');
   await d.locator("body").click({ position: { x: 4, y: 400 } });
   await d.keyboard.press("2");
-  await d.waitForSelector('[data-testid="attention"]', { timeout: 15000 });
+  await d.waitForSelector('.vrow .tag', { timeout: 15000 });
   await d.waitForTimeout(700);
   await shot(d, "desktop-dashboard");
 

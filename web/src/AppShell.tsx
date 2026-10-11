@@ -8,18 +8,25 @@ import { Wizard } from "./pages/agreement/Wizard";
 import { VaultPage } from "./pages/vault/VaultPage";
 import { AttackLab } from "./pages/AttackLab";
 import deployment from "./generated/deployment.json";
+import { isHosted } from "./lib/hosted";
 import "./ui/dashboard.css";
+import "./ui/calm.css";
 
 function Banners() {
   const app = useApp();
   return (
     <>
-      {!app.chainOnline && (
+      {!app.chainOnline && isHosted && (
+        <div className="banner" role="status" data-testid="hosted-notice">
+          <b>Hosted preview.</b> Sealstone's chain and AI run on your own machine, so live actions (sign, fund, attack) need <code>npm run dev</code> there: run it, then open <code>http://127.0.0.1:5173</code>. Nothing here touches a public network.
+        </div>
+      )}
+      {!app.chainOnline && !isHosted && (
         <div className="banner bad" role="alert">
           Can't reach the local chain at {deployment.rpcUrl.replace("http://", "")}. Start it with <code>npm run chain</code>.
         </div>
       )}
-      {app.serverOnline === false && (
+      {app.serverOnline === false && !isHosted && (
         <div className="banner" role="status">
           The AI service isn't running. Start it with <code>npm run server</code>. You can still use the built-in rules.
         </div>

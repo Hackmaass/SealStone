@@ -1,0 +1,115 @@
+/*
+ * The calm pass: the app (never the landing page) with less glare and less noise, in both themes.
+ * Scope: every rule sits under :root[data-theme="dark"|"light"]. The landing page never gets data-theme (the pre-paint script skips "/",
+ * and AppProvider removes it on the way out), so it is untouched. Loaded after the shared sheets, so same-specificity rules win.
+ * Reference: Aave Pro in dark (docs/design-refs/20-pro-*): neutral low-chroma surfaces, hairlines instead of filled blocks, mostly
+ * regular and medium weights, and ONE strong call to action per view.
+ * Unchanged on purpose: state colours keep their meaning (amber = proposed, green = on-chain, blue = human, red = reverted) and every
+ * pair below keeps at least 4.5:1 for text.
+ */
+
+/* ---------- tokens ---------- */
+:root[data-theme="dark"]{
+  --paper:#100F0F;            /* canvas (warm neutral grey, as in Aave Pro dark) */
+  --paper-2:#1A1919;          /* cards */
+  --paper-3:#242222;          /* inputs, chips, hover: a step lighter than a card, never a darker hole */
+  --rule:#2B2929;
+  --ink:#ECEBEB;              /* off-white: less halation than pure white */
+  --ink-2:#A9A8A8;
+  --accent:#A7A5FA; --accent-wash:#25243A;
+  --intaglio-wash:#14302A; --proposed-wash:#2D2616; --human-wash:#1F2742; --revert-wash:#34201F;
+  --shadow:0 12px 32px rgba(0,0,0,.45); --shadow-sm:none;
+  --glow-1:transparent; --glow-2:transparent;
+  --btn:#5B45E6; --btn-hover:#6A56EC; --on-btn:#fff;
+}
+:root[data-theme="light"]{
+  --paper:#F6F6F6;
+  --paper-2:#FDFDFD;
+  --paper-3:#EFEFEF;
+  --rule:#E5E5E5;
+  --ink:#1A1919; --ink-2:#5D5C5C;
+  --accent-wash:#EDECFB;
+  --intaglio-wash:#E4F2EC; --proposed-wash:#FAF0DB; --human-wash:#E7ECFA; --revert-wash:#FAE8E5;
+  --shadow:0 10px 28px rgba(30,28,28,.12); --shadow-sm:none;
+  --glow-1:transparent; --glow-2:transparent;
+  --btn:#5B45E6; --btn-hover:#4D38D6; --on-btn:#fff;
+}
+
+/* ---------- type: regular for reading, medium for labels, semibold only for headings ---------- */
+:root[data-theme] body{background:var(--paper);line-height:1.55}
+:root[data-theme] h1{font-weight:640;letter-spacing:-.022em}
+:root[data-theme] h2{font-weight:600}
+:root[data-theme] h3{font-weight:600}
+:root[data-theme] b,:root[data-theme] strong{font-weight:600}
+:root[data-theme] .nav button{font-weight:500}
+:root[data-theme] .btn,:root[data-theme] .chip,:root[data-theme] .pill{font-weight:550}
+:root[data-theme] .roles button .r{font-weight:600}
+:root[data-theme] .yourmove-head{font-weight:600}
+:root[data-theme] .vrow-id b,:root[data-theme] .dband .dhead-who{font-weight:600}
+
+/* ---------- surfaces: flat, hairline, no glow ---------- */
+:root[data-theme] .panel,:root[data-theme] .pill,:root[data-theme] .roles,:root[data-theme] .steps{box-shadow:none}
+:root[data-theme] .topbar{background:color-mix(in srgb,var(--paper-2) 92%,transparent)}
+:root[data-theme] textarea,:root[data-theme] textarea.agreement,:root[data-theme] input:not([type="radio"]):not([type="checkbox"]),:root[data-theme] .pill select,:root[data-theme] select{background:var(--paper-3);border-color:var(--rule);color:var(--ink)}
+:root[data-theme] textarea::placeholder,:root[data-theme] input::placeholder{color:var(--ink-2);opacity:.85}
+
+/* ---------- buttons: one strong action, quiet hairline for the rest ---------- */
+:root[data-theme] .btn{background:var(--btn);border-color:var(--btn);color:var(--on-btn)}
+:root[data-theme] .btn:hover{background:var(--btn-hover);border-color:var(--btn-hover);filter:none}
+:root[data-theme] .btn.go{background:var(--btn);border-color:var(--btn);color:var(--on-btn)}
+:root[data-theme] .btn.secondary{background:transparent;border-color:var(--rule);color:var(--ink)}
+@media (hover:hover){:root[data-theme] .btn.secondary:hover{background:var(--paper-3);border-color:var(--ink-2);filter:none}}
+:root[data-theme] .btn:disabled{background:var(--paper-3);border-color:var(--rule);color:var(--ink-2);opacity:1}
+:root[data-theme] .btn.secondary:disabled{background:transparent}
+:root[data-theme] .roles button[aria-pressed="true"]{background:var(--btn);color:var(--on-btn)}
+:root[data-theme] .roles button[aria-pressed="true"] .r,:root[data-theme] .roles button[aria-pressed="true"] .n{color:var(--on-btn)}
+:root[data-theme] .count,:root[data-theme] .vrow-next .tag{background:var(--btn);color:var(--on-btn)}
+:root[data-theme] .vrow-next .tag.quiet{background:var(--paper-3);color:var(--ink-2)}
+:root[data-theme] .steps li.now::before{background:var(--btn);border-color:var(--btn);color:var(--on-btn)}
+:root[data-theme] .steps li.now{background:var(--accent-wash)}
+:root[data-theme] .iconbtn{background:transparent}
+
+/* ---------- status blocks: a quiet card with a 3 px accent edge instead of a filled slab ---------- */
+:root[data-theme] .yourmove.mine{background:color-mix(in srgb,var(--intaglio) 7%,var(--paper-2));border:1px solid var(--rule);border-left:3px solid var(--intaglio)}
+:root[data-theme] .banner{background:color-mix(in srgb,var(--proposed) 8%,var(--paper-2));border-bottom:1px solid var(--rule)}
+:root[data-theme] .banner.bad{background:color-mix(in srgb,var(--revert) 8%,var(--paper-2))}
+:root[data-theme] .banner.done{background:color-mix(in srgb,var(--intaglio) 7%,var(--paper-2));border:1px solid var(--rule)}
+:root[data-theme] .chip{border:1px solid color-mix(in srgb,currentColor 28%,transparent)}
+:root[data-theme] .chip.pending{border-color:var(--rule)}
+
+/* ---------- the wizard: amber marks WHAT the AI proposed, but the text itself stays readable ---------- */
+:root[data-theme] .proposed-val{color:var(--ink);font-weight:500;border-bottom:2px solid var(--proposed);padding-bottom:1px}
+:root[data-theme] mark.amb{background:color-mix(in srgb,var(--proposed) 14%,transparent)}
+
+/* ---------- the Attack Lab and tables ---------- */
+:root[data-theme] table.lab th{font-weight:500;color:var(--ink-2)}
+:root[data-theme] table.lab td b{font-weight:600}
+:root[data-theme] .ms-row.locked{opacity:.7}
+
+/* ---------- the sidebar template (wide screens only; below 1181 px the compact bar and the phone menu are used) ---------- */
+
+@media (min-width:1181px){
+  :root[data-theme] body{padding-left:15.5rem}
+  :root[data-theme] .sidebar{position:fixed;z-index:30;top:0;bottom:0;left:0;width:15.5rem;display:flex;flex-direction:column;gap:20px;padding:18px 12px 16px;background:var(--paper);border-right:1px solid var(--rule);overflow-y:auto}
+  :root[data-theme] .sidebar .brand{padding:2px 8px 4px}
+  :root[data-theme] .side-nav{display:flex;flex-direction:column;gap:16px}
+  :root[data-theme] .side-group{display:flex;flex-direction:column;gap:2px}
+  :root[data-theme] .side-label{padding:0 10px 4px;font-size:.75rem;font-weight:500;color:var(--ink-2)}
+  :root[data-theme] .side-link{display:flex;align-items:center;gap:10px;width:100%;padding:9px 10px;border:0;border-radius:10px;background:none;color:var(--ink-2);font:500 .9375rem var(--sans);text-align:left;cursor:pointer}
+  :root[data-theme] .side-link:hover{background:var(--paper-3);color:var(--ink)}
+  :root[data-theme] .side-link[aria-current="page"]{background:var(--paper-3);color:var(--ink)}
+  :root[data-theme] .side-link[aria-current="page"] svg{color:var(--accent)}
+  :root[data-theme] .side-roles{display:flex;flex-direction:column;gap:2px}
+  :root[data-theme] .side-roles button{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:9px 10px;border:0;border-radius:10px;background:none;text-align:left;cursor:pointer;color:var(--ink)}
+  :root[data-theme] .side-roles button:hover{background:var(--paper-3)}
+  :root[data-theme] .side-roles button[aria-pressed="true"]{background:var(--accent-wash);box-shadow:inset 2px 0 0 var(--accent)}
+  :root[data-theme] .side-role-t{display:flex;align-items:baseline;gap:8px;min-width:0}
+  :root[data-theme] .side-roles .r{font-size:.875rem;font-weight:600}
+  :root[data-theme] .side-roles .n{font-size:.8125rem;font-weight:400;color:var(--ink-2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  :root[data-theme] .topbar{padding-left:24px}
+}
+
+
+/* the top strip is only status and settings: keep it quiet */
+:root[data-theme] .topbar .pill{background:transparent;border-color:transparent}
+:root[data-theme] .topbar .iconbtn{border-color:transparent}
