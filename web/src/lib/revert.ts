@@ -98,6 +98,16 @@ export function decodeRevert(err: unknown, iface: Interface, ctx: { role?: strin
 
 /** The "args" part of a raw error line: Name(index: 0, actual: Released). Used under the plain-English line. */
 export function formatRawError(d: DecodedRevert): string {
-  const parts = Object.entries(d.args).map(([k, v]) => `${k}: ${typeof v === "bigint" ? v.toString() : String(v)}`);
+  const parts = Object.entries(d.args).map(([k, v]) => `${k}: ${typeof v === "bigint" ? rawValue(d.name, k, v) : String(v)}`);
   return `${d.name}(${parts.join(", ")})`;
+}
+
+/** The two enums the vault's errors carry, shown by name (the chain only sends the number) so "actual: 3" reads as "actual: Released". */
+const ENUM_NAMES: Record<string, string[]> = {
+  InvalidMilestoneState: ["Pending", "Completed", "Disputed", "Released", "Refunded"],
+  WrongAgreementState: ["AwaitingSignatures", "AwaitingFunding", "Active", "Closed"],
+};
+function rawValue(error: string, key: string, v: bigint): string {
+  const name = key === "actual" ? ENUM_NAMES[error]?.[Number(v)] : undefined;
+  return name ?? v.toString();
 }

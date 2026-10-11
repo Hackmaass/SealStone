@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { AbiCoder, ErrorFragment, Interface } from "ethers";
 import { MilestoneVault } from "../generated/contracts";
-import { decodeRevert, findRevertData, makeInterface } from "./revert";
+import { decodeRevert, findRevertData, formatRawError, makeInterface } from "./revert";
 import { formatWei, explainRevert } from "../ui/copy";
 
 const iface = makeInterface([MilestoneVault.abi]);
@@ -78,5 +78,17 @@ describe("copy", () => {
   it("covers every contract error with a title (none falls through to the generic message)", () => {
     const names = vault.fragments.filter((f): f is ErrorFragment => f instanceof ErrorFragment).map((f) => f.name);
     for (const n of names) expect(explainRevert(n, { actual: 0, index: 0, expectedIndex: 0, expected: 0n, sent: 0n, escalationAllowedAt: 0n }).title, n).not.toBe("The contract refused this");
+  });
+});
+
+describe("formatRawError names the states the chain only sends as numbers", () => {
+  const d = (name: string, args: Record<string, unknown>) => ({ name, args, raw: "0x", title: "", detail: "", reverted: true as const });
+  it("reads actual: 3 as Released for InvalidMilestoneState and actual: 2 as Active for WrongAgreementState", () => {
+    expect(formatRawError(d("InvalidMilestoneState", { index: 0n, actual: 3n }))).toBe("InvalidMilestoneState(index: 0, actual: Released)");
+    expect(formatRawError(d("WrongAgreementState", { actual: 2n }))).toBe("WrongAgreementState(actual: Active)");
+  });
+  it("leaves every other number alone", () => {
+    expect(formatRawError(d("MilestoneOutOfOrder", { index: 1n, expectedIndex: 0n }))).toBe("MilestoneOutOfOrder(index: 1, expectedIndex: 0)");
+    expect(formatRawError(d("InvalidMilestoneState", { index: 0n, actual: 9n }))).toBe("InvalidMilestoneState(index: 0, actual: 9)");
   });
 });

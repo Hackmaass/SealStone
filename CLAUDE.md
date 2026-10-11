@@ -21,14 +21,16 @@ Escrow that can't be tricked by ambiguous agreements, swapped deliverables, or m
 2. **Deliverable integrity**: the provider submits the SHA-256 of the deliverable when marking a milestone complete. The client must approve **that exact hash**. A swapped deliverable makes approval revert.
 3. **Fund integrity**: a role-gated state machine with pull payments, checks-effects-interactions and a reentrancy guard; a live reconciliation panel; and an Attack Lab that fires real adversarial transactions at the contract.
 
-## Non-negotiable rules (from the booklet; judges will check)
-- **AI output is never written to the contract directly.** Only a human-confirmed checklist that passes the deterministic validator can be deployed. Keep this boundary visible in code (`confirmedChecklist` vs `proposedChecklist` types).
-- **AI informs, rules decide.** Every money-moving decision is made by Solidity rules. The validator's arithmetic and party checks override the AI.
-- **Local fallback is mandatory.** The full demo must work with Wi-Fi off: rules-based extractor, local Hardhat node, no CDN fonts or scripts at runtime.
-- **Undefined transitions are rejected** with a specific custom error. There is never a silent no-op.
-- **The balance always reconciles.** `address(this).balance` must equal deposits minus withdrawals (forced ETH is reported as surplus, never counted).
-- **Fictional data only.** No real people, real money, public networks or live third-party systems.
-- The four booklet-required adversarial tests must exist by name: second release, unauthorized refund, out-of-order transition, reentrancy.
+## Non-negotiable rules (judges will check)
+Each rule is tagged with where it comes from. **[Booklet]** = the VORTEXA 3.0 problem booklet says it (B-03 page or Common Rules). **[Team]** = our own stricter choice; the booklet does not require it. The booklet publishes no judging rubric, so no scoring weights are known.
+- **[Booklet] AI output is never written to the contract directly.** Only a human-confirmed checklist that passes the deterministic validator can be deployed. Keep this boundary visible in code (`confirmedChecklist` vs `proposedChecklist` types).
+- **[Booklet] AI informs, rules decide.** Where a decision has real consequences, the outcome must follow explicit, checkable rules and AI "must not silently override them". Every money-moving decision is made by Solidity rules. The validator's arithmetic and party checks override the AI.
+- **[Booklet] Local fallback is mandatory.** External AI may be used, but "the core demonstration must not depend on" it. **[Team]** We go further: the full demo must work with Wi-Fi off (rules-based extractor, local Hardhat node, no CDN fonts or scripts at runtime).
+- **[Booklet] Undefined transitions are rejected** with a specific custom error. There is never a silent no-op.
+- **[Booklet] The balance always reconciles.** `address(this).balance` must equal deposits minus withdrawals (forced ETH is reported as surplus, never counted).
+- **[Booklet] Fictional data only.** "Do not use real personal records, real financial transactions, or live third-party systems." Simulated funds only: "No real cryptocurrency" (the booklet says no public deployment is *required*; it does not forbid one).
+- **[Team] No public networks by default.** The local Hardhat node is the default and the mandatory offline fallback. A testnet deploy (MST, see PROGRESS.md decisions log) is optional, key-gated and run by the team; whether it counts as a "live third-party system" is unresolved, so ask the organizers before relying on it.
+- **[Booklet]** The four required adversarial tests must exist by name: second release, unauthorized refund, out-of-order transition, reentrancy.
 
 ## Stack
 - `contracts/`: Hardhat 2 + `@nomicfoundation/hardhat-toolbox` (ethers v6, chai, solidity-coverage), Solidity `0.8.24`, OpenZeppelin Contracts v5 (`ReentrancyGuard`). TypeScript config and tests.

@@ -72,3 +72,25 @@ html.presenter .vhead-in .title .facts:first-of-type{display:none}
 .sheet .files{grid-template-columns:1fr 1fr;margin:12px 0}
 .sheet .file{align-items:flex-start}
 @media (max-width:560px){.sheet .files{grid-template-columns:1fr}}
+
+/* ---------- attack lab additions ---------- */
+.lab-page .score{text-align:right}
+.lab-actions{white-space:nowrap}
+.lab-actions .btn{padding:4px 12px;min-height:32px}
+.lab-actions .linklike{display:block;margin-top:4px;color:var(--ink-2)}
+table.lab .tags{display:flex;gap:8px;align-items:center;margin-top:4px}
+table.lab .ans{display:block}
+table.lab .err.bad{color:var(--revert)}
+table.lab .verdict.stampin{display:inline-block}
+.lab-detail td{background:var(--paper)}
+tr.contrast.lab-detail td{background:var(--revert-wash)}
+tr.contrast td{border-top:2px solid var(--revert)}
+.lab-steps{list-style:none;margin:0 0 10px;padding:0;display:grid;gap:8px}
+.lab-step{display:grid;grid-template-columns:18px 1fr;gap:8px}
+.lab-step .ic{font-weight:700;color:var(--intaglio)}
+.lab-step.bad .ic{color:var(--revert)}
+.lab-step.setup{opacity:.8}
+.lab-step .raw{color:var(--ink-2);word-break:break-all}
+.proofs summary{cursor:pointer;font-weight:600;font-size:.875rem}
+.proofs ul{margin:6px 0;padding-left:18px;display:grid;gap:2px}
+@media (max-width:720px){.lab-head{flex-wrap:wrap}.lab-page .score{text-align:left}}

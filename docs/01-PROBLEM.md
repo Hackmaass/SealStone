@@ -20,8 +20,14 @@
 - **Reproducibility:** the solution must support reproducible live testing, using inputs permitted by the problem statement.
 - **AI:** every solution must use AI meaningfully (language understanding, classification, matching, forecasting, extraction or adaptation). A chatbot, or an LLM call that only rewrites text, does not qualify. AI may be combined with deterministic logic, validation and optimization.
 - **Correctness:** where a decision has real consequences (eligibility, authorization, arithmetic, scheduling), the outcome must follow explicit, checkable rules. AI may inform such decisions but must not silently override them.
-- **Data:** no organizer dataset. Use manual inputs, your own files, team-generated scenarios or small built-in examples. Fictional data only.
-- **Infrastructure:** no paid API, paid cloud, GPU or special hardware required. External AI may be used, but the core demo must not depend on it; provide a local fallback.
+- **Data:** no organizer dataset is provided. Use manual inputs, your own files, team-generated scenarios or small built-in examples. Use fictional data only; do not use real personal records, real financial transactions, or live third-party systems.
+- **Infrastructure:** no paid API, paid cloud service, GPU or special hardware is required. External AI services may be used, but the core demonstration must not depend on them; provide a local fallback.
+
+> **Checked against the booklet PDF (2026-10-11):** the B-03 page and the six Common Rules above match the booklet. Notes:
+> - The booklet publishes **no judging rubric or scoring weights**. Any percentages you see elsewhere (e.g. from other hackathons) are not VORTEXA's.
+> - **"Wi-Fi off" is our rule, not the booklet's.** The booklet requires only that the core demo not depend on external AI and that a local fallback exists. We choose the stricter standard (see C2).
+> - **"No public networks" is our rule, not the booklet's.** The booklet says "no public deployment [is] required"; it does not forbid one. A testnet deploy may still be read as a "live third-party system" (Data rule), so it is a gray area: see PROGRESS.md.
+> - Third-party oracles (Chainlink, GenLayer) are excluded by our offline standard and arguably by the "live third-party systems" clause, not by the AI-fallback rule (oracles are not AI).
 
 ## Traceability matrix (every requirement → where it's satisfied → how it's proven)
 
