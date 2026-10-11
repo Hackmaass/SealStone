@@ -113,8 +113,41 @@ describe("Booklet-required adversarial tests", () => {
       .withArgs(AgreementState.AwaitingSignatures);
   });
 
-  // Implemented in P03 (needs contracts/contracts/attack/ReentrantProvider.sol).
-  it.skip("blocks a re-entrancy attack");
+  it("blocks a re-entrancy attack", async () => {
+    const [client, , arbiter] = await ethers.getSigners();
+    const attacker = await ethers.deployContract("ReentrantProvider");
+    const vault = await ethers.deployContract("MilestoneVault", [
+      client.address,
+      await attacker.getAddress(),
+      arbiter.address,
+      AGREEMENT_HASH,
+      AMOUNTS,
+      REVIEW_WINDOW,
+    ]);
+    await attacker.setVault(await vault.getAddress());
+
+    await vault.connect(client).sign(AGREEMENT_HASH);
+    await attacker.sign(AGREEMENT_HASH);
+    await vault.connect(client).fund({ value: TOTAL });
+    await attacker.markComplete(0, deliverableOf(0));
+    await vault.connect(client).approve(0, deliverableOf(0));
+    expect(await vault.credits(await attacker.getAddress())).to.equal(AMOUNTS[0]);
+
+    await attacker.attackWithdraw();
+
+    const attempts = await attacker.reentryAttempts();
+    expect(attempts).to.be.gte(1n);
+    expect(await attacker.reentryBlocked()).to.equal(attempts);
+    expect(await attacker.reentrySucceeded()).to.equal(0n);
+    // The re-entry was stopped by the reentrancy guard itself.
+    expect(await attacker.lastRevertSelector()).to.equal(ethers.id("ReentrancyGuardReentrantCall()").slice(0, 10));
+    // The attacker received exactly what it was owed, once.
+    expect(await ethers.provider.getBalance(await attacker.getAddress())).to.equal(AMOUNTS[0]);
+    expect(await vault.credits(await attacker.getAddress())).to.equal(0n);
+    expect(await vault.totalWithdrawn()).to.equal(AMOUNTS[0]);
+    await expectReconciled(vault);
+    expect((await vault.reconcile()).actualBalance).to.equal(TOTAL - AMOUNTS[0]);
+  });
 });
 
 describe("Further guarantees", () => {
@@ -295,5 +328,89 @@ describe("Further guarantees", () => {
     expect(r.actualBalance).to.equal(1n);
     expect(r.surplus).to.equal(0n);
     expect(r.expectedBalance).to.equal(TOTAL);
+  });
+});
+
+describe("Attack contracts (the attackers are real, the product survives them)", () => {
+  it("naive escrow is drained by the same attack pattern (contrast)", async () => {
+    const [, drainerFunder, victimA, victimB] = await ethers.getSigners();
+    const escrow = await ethers.deployContract("NaiveEscrow");
+    const drainer = await ethers.deployContract("NaiveDrainer", [await escrow.getAddress()]);
+    const drainerAddr = await drainer.getAddress();
+    const escrowAddr = await escrow.getAddress();
+
+    // The drainer is owed 1 ETH; two honest users are owed 1.5 ETH each.
+    await escrow.connect(drainerFunder).deposit(drainerAddr, { value: ethers.parseEther("1") });
+    await escrow.connect(victimA).deposit(victimA.address, { value: ethers.parseEther("1.5") });
+    await escrow.connect(victimB).deposit(victimB.address, { value: ethers.parseEther("1.5") });
+    expect(await ethers.provider.getBalance(escrowAddr)).to.equal(ethers.parseEther("4"));
+
+    await drainer.attack();
+
+    // It was owed 1 ETH and walked away with all 4: the victims' money.
+    expect(await ethers.provider.getBalance(drainerAddr)).to.equal(ethers.parseEther("4"));
+    expect(await ethers.provider.getBalance(escrowAddr)).to.equal(0n);
+    expect(await drainer.reentries()).to.be.gte(1n);
+    // The victims still "have" credit on the books, but there is nothing left to pay it.
+    expect(await escrow.credits(victimA.address)).to.equal(ethers.parseEther("1.5"));
+    await expect(escrow.connect(victimA).withdraw()).to.be.reverted;
+    await expect(escrow.connect(victimB).withdraw()).to.be.reverted;
+  });
+
+  it("force-sent ETH is reported as surplus and cannot be withdrawn", async () => {
+    const ctx = await loadFixture(activeFixture);
+    const { vault, client, provider } = ctx;
+    const forced = ethers.parseEther("0.3");
+    const sender = await ethers.deployContract("ForceSender", { value: forced });
+    await sender.boom(await vault.getAddress());
+
+    let r = await vault.reconcile();
+    expect(r.surplus).to.equal(forced);
+    expect(r.ok).to.equal(true);
+    expect(r.actualBalance).to.equal(TOTAL + forced);
+    await expectReconciled(vault);
+
+    // Run the whole agreement and let both parties take everything they are owed.
+    for (let i = 0; i < 3; i++) {
+      await completeMilestone(ctx, i);
+      await vault.connect(client).approve(i, deliverableOf(i));
+    }
+    await vault.connect(provider).withdraw();
+    await expectReconciled(vault);
+
+    // Nobody can pull the surplus: both credits are zero and nothing else is withdrawable.
+    for (const who of [client, provider, ctx.arbiter, ctx.stranger]) {
+      await expect(vault.connect(who).withdraw()).to.be.revertedWithCustomError(vault, "NothingToWithdraw");
+    }
+    r = await vault.reconcile();
+    expect(r.actualBalance).to.equal(forced);
+    expect(r.surplus).to.equal(forced);
+    expect(r.expectedBalance).to.equal(0n);
+    expect(r.ok).to.equal(true);
+  });
+
+  it("restores the credit and the books when the payout fails (TransferFailed)", async () => {
+    const [client, , arbiter] = await ethers.getSigners();
+    const rejecting = await ethers.deployContract("RejectingProvider");
+    const vault = await ethers.deployContract("MilestoneVault", [
+      client.address,
+      await rejecting.getAddress(),
+      arbiter.address,
+      AGREEMENT_HASH,
+      AMOUNTS,
+      REVIEW_WINDOW,
+    ]);
+    await rejecting.setVault(await vault.getAddress());
+    await vault.connect(client).sign(AGREEMENT_HASH);
+    await rejecting.sign(AGREEMENT_HASH);
+    await vault.connect(client).fund({ value: TOTAL });
+    await rejecting.markComplete(0, deliverableOf(0));
+    await vault.connect(client).approve(0, deliverableOf(0));
+
+    await expect(rejecting.pull()).to.be.revertedWithCustomError(vault, "TransferFailed");
+
+    expect(await vault.credits(await rejecting.getAddress())).to.equal(AMOUNTS[0]);
+    expect(await vault.totalWithdrawn()).to.equal(0n);
+    await expectReconciled(vault);
   });
 });

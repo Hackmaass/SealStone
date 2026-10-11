@@ -6,7 +6,7 @@
 | P00 Bootstrap | ✅ | see P00 verification below |
 | P01 Contract core | ✅ | compiles with 0 warnings; smoke test passes |
 | P02 Core tests | ✅ | 128 passing + 1 pending (re-entrancy placeholder for P03); mutation check done |
-| P03 Attacks + invariant | ⬜ | |
+| P03 Attacks + invariant | ✅ | re-entrancy blocked, naive contrast drained, force-send surplus, TransferFailed restore, seeded fuzz |
 | P04 Deploy + seed | ⬜ | |
 | P05 AI service | ⬜ | |
 | P06 AI eval | ⬜ | |
@@ -20,8 +20,9 @@
 Legend: ⬜ not started · 🟨 in progress · ✅ done (acceptance checks pass) · ✂️ cut
 
 ## Latest numbers
-- Contract tests: 128 passing / 129 total (1 pending: `blocks a re-entrancy attack`, implemented in P03)
-- Coverage (MilestoneVault.sol): lines 100% · branches 96.3% (uncovered branches: re-entrancy guard + `TransferFailed` need P03's attack contracts; two defensive underflow guards in `reconcile()` are unreachable by design)
+- Contract tests: 138 passing / 138 total (0 pending). Includes the 4 booklet-required tests by exact name.
+- Invariant fuzz (5 seeds x 200 steps = 1,000 steps, 21 vaults): 401 succeeded / 599 reverted; 13 distinct custom errors hit; every revert decoded to a vault custom error (no Panic, no empty revert); every success emitted an event; I1-I8 asserted after each step; failed calls left storage identical (I6).
+- Coverage (MilestoneVault.sol, attack/ skipped via .solcover.js): lines 100% · branches 98.15% (only two unreachable defensive underflow guards in `reconcile()` remain uncovered)
 - AI eval: see docs/EVAL-RESULTS.md
 
 ## Decisions log
@@ -29,6 +30,9 @@ Legend: ⬜ not started · 🟨 in progress · ✅ done (acceptance checks pass)
 - 2026-10-11 P00: `server/` is `"type": "module"` (tsx); `contracts/` stays CommonJS (Hardhat 2 requirement). Workspace dep is `"@mv/shared": "*"` (npm rejects `workspace:*`).
 - 2026-10-11 P00: placeholder npm scripts call `node scripts/todo.mjs Pxx` (avoids cmd.exe quoting problems).
 - 2026-10-11 P00: Ollama default model `llama3.2:3b` (per `.env.example`) is NOT installed; `qwen2.5:7b-instruct` is. Kept `.env.example` as specified. Either `ollama pull llama3.2:3b` or set `OLLAMA_MODEL=qwen2.5:7b-instruct` in `.env`. User decides (pull is ~2 GB).
+- 2026-10-11 P03: attack contracts in `contracts/contracts/attack/`: ReentrantProvider (records `lastRevertSelector`; the test asserts it equals `ReentrancyGuardReentrantCall`), RejectingProvider (extra: proves `TransferFailed` restores the credit), NaiveEscrow + NaiveDrainer (1 ETH credit drains 4 ETH; escrow zeroes with `= 0` after the call), ForceSender. Known compiler warning: the `selfdestruct` deprecation in `ForceSender.sol` only (test-only contract, required by spec).
+- 2026-10-11 P03: Invariant.test.ts uses a state-aware generator (~50% valid calls, 30% of those perturbed into near misses) and redeploys a fresh random vault (1-8 milestones) once one closes and drains. Mutation check: dropping `totalReleased += amount` fails all 5 seeds (I4/I5) with replay info; restored.
+- 2026-10-11 Process: user asked that commits carry no Claude co-author/attribution, only their identity. Existing P00-P02 commits were rewritten to strip the trailer; repo-local `user.name` set to Omkar Rane.
 - 2026-10-11 P02: suites = Constructor, Lifecycle, AccessControl (table), StateMachine (table: 6 functions x 5 milestone states + ordering/index/pre-funding), Adversarial. Mutation check: removing `onlyClient` from `approve` makes 4 tests fail; restored. Force-ETH and balance-drain are simulated with `hardhat_setBalance` in P02; the real `ForceSender` (selfdestruct) comes in P03.
 - 2026-10-11 P01: contract implemented to the spec exactly. Constructor params are named `client_`/`provider_`/`arbiter_`/`agreementHash_`/`reviewWindow_` (avoids shadowing the immutables). `milestones` array is private; `getMilestone(i)` reverts `InvalidMilestone`. `fallback()` is `external payable` so value+data calls hit `DirectPaymentNotAccepted`. `reconcile()` guards every subtraction so it never reverts. Out-of-order (`i == nextMilestone`) is checked after the milestone-state check and before `ZeroHash`.
 - 2026-10-11 P01: terminal-state rejection tests (P02) must use M0 while the agreement is still Active; on the last milestone the agreement is Closed, so `WrongAgreementState` fires first (correct per spec).
