@@ -94,3 +94,44 @@ tr.contrast td{border-top:2px solid var(--revert)}
 .proofs summary{cursor:pointer;font-weight:600;font-size:.875rem}
 .proofs ul{margin:6px 0;padding-left:18px;display:grid;gap:2px}
 @media (max-width:720px){.lab-head{flex-wrap:wrap}.lab-page .score{text-align:left}}
+
+/* ---------- "same attack, two escrows" ---------- */
+.duel{margin-bottom:20px;padding:20px 24px 14px;background:var(--paper-2);border:1px solid var(--rule);border-radius:var(--r-md);box-shadow:var(--shadow-sm)}
+.duel .eyebrow{display:block;font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:6px}
+.duel h2{font-size:1.1875rem;max-width:60ch}
+.duel-head{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:14px}
+.duel.idle{display:flex;justify-content:space-between;align-items:center;gap:24px;background:linear-gradient(100deg,var(--accent-wash) 0%,var(--paper-2) 70%)}
+.duel.idle p{margin-top:4px;max-width:58ch}
+.duel-grid{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:16px;align-items:stretch}
+.duel-vs{align-self:center;width:38px;height:38px;border-radius:50%;display:grid;place-items:center;background:var(--paper-3);color:var(--ink-2);font-size:.8125rem;font-weight:700;text-transform:uppercase}
+.duel-side{display:flex;flex-direction:column;gap:12px;padding:16px 20px 12px;border:1px solid var(--rule);border-top-width:4px;border-radius:var(--r-md);background:var(--paper)}
+.duel-side.bad{border-top-color:var(--revert);background:linear-gradient(180deg,var(--revert-wash) 0%,var(--paper) 62%)}
+.duel-side.ok{border-top-color:var(--intaglio);background:linear-gradient(180deg,var(--intaglio-wash) 0%,var(--paper) 62%)}
+.duel-side h3{font-size:1.0625rem;margin-top:8px}
+.duel-badge{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:var(--r-pill);font-size:.8125rem;font-weight:800;letter-spacing:.06em}
+.duel-badge.bad{background:var(--revert);color:var(--on-accent)}
+.duel-badge.ok{background:var(--intaglio);color:var(--on-accent)}
+.duel-big{display:flex;flex-direction:column;gap:2px}
+.duel-big .n{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:2.125rem;font-weight:650;line-height:1.1;letter-spacing:-.02em}
+.duel-big .n .mono{font-size:inherit}
+.duel-side.bad .duel-big .n{color:var(--revert)}
+.duel-side.ok .duel-big .n{color:var(--intaglio)}
+.duel-big .cap{font-size:.875rem;color:var(--ink-2)}
+.duel-side dl{margin:0;display:grid;gap:0}
+.duel-row{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:7px 0;border-top:1px solid var(--rule);font-size:.9375rem}
+.duel-row dt{color:var(--ink-2)}
+.duel-row dd{margin:0;text-align:right}
+.duel-row.bad dd{color:var(--revert);font-weight:600}
+.duel-row.ok dd{color:var(--intaglio);font-weight:600}
+.duel-guard{display:block;font-size:.75rem;overflow-wrap:anywhere}
+.duel-row dt{flex:none}
+.duel-foot{margin-top:10px}
+.duel.stale .duel-grid,.duel.stale .duel-foot{opacity:.45;transition:opacity .2s}
+@media (max-width:860px){
+  .duel{padding:18px 16px 16px}
+  .duel-head,.duel.idle{flex-direction:column;align-items:stretch}
+  .duel-grid{grid-template-columns:1fr}
+  .duel-vs{justify-self:center;width:32px;height:32px}
+  .duel-big .n{font-size:1.875rem}
+  .duel-head .btn,.duel.idle .btn{width:100%;justify-content:center}
+}

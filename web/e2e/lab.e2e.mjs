@@ -4,6 +4,7 @@ import { chromium } from "playwright-core";
 import { Interface, JsonRpcProvider } from "ethers";
 import { mkdirSync, readFileSync } from "node:fs";
 import path from "node:path";
+import { contrastOf } from "./lib/contrast.mjs";
 
 const BASE = process.env.WEB_URL ?? "http://127.0.0.1:5173";
 const SHOTS = process.argv[2] ?? path.resolve("e2e-shots");
@@ -65,6 +66,15 @@ try {
   if (loads >= 8) fail("the Attack Lab page never rendered, even after 8 loads");
   if (loads > 0) console.log(`(note: the page needed ${loads + 1} loads: the environment refused ${loads} connection(s))`);
 
+  // before anything has run, the comparison card is a one-button teaser, and that button runs just the two rows it needs
+  const teaser = await page.locator('[data-testid="contrast-card"]').innerText();
+  if (!/Run the comparison/.test(teaser)) fail(`the idle comparison card should offer "Run the comparison": ${teaser}`);
+  await page.click('[data-testid="run-duel"]');
+  await page.waitForSelector(".duel-grid", { timeout: 120000 });
+  const ranOnly = await page.locator("tr[data-attack]").evaluateAll((trs) => trs.filter((tr) => tr.dataset.status !== "idle").map((tr) => tr.dataset.attack).sort());
+  if (JSON.stringify(ranOnly) !== JSON.stringify(["naive-contrast", "reentrancy"])) fail(`"Run the comparison" should run only the re-entrancy row and its contrast, ran ${JSON.stringify(ranOnly)}`);
+  log('"Run the comparison" runs just the re-entrancy row and its naive contrast, then shows the card');
+
   for (let n = 1; n <= 3; n++) {
     await page.click('[data-testid="run-all"]');
     await page.waitForSelector('[data-testid="run-all"]:has-text("Running")');
@@ -90,7 +100,29 @@ try {
     const score = await page.locator('[data-testid="score-blocked"]').innerText();
     if (score !== "12") fail(`run ${n}: score should read 12, saw ${score}`);
     log(`run ${n} of 3: 12 of 12 blocked, 12 ledgers reconciled, contrast drained 3.000 ETH (no page reload)`);
+    // the side-by-side card: red DRAINED 3.000 ETH next to green BLOCKED 0.000 ETH lost, every figure read from the two runs
+    const card = page.locator('[data-testid="contrast-card"]');
+    const cardText = await card.innerText();
+    if (!/DRAINED/.test(cardText) || !/BLOCKED/.test(cardText)) fail(`run ${n}: the comparison card should show DRAINED and BLOCKED: ${cardText}`);
+    if (!/3\.000 ETH/.test(await page.locator('[data-testid="duel-naive-lost"]').innerText())) fail(`run ${n}: the naive side should read 3.000 ETH stolen`);
+    if (!/0\.000 ETH/.test(await page.locator('[data-testid="duel-sealstone-lost"]').innerText())) fail(`run ${n}: the Sealstone side should read 0.000 ETH lost`);
+    if (!/Yes, to the wei/.test(cardText) || !/No/.test(cardText)) fail(`run ${n}: the card should say the Sealstone books balance and the naive ones do not`);
+    if (n === 1) await page.screenshot({ path: path.join(SHOTS, "lab-duel.png") });
   }
+
+  // text contrast on the card, COMPUTED from what is painted (docs/08: at least 4.5:1), in light and in dark
+  for (const scheme of ["light", "dark"]) {
+    await page.emulateMedia({ colorScheme: scheme });
+    await page.evaluate((t) => { document.documentElement.dataset.theme = t; }, scheme); // the app starts dark: pick the theme itself, not just the system setting
+    await page.waitForTimeout(300);
+    for (const sel of [".duel-badge.bad", ".duel-badge.ok", ".duel-big .n", ".duel-side.bad .duel-big .n", ".duel-row.bad dd", ".duel-row.ok dd", ".duel-side header p", ".duel-foot"]) {
+      const ratio = await contrastOf(page, sel, { pill: sel.startsWith(".duel-badge") });
+      if (ratio !== null && ratio < 4.5) fail(`${sel} has contrast ${ratio}:1 in ${scheme} mode (minimum 4.5:1)`);
+    }
+  }
+  await page.emulateMedia({ colorScheme: "light" });
+  await page.evaluate(() => { document.documentElement.dataset.theme = "light"; });
+  log("the comparison card's text meets 4.5:1 in light and dark, computed from the painted pixels");
 
   // the booklet rows: a star, a badge, and the exact test names
   const stars = await page.locator("table.lab .star").count();

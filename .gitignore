@@ -9,10 +9,15 @@ server/data/agreements/*.json
 !server/data/agreements/.gitkeep
 *.log
 
-# Solution Proposal, Architecture Report, and Competitive Analysis (kept local, not on git)
+# Solution Proposal, Architecture Report, and Internal Notes (kept local, not on git)
 docs/report/
 docs/Sealstone-Solution-Proposal-Architecture.pdf
 docs/BLOCKCHAIN-COMPETITIVE-ANALYSIS.md
+docs/LIVE-ALERTS.md
 
 # Third-party design reference screenshots (review only, never committed)
 docs/design-refs/
+
+# Test output screenshots
+e2e-shots/
+**/e2e-shots/

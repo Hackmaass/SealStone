@@ -47,6 +47,23 @@ export interface Step {
 
 export type Status = "pass" | "fail" | "error";
 
+/** The numbers the "same attack, two escrows" card compares. Read from the chain by the two runs, never typed in. */
+export interface DuelFigures {
+  /** what the attacker was legitimately owed */
+  owed: bigint;
+  /** what the attacker actually walked away with */
+  took: bigint;
+  /** other people's money the attacker got (took minus owed, never negative) */
+  lost: bigint;
+  /** naive escrow only: what the escrow still holds afterwards */
+  left?: bigint;
+  /** Sealstone only: how many re-entries were tried and how many the guard stopped */
+  reentries?: number;
+  stopped?: number;
+  /** Sealstone only: the error name the guard answered with */
+  guard?: string;
+}
+
 export interface AttackRun {
   id: string;
   /** pass: matched what was expected. fail: the contract did something else. error: the lab itself could not complete the run. */
@@ -58,6 +75,8 @@ export interface AttackRun {
   ledger: { ok: boolean | null; text: string };
   /** Wei drained (contrast row only). */
   drained?: bigint;
+  /** Only the re-entrancy row and its contrast carry these. */
+  figures?: DuelFigures;
   error?: string;
   ms: number;
 }
@@ -70,6 +89,7 @@ class Sandbox {
   summary: string | null = null;
   lastRevert: Step["revert"] | null = null;
   drained: bigint | undefined;
+  figures: DuelFigures | undefined;
   private signers = new Map<Role, Signer>();
 
   async signer(role: Role): Promise<Signer> {
@@ -296,6 +316,8 @@ export const ATTACKS: AttackDef[] = [
       c.check("They were stopped by the re-entrancy guard (not by running out of gas)", guard === REENTRANCY_ERROR, `last refusal: ${guard}`);
       c.check("The attacker received exactly what it was owed", received === eth(1), `received ${formatWei(received)} ETH, owed 1.000 ETH`);
       c.check("Nothing is left owed to the attacker", stillOwed === 0n, `credit ${formatWei(stillOwed)} ETH`);
+      const owed = ((await vaultContract(c.vault!).getMilestone(0)) as { amount: bigint }).amount; // what the contract itself says milestone 1 pays
+      c.figures = { owed, took: received, lost: received > owed ? received - owed : 0n, reentries: Number(attempts), stopped: Number(blocked), guard };
       c.summary = `${attempts} re-entries tried, ${blocked} blocked, ${succeeded} succeeded. It was paid exactly ${formatWei(received)} ETH, the amount owed.`;
     },
   },
@@ -471,6 +493,7 @@ export const CONTRAST: AttackDef = {
     const got = await provider.getBalance(drainerAddress);
     const stolen = got > eth(1) ? got - eth(1) : 0n;
     c.drained = stolen;
+    c.figures = { owed: eth(1), took: got, lost: stolen, left };
     const shortfall = others > left ? others - left : 0n;
     c.check("The naive escrow was drained of other users' money", stolen === others && left === 0n, `escrow holds ${formatWei(left)} ETH, ${formatWei(stolen)} ETH of other users' money was stolen`);
     c.summary = `Drained ${formatWei(stolen)} ETH that belonged to other users. ${formatWei(shortfall)} ETH short.`;
@@ -507,7 +530,7 @@ export async function runAttack(def: AttackDef): Promise<AttackRun> {
 
   const last = c.lastRevert;
   const answer = c.summary ? { title: c.summary, raw: last ? last.raw : "" } : last ? { title: last.title, raw: last.raw } : { title: error ?? "—", raw: "" };
-  return { id: def.id, status, steps: c.steps, answer, vault: c.vault, ledger, drained: c.drained, error, ms: Date.now() - started };
+  return { id: def.id, status, steps: c.steps, answer, vault: c.vault, ledger, drained: c.drained, figures: c.figures, error, ms: Date.now() - started };
 }
 
 // ───────────────────────── scoring (pure) ─────────────────────────
@@ -541,6 +564,21 @@ export function scoreOf(runs: Record<string, AttackRun | undefined>, defs: Attac
   }
   const cr = contrast ? runs[contrast.id] : undefined;
   return { total: attacks.length, blocked, failed, errored, notRun, ledgersOk, contrastDrained: cr && cr.status === "pass" ? cr.drained ?? 0n : null };
+}
+
+export interface Duel {
+  naive: DuelFigures;
+  sealstone: DuelFigures;
+  /** did the vault's own reconcile() say the books balance after the attack */
+  ledgerOk: boolean;
+}
+
+/** The side-by-side comparison, only when BOTH runs behaved as expected (a failed or errored run never gets a flattering card). */
+export function duelOf(runs: Record<string, AttackRun | undefined>): Duel | null {
+  const real = runs["reentrancy"];
+  const naive = runs[CONTRAST.id];
+  if (!real || !naive || real.status !== "pass" || naive.status !== "pass" || !real.figures || !naive.figures) return null;
+  return { naive: naive.figures, sealstone: real.figures, ledgerOk: real.ledger.ok === true };
 }
 
 export function verdictOf(def: AttackDef, run: AttackRun | undefined): { word: string; tone: "wait" | "blocked" | "unsafe" | "fail" | "error" } {

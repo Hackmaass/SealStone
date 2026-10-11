@@ -190,7 +190,7 @@ Brief from the user: the first look and spacing of the dashboard were not good e
 - Editable: every box, arrow, table and label is a native PowerPoint object; the impact slide's line chart is a real chart (right-click, Edit Data); only screenshots and the hash seals are pictures. The template's own embedded typefaces are kept. Validated against the template and re-opened and saved by PowerPoint itself.
 - **Dashboard screenshot is a placeholder** on slide 4 (dashed frame named "PLACEHOLDER dashboard screenshot"). In PowerPoint: delete the frame and insert the picture, or save the capture as `docs/pitch/img/dashboard.jpg` and rebuild.
 - The studio and vault pictures in `docs/pitch/img/` pre-date the dashboard redesign (top-bar navigation); the Attack Lab picture is from the recaptured landing set (side navigation). Retake with `node web/e2e/capture-deck.mjs` once the design is final, so the deck is consistent.
-- Build scripts: `docs/pitch/build/` (see its README; paths inside need adjusting).
+- Build scripts: `docs/pitch/build/` (see its README; paths inside need adjusting). Typefaces: the template's Heading Now (headlines and body), Georgia italic for takeaway lines, Consolas for code.
 
 ## App shell + dashboard follow the Aave Pro template, calm and dark by default (2026-10-11)
 User direction: keep the layout template of the Aave references (app.aave.com / pro.aave.com, saved under Downloads and used as DESIGN REFERENCES ONLY: our own markup, CSS, icons and copy; their palette values were read as data and our own close neutrals used), keep our dashboard's content, keep it clean and simple, dark by default with a light/dark toggle. The landing page is approved and untouched.
