@@ -4,7 +4,7 @@
 | Prompt | Status | Notes |
 |---|---|---|
 | P00 Bootstrap | ✅ | see P00 verification below |
-| P01 Contract core | ⬜ | |
+| P01 Contract core | ✅ | compiles with 0 warnings; smoke test passes |
 | P02 Core tests | ⬜ | |
 | P03 Attacks + invariant | ⬜ | |
 | P04 Deploy + seed | ⬜ | |
@@ -29,6 +29,9 @@ Legend: ⬜ not started · 🟨 in progress · ✅ done (acceptance checks pass)
 - 2026-10-11 P00: `server/` is `"type": "module"` (tsx); `contracts/` stays CommonJS (Hardhat 2 requirement). Workspace dep is `"@mv/shared": "*"` (npm rejects `workspace:*`).
 - 2026-10-11 P00: placeholder npm scripts call `node scripts/todo.mjs Pxx` (avoids cmd.exe quoting problems).
 - 2026-10-11 P00: Ollama default model `llama3.2:3b` (per `.env.example`) is NOT installed; `qwen2.5:7b-instruct` is. Kept `.env.example` as specified. Either `ollama pull llama3.2:3b` or set `OLLAMA_MODEL=qwen2.5:7b-instruct` in `.env`. User decides (pull is ~2 GB).
+- 2026-10-11 P01: contract implemented to the spec exactly. Constructor params are named `client_`/`provider_`/`arbiter_`/`agreementHash_`/`reviewWindow_` (avoids shadowing the immutables). `milestones` array is private; `getMilestone(i)` reverts `InvalidMilestone`. `fallback()` is `external payable` so value+data calls hit `DirectPaymentNotAccepted`. `reconcile()` guards every subtraction so it never reverts. Out-of-order (`i == nextMilestone`) is checked after the milestone-state check and before `ZeroHash`.
+- 2026-10-11 P01: terminal-state rejection tests (P02) must use M0 while the agreement is still Active; on the last milestone the agreement is Closed, so `WrongAgreementState` fires first (correct per spec).
+- 2026-10-11 P00: `server/src/index.ts` loads `.env` from the repo root (npm runs the server from `server/`). `.gitattributes` added (`* text=auto eol=lf`) since this product hashes text.
 - 2026-10-11 P00: Vite scaffold resolved to Vite 8 / React 19 / TypeScript 6 (newest create-vite). Dev server pinned to 127.0.0.1:5173 with `strictPort`.
 
 ## P00 verification (2026-10-11)
@@ -40,7 +43,7 @@ Legend: ⬜ not started · 🟨 in progress · ✅ done (acceptance checks pass)
 - npm install warned: 60 audit vulnerabilities in transitive dev deps (hardhat toolchain), and "allow-scripts" notes for keccak/secp256k1/esbuild install scripts (not run; everything above works without them).
 
 ## Open questions
--
+- P01 / spec: `escalate` computes `completedAt + reviewWindow` in uint64 with checked arithmetic. A huge `reviewWindow` (near 2^64) would make `escalate` panic (Panic 0x11) instead of a custom error. Not changed (spec is source of truth); a constructor cap on `reviewWindow` would fix it if wanted.
 
 ## Known issues
 -

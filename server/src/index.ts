@@ -1,6 +1,10 @@
-import "dotenv/config";
+import { config } from "dotenv";
+import { fileURLToPath } from "node:url";
 import express from "express";
 import cors from "cors";
+
+// .env lives at the repo root, not in server/ (npm runs this from server/).
+config({ path: fileURLToPath(new URL("../../.env", import.meta.url)) });
 
 const app = express();
 app.use(cors());
