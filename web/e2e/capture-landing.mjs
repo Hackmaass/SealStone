@@ -40,6 +40,7 @@ try {
   const phone = await browser.newContext({ ...PHONE, colorScheme: "light", reducedMotion: "reduce" });
   await phone.addInitScript(() => localStorage.setItem("mv.aiMode", "rules")); // the built-in rules: no AI needed for a picture
   await phone.addInitScript(hideToasts);
+  await phone.addInitScript(() => localStorage.setItem("mv.theme", "light")); // the app starts dark; the landing pictures are light
   const p = await phone.newPage();
 
   // 1. the agreement studio: a flagged term, Confirm locked
@@ -84,6 +85,7 @@ try {
   // ───────────── desktop layout ─────────────
   const desk = await browser.newContext({ ...DESKTOP, deviceScaleFactor: 1.5, colorScheme: "light", reducedMotion: "reduce" });
   await desk.addInitScript(hideToasts);
+  await desk.addInitScript(() => localStorage.setItem("mv.theme", "light"));
   const d = await desk.newPage();
 
   // 6. the dashboard, as the provider (so something is waiting on them)

@@ -28,6 +28,7 @@ export function TopBar() {
   const app = useApp();
   const path = usePath();
   const [menu, setMenu] = useState(false);
+  const dark = app.theme !== "light";
 
   // The phone menu closes when you go somewhere, and on Escape. While it is open the page behind it does not scroll.
   useEffect(() => setMenu(false), [path]);
@@ -101,8 +102,12 @@ export function TopBar() {
         <button className="iconbtn round desk-only" aria-pressed={app.presenter} aria-label="Presenter mode" onClick={app.togglePresenter} title="Presenter mode (P)">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="2" /><path d="M8 20h8M12 16v4" /></svg>
         </button>
-        <button className="iconbtn round desk-only" aria-label="Toggle theme" onClick={app.toggleTheme} title="Toggle theme (T)">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z" /></svg>
+        <button className="iconbtn round desk-only" aria-label={dark ? "Switch to the light theme" : "Switch to the dark theme"} onClick={app.toggleTheme} title={`${dark ? "Light" : "Dark"} theme (T)`}>
+          {dark ? (
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4" /><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" /></svg>
+          ) : (
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z" /></svg>
+          )}
         </button>
 
         {/* phone: who you are acting as, and the menu button */}
@@ -167,7 +172,7 @@ export function TopBar() {
               </button>
               <button className="pm-row" type="button" onClick={app.toggleTheme}>
                 <span>Theme</span>
-                <span className="muted">{app.theme ?? "System"}</span>
+                <span className="muted">{dark ? "Dark" : "Light"}</span>
               </button>
             </div>
           </div>

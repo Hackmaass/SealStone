@@ -72,7 +72,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [serverOnline, setServerOnline] = useState<boolean | null>(null);
   const [aiMode, setAiModeState] = useState<Mode>((safeGet("mv.aiMode") as Mode | null) ?? "auto");
   const [lastAi, setLastAi] = useState<LastAi | null>(null);
-  const [theme, setTheme] = useState<"light" | "dark" | null>((safeGet("mv.theme") as "light" | "dark" | null) ?? null);
+  const [theme, setTheme] = useState<"light" | "dark" | null>((safeGet("mv.theme") as "light" | "dark" | null) ?? "dark");
   const [presenter, setPresenter] = useState(false);
   const lastBlock = useRef<number | null>(null);
 
@@ -140,7 +140,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const toggleTheme = useCallback(() => {
     setTheme((cur) => {
-      const dark = cur ? cur === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+      const dark = cur !== "light"; // the app starts dark unless the person chose light
       const next = dark ? "light" : "dark";
       safeSet("mv.theme", next);
       return next;

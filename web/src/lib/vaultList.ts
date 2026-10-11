@@ -67,7 +67,10 @@ async function findCreations(): Promise<Found[]> {
     }
   }
   fresh.scanned = latest;
-  return fresh.found.filter((f) => f.isVault && f.client.toLowerCase() !== SANDBOX_CLIENT);
+  // A demo reset redeploys to the same addresses; an open page may still hold the earlier sighting. One entry per address, the newest wins.
+  const byAddress = new Map<string, Found>();
+  for (const f of fresh.found) if (f.isVault && f.client.toLowerCase() !== SANDBOX_CLIENT) byAddress.set(f.address.toLowerCase(), f);
+  return [...byAddress.values()];
 }
 
 const titles = new Map<string, { title: string; names: VaultSummary["names"] } | null>();

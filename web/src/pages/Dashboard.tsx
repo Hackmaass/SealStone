@@ -59,77 +59,98 @@ const Figure = ({ wei }: { wei: bigint }) => (
 const pct = (part: bigint, whole: bigint): number => (whole === 0n ? 0 : Number((part * 10000n) / whole) / 100);
 
 type Flow = { deposited: bigint; released: bigint; refunded: bigint; withdrawn: bigint };
+type Totals = ReturnType<typeof totalsOf>;
 
 /**
- * THE MONEY, as the balance equation the contract enforces: every wei deposited is in escrow, owed to someone, or withdrawn.
- * The bar is drawn from the chain's own reconcile() numbers; the words under it carry the same facts, so colour is never alone.
+ * THE HEADER BAND: who you are, what is next, and the money in four numbers. The three amounts split every deposited wei into
+ * in escrow / ready to withdraw / withdrawn (the same split the bar below draws), and the last number is the ledger verdict.
  */
-function MoneyHero({ ready, totals, list, flow }: { ready: boolean; totals: ReturnType<typeof totalsOf>; list: VaultSummary[]; flow: Flow }) {
-  const held = totals.inEscrow;
-  const sum = held + totals.owed + flow.withdrawn;
-  const balance = list.reduce((s, v) => s + v.reconcile.actualBalance, 0n);
-  const parts = [
-    { key: "escrow", label: "In escrow", hint: "locked until a rule releases it", wei: held },
-    { key: "owed", label: "Ready to withdraw", hint: "released or refunded, not yet taken", wei: totals.owed },
-    { key: "gone", label: "Withdrawn", hint: "already paid out", wei: flow.withdrawn },
-  ];
+function Band({ ready, totals, list, flow, headline, who, actions }: { ready: boolean; totals: Totals; list: VaultSummary[]; flow: Flow; headline: string; who: string; actions: ReactNode }) {
   const bad = ready && list.length > 0 && !totals.allReconciled;
+  const verdict = !ready ? "Checking…" : list.length === 0 ? "Nothing yet" : totals.allReconciled ? "✓ All reconcile" : "✕ Check a vault";
   return (
-    <section className="hero" aria-label="The money" data-testid="dash-stats">
-      <div className="hero-top">
-        <div>
-          <p className="hero-k">In escrow now</p>
-          <p className="hero-fig" data-testid="hero-escrow">{ready ? <Figure wei={held} /> : <span className="sk hero-sk" aria-hidden="true" />}</p>
-          <p className="hero-sub">
-            {ready ? (
-              <>
-                across <b data-testid="stat-vaults">{totals.vaults}</b> {totals.vaults === 1 ? "vault" : "vaults"}, {totals.active} active. Simulated funds on a local chain.
-              </>
-            ) : (
-              "Reading the chain…"
-            )}
+    <header className="dband" data-testid="dash-stats">
+      <div className="dband-main">
+        <div className="dhead-title">
+          <h1>Dashboard</h1>
+          <p className="dhead-who">
+            <span className="dhead-dot" aria-hidden="true" />
+            {who}
           </p>
         </div>
-        <div className={`hero-proof${bad ? " bad" : ""}`}>
-          <span className="hero-proof-ic" aria-hidden="true">
-            <Icon><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z" /><path d="M8.5 12l2.5 2.5L16 9.5" /></Icon>
-          </span>
-          <div>
-            <p className="hero-proof-t" data-testid="stat-ledgers">
-              {!ready ? "Checking the ledgers…" : list.length === 0 ? "Nothing to check yet" : totals.allReconciled ? "✓ Every ledger reconciles" : "✕ A ledger does not reconcile"}
-            </p>
-            <p className="hero-proof-s">
-              {ready && list.length > 0 ? (
-                <>
-                  Contract balance <Amount wei={balance} /> = deposited <Amount wei={flow.deposited} /> − withdrawn <Amount wei={flow.withdrawn} />
-                </>
-              ) : (
-                "The contract checks this after every move."
-              )}
-            </p>
-          </div>
+        <p className="dhead-sub" data-testid="dash-headline">{headline}</p>
+        <div className="dhead-actions">{actions}</div>
+      </div>
+      <dl className="dband-metrics">
+        <div className="m escrow">
+          <dt><span className="sw" aria-hidden="true" />In escrow now</dt>
+          <dd className="big" data-testid="hero-escrow">{ready ? <Figure wei={totals.inEscrow} /> : <span className="sk hero-sk" aria-hidden="true" />}</dd>
+          <dd className="h">
+            {ready ? (
+              <>
+                <b data-testid="stat-vaults">{totals.vaults}</b> {totals.vaults === 1 ? "vault" : "vaults"}, {totals.active} active
+              </>
+            ) : (
+              "reading the chain"
+            )}
+          </dd>
+        </div>
+        <div className="m owed">
+          <dt><span className="sw" aria-hidden="true" />Ready to withdraw</dt>
+          <dd className="big">{ready ? <Figure wei={totals.owed} /> : "—"}</dd>
+          <dd className="h">released or refunded</dd>
+        </div>
+        <div className="m gone">
+          <dt><span className="sw" aria-hidden="true" />Withdrawn</dt>
+          <dd className="big">{ready ? <Figure wei={flow.withdrawn} /> : "—"}</dd>
+          <dd className="h">already paid out</dd>
+        </div>
+        <div className={`m proof${bad ? " bad" : ""}`}>
+          <dt>Ledgers</dt>
+          <dd className="big verdict" data-testid="stat-ledgers">{verdict}</dd>
+          <dd className="h">checked after every move</dd>
+        </div>
+      </dl>
+    </header>
+  );
+}
+
+/** The balance equation the contract enforces, drawn as one bar (same colours as the swatches in the header band). */
+function LedgerStrip({ ready, totals, list, flow }: { ready: boolean; totals: Totals; list: VaultSummary[]; flow: Flow }) {
+  const parts = [
+    { key: "escrow", label: "In escrow", wei: totals.inEscrow },
+    { key: "owed", label: "Ready to withdraw", wei: totals.owed },
+    { key: "gone", label: "Withdrawn", wei: flow.withdrawn },
+  ];
+  const sum = parts.reduce((t, p) => t + p.wei, 0n);
+  const balance = list.reduce((t, v) => t + v.reconcile.actualBalance, 0n);
+  return (
+    <section className="dstrip" aria-label="Balance check">
+      <span className="dstrip-ic" aria-hidden="true">
+        <Icon><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z" /><path d="M8.5 12l2.5 2.5L16 9.5" /></Icon>
+      </span>
+      <div className="dstrip-body">
+        <p className="dstrip-t">The balance always reconciles</p>
+        <p className="dstrip-s">
+          {ready && list.length > 0 ? (
+            <>
+              Contract balance <Amount wei={balance} /> = deposited <Amount wei={flow.deposited} /> − withdrawn <Amount wei={flow.withdrawn} />. Simulated funds on a local chain.
+            </>
+          ) : (
+            "The contract checks deposits minus payouts against its real balance after every move."
+          )}
+        </p>
+        <div className="dstrip-bar" role="img" aria-label={ready && sum > 0n ? parts.map((p) => `${p.label} ${formatWei(p.wei, 3)} ETH`).join(", ") : "No funds yet"}>
+          {ready && sum > 0n ? parts.map((p) => p.wei > 0n && <span key={p.key} className={`seg ${p.key}`} style={{ width: `${pct(p.wei, sum)}%` }} />) : <span className="seg none" />}
         </div>
       </div>
-
-      <div className="hero-bar" role="img" aria-label={ready && sum > 0n ? parts.map((p) => `${p.label} ${formatWei(p.wei, 3)} ETH`).join(", ") : "No funds yet"}>
-        {ready && sum > 0n ? parts.map((p) => p.wei > 0n && <span key={p.key} className={`seg ${p.key}`} style={{ width: `${pct(p.wei, sum)}%` }} />) : <span className="seg none" />}
-      </div>
-      <dl className="hero-legend">
-        {parts.map((p) => (
-          <div key={p.key} className={p.key}>
-            <dt><span className="sw" aria-hidden="true" />{p.label}</dt>
-            <dd>{ready ? <Amount wei={p.wei} /> : "—"}</dd>
-            <dd className="h">{p.hint}</dd>
-          </div>
-        ))}
-      </dl>
     </section>
   );
 }
 
 const SEGMENT: Record<string, string> = { Pending: "pending", Completed: "proposed", Disputed: "revert", Released: "onchain", Refunded: "human" };
 
-/** One vault as a single row: its seal, one segment per milestone (state also in words), the money, and whose move it is. */
+/** One vault as a table row: its seal, one segment per milestone (state also in words), the money and its ledger verdict, whose move it is. */
 function VaultRow({ v, me }: { v: VaultSummary; me: string }) {
   const { step, role } = stepFor(v, me);
   const open = () => navigate(`/vault/${v.address}`);
@@ -160,14 +181,22 @@ function VaultRow({ v, me }: { v: VaultSummary; me: string }) {
         </div>
         <div className="vrow-money">
           <Amount wei={v.reconcile.heldInEscrow} />
-          <span className="muted small">in escrow</span>
+          <span className={`small vrow-ledger ${v.reconcile.ok ? "ok" : "bad"}`}>{v.reconcile.ok ? "✓ Reconciled" : "✕ Not reconciled"}</span>
         </div>
         <p className={`vrow-next${step.mine ? " mine" : ""}`}>
           {step.mine ? <span className="tag">Your move</span> : <span className="tag quiet">{role === "stranger" ? "Next" : "Waiting"}</span>}
           <span>{sentence(step.headline)}</span>
         </p>
-        <span className={`vrow-ledger ${v.reconcile.ok ? "ok" : "bad"}`}>{v.reconcile.ok ? "✓ Reconciled" : "✕ Not reconciled"}</span>
-        <span className="vrow-go" aria-hidden="true">›</span>
+        <button
+          type="button"
+          className={`btn vrow-open ${step.mine ? "go" : "secondary"}`}
+          onClick={(e) => {
+            e.stopPropagation();
+            open();
+          }}
+        >
+          {step.mine ? "Open vault" : "Open"}
+        </button>
       </article>
     </li>
   );
@@ -200,151 +229,147 @@ export function Dashboard() {
 
   return (
     <div className="dash">
-      <header className="dhead">
-        <div>
-          <div className="dhead-title">
-            <h1>Dashboard</h1>
-            <p className="dhead-who">
-              <span className="dhead-dot" aria-hidden="true" />
-              {app.names[app.role]}
-              {myRole ? ` · ${myRole}` : ""}
+      <Band
+        ready={ready}
+        totals={totals}
+        list={list}
+        flow={flow}
+        headline={headline}
+        who={`${app.names[app.role]}${myRole ? ` · ${myRole}` : ""}`}
+        actions={
+          <>
+            <button className="btn go" type="button" onClick={() => navigate("/agreement")}>Draft an agreement</button>
+            <button className="btn secondary" type="button" onClick={() => navigate(`/vault/${deployment.preseededVault.address}`)}>Open the demo vault</button>
+          </>
+        }
+      />
+
+      <LedgerStrip ready={ready} totals={totals} list={list} flow={flow} />
+
+      <section className="dpanel" aria-label="Waiting on you">
+        <div className="dpanel-head">
+          <h2>
+            Needs your move
+            {ready && attention.length > 0 && <span className="count" aria-label={`${attention.length} waiting`}>{attention.length}</span>}
+          </h2>
+          {ready && elsewhere >= 0 && attention.length > 0 && (
+            <button className="linklike small" type="button" onClick={() => app.setRoleIdx(elsewhere)}>
+              {app.names[ACCOUNT_ROLES[elsewhere]]} has {counts[elsewhere]} · switch
+            </button>
+          )}
+        </div>
+
+        {state.status === "loading" && <VaultTableSkeleton />}
+        {state.status === "error" && (
+          <div className="empty" role="alert">
+            <p>Couldn't read the chain.</p>
+            <p className="muted small">
+              {state.message}. Is it running? <code>npm run chain</code>
             </p>
+            <button className="btn secondary" type="button" style={{ marginTop: 10 }} onClick={refresh}>Try again</button>
           </div>
-          <p className="dhead-sub" data-testid="dash-headline">{headline}</p>
-        </div>
-        <div className="dhead-actions">
-          <button className="btn secondary" type="button" onClick={() => navigate(`/vault/${deployment.preseededVault.address}`)}>Open the demo vault</button>
-          <button className="btn go" type="button" onClick={() => navigate("/agreement")}>Draft an agreement</button>
-        </div>
-      </header>
-
-      <MoneyHero ready={ready} totals={totals} list={list} flow={flow} />
-
-      <div className="dgrid">
-        <div className="dmain">
-          <section className="dpanel" aria-label="Waiting on you">
-            <div className="dpanel-head">
-              <h2>
-                Needs your move
-                {ready && attention.length > 0 && <span className="count" aria-label={`${attention.length} waiting`}>{attention.length}</span>}
-              </h2>
-              {ready && elsewhere >= 0 && attention.length > 0 && (
-                <button className="linklike small" type="button" onClick={() => app.setRoleIdx(elsewhere)}>
-                  {app.names[ACCOUNT_ROLES[elsewhere]]} has {counts[elsewhere]} · switch
-                </button>
-              )}
+        )}
+        {ready && attention.length === 0 && (
+          <div className="allclear">
+            <span className="allclear-ic" aria-hidden="true"><Icon><path d="M5 12.5l4.5 4.5L19 7.5" /></Icon></span>
+            <div className="allclear-t">
+              <p><b>You're all caught up.</b></p>
+              <p className="muted small">
+                {list.length === 0
+                  ? "There are no vaults yet."
+                  : elsewhere >= 0
+                    ? `Nothing is waiting on ${app.names[app.role]}. ${app.names[ACCOUNT_ROLES[elsewhere]]} has ${plural(counts[elsewhere], "thing")} to do.`
+                    : `Nothing is waiting on ${app.names[app.role]} right now.`}
+              </p>
             </div>
-
-            {state.status === "loading" && <VaultTableSkeleton />}
-            {state.status === "error" && (
-              <div className="empty" role="alert">
-                <p>Couldn't read the chain.</p>
-                <p className="muted small">
-                  {state.message}. Is it running? <code>npm run chain</code>
-                </p>
-                <button className="btn secondary" type="button" style={{ marginTop: 10 }} onClick={refresh}>Try again</button>
-              </div>
+            {elsewhere >= 0 && list.length > 0 && (
+              <button className="btn secondary" type="button" onClick={() => app.setRoleIdx(elsewhere)}>
+                Switch to {app.names[ACCOUNT_ROLES[elsewhere]]}
+              </button>
             )}
-            {ready && attention.length === 0 && (
-              <div className="allclear">
-                <span className="allclear-ic" aria-hidden="true"><Icon><path d="M5 12.5l4.5 4.5L19 7.5" /></Icon></span>
-                <div className="allclear-t">
-                  <p><b>You're all caught up.</b></p>
-                  <p className="muted small">
-                    {list.length === 0
-                      ? "There are no vaults yet."
-                      : elsewhere >= 0
-                        ? `Nothing is waiting on ${app.names[app.role]}. ${app.names[ACCOUNT_ROLES[elsewhere]]} has ${plural(counts[elsewhere], "thing")} to do.`
-                        : `Nothing is waiting on ${app.names[app.role]} right now.`}
-                  </p>
+          </div>
+        )}
+        {attention.length > 0 && (
+          <ul className="attention" data-testid="attention">
+            {attention.map((a) => (
+              <li key={a.vault.address + a.kind}>
+                <span className={`att-ic ${a.kind}`} aria-hidden="true">{a.kind === "move" ? "→" : "↓"}</span>
+                <div className="att-body">
+                  <span className="att-title">
+                    <b>{vaultName(a.vault)}</b> <span className="muted small mono">{shortHash(a.vault.address)}</span>
+                  </span>
+                  <span>{a.headline}</span>
+                  {a.milestone && (
+                    <span className="muted small">
+                      Milestone {a.milestone.number} · <Amount wei={a.milestone.amount} />
+                    </span>
+                  )}
                 </div>
-                {elsewhere >= 0 && list.length > 0 && (
-                  <button className="btn secondary" type="button" onClick={() => app.setRoleIdx(elsewhere)}>
-                    Switch to {app.names[ACCOUNT_ROLES[elsewhere]]}
-                  </button>
-                )}
-              </div>
-            )}
-            {attention.length > 0 && (
-              <ul className="attention" data-testid="attention">
-                {attention.map((a) => (
-                  <li key={a.vault.address + a.kind}>
-                    <span className={`att-ic ${a.kind}`} aria-hidden="true">{a.kind === "move" ? "→" : "↓"}</span>
-                    <div className="att-body">
-                      <span className="att-title">
-                        <b>{vaultName(a.vault)}</b> <span className="muted small mono">{shortHash(a.vault.address)}</span>
-                      </span>
-                      <span>{a.headline}</span>
-                      {a.milestone && (
-                        <span className="muted small">
-                          Milestone {a.milestone.number} · <Amount wei={a.milestone.amount} />
-                        </span>
-                      )}
-                    </div>
-                    <button className="btn go" type="button" onClick={() => navigate(`/vault/${a.vault.address}`)}>{a.kind === "move" ? "Open vault" : "Withdraw"}</button>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </section>
+                <button className="btn go" type="button" onClick={() => navigate(`/vault/${a.vault.address}`)}>{a.kind === "move" ? "Open vault" : "Withdraw"}</button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
 
-          <section className="dpanel" aria-label="Your vaults">
-            <div className="dpanel-head">
-              <h2>
-                Vaults
-                {ready && list.length > 0 && <span className="muted small dpanel-n">{list.length}</span>}
-              </h2>
-              <button className="linklike small" type="button" onClick={() => navigate("/vaults")}>See all vaults</button>
-            </div>
-            {state.status === "loading" && <VaultTableSkeleton />}
-            {ready && list.length === 0 && (
-              <div className="empty">
-                <p>No agreements yet.</p>
-                <p className="muted small">Draft one from text, or open the demo vault.</p>
-                <div className="actions" style={{ marginTop: 10 }}>
-                  <button className="btn go" type="button" onClick={() => navigate("/agreement")}>Draft an agreement</button>
-                  <button className="btn secondary" type="button" onClick={() => navigate(`/vault/${deployment.preseededVault.address}`)}>Open the demo vault</button>
-                </div>
-              </div>
-            )}
-            {ready && list.length > 0 && (
-              <ul className="vrows">
-                {list.slice(0, 5).map((v) => (
-                  <VaultRow key={v.address} v={v} me={me} />
-                ))}
-              </ul>
-            )}
-          </section>
+      <section className="dpanel" aria-label="Your vaults">
+        <div className="dpanel-head">
+          <h2>
+            Vaults
+            {ready && list.length > 0 && <span className="muted small dpanel-n">{list.length}</span>}
+          </h2>
+          <button className="linklike small" type="button" onClick={() => navigate("/vaults")}>See all vaults</button>
         </div>
+        {state.status === "loading" && <VaultTableSkeleton />}
+        {ready && list.length === 0 && (
+          <div className="empty">
+            <p>No agreements yet.</p>
+            <p className="muted small">Draft one from text, or open the demo vault.</p>
+            <div className="actions" style={{ marginTop: 10 }}>
+              <button className="btn go" type="button" onClick={() => navigate("/agreement")}>Draft an agreement</button>
+              <button className="btn secondary" type="button" onClick={() => navigate(`/vault/${deployment.preseededVault.address}`)}>Open the demo vault</button>
+            </div>
+          </div>
+        )}
+        {ready && list.length > 0 && (
+          <>
+            <div className="vthead" aria-hidden="true">
+              <span className="c-id">Agreement</span>
+              <span className="c-prog">Progress</span>
+              <span className="c-money">In escrow</span>
+              <span className="c-next">Next step</span>
+            </div>
+            <ul className="vrows">
+              {list.slice(0, 5).map((v) => (
+                <VaultRow key={v.address} v={v} me={me} />
+              ))}
+            </ul>
+          </>
+        )}
+      </section>
 
-        <aside className="daside" aria-label="More">
-          <section className="dlab" aria-label="Attack Lab">
-            <span className="dlab-art" aria-hidden="true">
-              <svg viewBox="0 0 96 96" width="44" height="44">
-                <circle cx="48" cy="48" r="30" fill="none" stroke="currentColor" strokeWidth="3" />
-                <circle cx="48" cy="48" r="9" fill="currentColor" />
-                {Array.from({ length: 24 }, (_, i) => {
-                  const a = (i / 24) * Math.PI * 2;
-                  const r2 = 38 + (i % 5) * 2;
-                  return <line key={i} x1={48 + 33 * Math.cos(a)} y1={48 + 33 * Math.sin(a)} x2={48 + r2 * Math.cos(a)} y2={48 + r2 * Math.sin(a)} stroke="currentColor" strokeWidth="3" strokeLinecap="round" />;
-                })}
-              </svg>
-            </span>
-            <h2>Try to break it</h2>
-            <p className="muted small">Fire 12 real attacks at a sandbox vault, including a re-entrancy attack that drains a naive escrow.</p>
-            <button className="btn secondary" type="button" onClick={() => navigate("/attack-lab")}>Open the Attack Lab</button>
-          </section>
+      <section className="dlab" aria-label="Attack Lab">
+        <span className="dlab-art" aria-hidden="true">
+          <svg viewBox="0 0 96 96" width="44" height="44">
+            <circle cx="48" cy="48" r="30" fill="none" stroke="currentColor" strokeWidth="3" />
+            <circle cx="48" cy="48" r="9" fill="currentColor" />
+            {Array.from({ length: 24 }, (_, i) => {
+              const a = (i / 24) * Math.PI * 2;
+              const r2 = 38 + (i % 5) * 2;
+              return <line key={i} x1={48 + 33 * Math.cos(a)} y1={48 + 33 * Math.sin(a)} x2={48 + r2 * Math.cos(a)} y2={48 + r2 * Math.sin(a)} stroke="currentColor" strokeWidth="3" strokeLinecap="round" />;
+            })}
+          </svg>
+        </span>
+        <div className="dlab-t">
+          <h2>Try to break it</h2>
+          <p className="muted small">Fire 12 real attacks at a sandbox vault, including a re-entrancy attack that drains a naive escrow.</p>
+        </div>
+        <button className="btn secondary" type="button" onClick={() => navigate("/attack-lab")}>Open the Attack Lab</button>
+      </section>
 
-          <section className="dpanel dkeys" aria-label="Shortcuts">
-            <div className="dpanel-head"><h2>Shortcuts</h2></div>
-            <dl>
-              <div><dt>Act as someone else</dt><dd><kbd>1</kbd> – <kbd>4</kbd></dd></div>
-              <div><dt>Light or dark</dt><dd><kbd>T</kbd></dd></div>
-              <div><dt>Presenter mode</dt><dd><kbd>P</kbd></dd></div>
-            </dl>
-          </section>
-        </aside>
-      </div>
+      <p className="dkeys muted small">
+        Shortcuts: <kbd>1</kbd>–<kbd>4</kbd> act as someone else · <kbd>T</kbd> light or dark · <kbd>P</kbd> presenter mode
+      </p>
     </div>
   );
 }
