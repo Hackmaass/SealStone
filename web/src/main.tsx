@@ -5,6 +5,7 @@ import "@fontsource-variable/inter";
 import "@fontsource/ibm-plex-mono/latin-400.css";
 import "@fontsource/ibm-plex-mono/latin-500.css";
 import "./ui/tokens.css";
+import "./ui/brand.css";
 import "./ui/app.css";
 import "./ui/extra.css";
 import "./ui/vault.css";

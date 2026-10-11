@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { link } from "../../lib/router";
 import deployment from "../../generated/deployment.json";
-import { ContrastChart, Icon, SealMark, StoneStack } from "./art";
+import { BrandMark } from "../../ui/BrandMark";
+import { ContrastChart, Icon, StoneStack } from "./art";
 import { COMMAND, FACTS, FAQS } from "./facts";
 import { SealDemo } from "./SealDemo";
 import "./landing.css";
@@ -71,7 +72,7 @@ function Nav() {
       <a className="lp-skip" href="#main">Skip to content</a>
       <header className="lp-nav">
         <a className="lp-logo" href="/" aria-label="Sealstone home" onClick={(e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: smooth() }); }}>
-          <SealMark size={30} />
+          <BrandMark size={30} />
           <span>Sealstone</span>
         </a>
         <nav className="lp-links" aria-label="Sections">
@@ -90,7 +91,7 @@ function Nav() {
         <div className="lp-menu" role="dialog" aria-modal="true" aria-label="Menu">
           <div className="lp-menu-head">
             <a className="lp-logo" href="/" onClick={(e) => { e.preventDefault(); setOpen(false); window.scrollTo({ top: 0 }); }}>
-              <SealMark size={30} />
+              <BrandMark size={30} />
               <span>Sealstone</span>
             </a>
             <button className="lp-burger" type="button" aria-label="Close the menu" onClick={() => setOpen(false)}>
@@ -127,7 +128,7 @@ function Hero() {
   return (
     <section className="lp-hero lp-panel" aria-labelledby="hero-h">
       <Reveal className="lp-hero-copy">
-        <div className="lp-eyebrow"><span className="lp-chip-icon"><SealMark size={22} /></span>Sealstone</div>
+        <div className="lp-eyebrow"><span className="lp-chip-icon"><BrandMark size={22} /></span>Sealstone</div>
         <h1 id="hero-h">Escrow that can't be tricked</h1>
         <p className="lp-lede">Hold the money until the work is delivered. Everyone agrees to the same terms, nobody can swap the file, and any attempt to cheat is refused.</p>
         <div className="lp-cta-row">
@@ -289,7 +290,7 @@ function LabSection() {
   return (
     <section id="lab" className="lp-dark lp-panel" aria-labelledby="lab-h">
       <Reveal className="lp-center">
-        <div className="lp-eyebrow dark"><span className="lp-chip-icon dark"><SealMark size={22} /></span>Attack Lab</div>
+        <div className="lp-eyebrow dark"><span className="lp-chip-icon dark"><BrandMark size={22} /></span>Attack Lab</div>
         <h2 id="lab-h" className="lp-h1">Try to <span className="lp-grad">break it</span></h2>
         <p className="lp-lede dark">Twelve real attacks, one click. Each one is a real transaction, and none of them gets money it isn't owed.</p>
         <div className="lp-cta-row">
@@ -386,7 +387,7 @@ function ProofSection() {
   return (
     <section id="proof" className="lp-proof lp-panel" aria-labelledby="proof-h">
       <Reveal className="lp-center">
-        <div className="lp-eyebrow"><span className="lp-chip-icon"><SealMark size={22} /></span>The Sealstone guarantee</div>
+        <div className="lp-eyebrow"><span className="lp-chip-icon"><BrandMark size={22} /></span>The Sealstone guarantee</div>
         <h2 id="proof-h" className="lp-h1">Provable by default</h2>
         <p className="lp-lede">Three promises, each with a way to check it yourself. And an honest list of what Sealstone doesn't do.</p>
       </Reveal>
@@ -507,7 +508,7 @@ function Footer() {
       <div className="lp-foot-grid">
         <div className="lp-foot-brand">
           <a className="lp-logo" href="/" onClick={(e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: smooth() }); }}>
-            <SealMark size={30} />
+            <BrandMark size={30} />
             <span>Sealstone</span>
           </a>
           <p>Escrow that can't be tricked by ambiguous agreements, swapped deliverables or malicious contracts.</p>

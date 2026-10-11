@@ -1,0 +1,4 @@
+/* The Sealstone symbol as a mask: the file's shapes take the colour of the text around them. */
+.brand-mark{display:inline-block;flex:none;background-color:currentColor;-webkit-mask:url("../assets/sealstone-mark.png") center/contain no-repeat;mask:url("../assets/sealstone-mark.png") center/contain no-repeat}
+.brand .brand-mark{color:var(--ink)}
+.lp-logo .brand-mark{color:var(--lp-ink)}

@@ -1,14 +1,12 @@
 import { useEffect, useState, type ReactNode } from "react";
-import { id } from "ethers";
 import { useApp } from "../lib/app";
 import { ACCOUNT_ROLES, accountAddress } from "../lib/chain";
 import { link, navigate, usePath } from "../lib/router";
-import { HashSeal } from "./components";
+import { BrandMark } from "./BrandMark";
 import { formatWei, shortHash } from "./copy";
 import type { Mode } from "../lib/api";
 import deployment from "../generated/deployment.json";
 
-const BRAND_HASH = id("sealstone");
 const ROLE_WORD = { client: "Client", provider: "Provider", arbiter: "Arbiter", stranger: "Anyone" } as const;
 const MODES: Array<[Mode, string]> = [
   ["auto", "Auto"],
@@ -66,7 +64,7 @@ export function TopBar() {
       {/* the sidebar (wide screens): where you are going, and who you are acting as */}
       <aside className="sidebar desk-only" aria-label="Sealstone">
         <a className="brand" href="/" onClick={link("/")} aria-label="Sealstone home">
-          <HashSeal hash={BRAND_HASH} state="onchain" size={28} />
+          <BrandMark size={28} />
           Sealstone
         </a>
         <nav className="side-nav" aria-label="Main">
@@ -108,7 +106,7 @@ export function TopBar() {
 
       <header className="topbar">
         <a className="brand phone-only" href="/" onClick={link("/")} aria-label="Sealstone home">
-          <HashSeal hash={BRAND_HASH} state="onchain" size={28} />
+          <BrandMark size={28} />
           Sealstone
         </a>
         <div className="spacer" />
@@ -156,7 +154,7 @@ export function TopBar() {
         <div className="phone-menu" id="phone-menu" role="dialog" aria-modal="true" aria-label="Menu">
           <div className="pm-head">
             <a className="brand" href="/" onClick={link("/")}>
-              <HashSeal hash={BRAND_HASH} state="onchain" size={28} />
+              <BrandMark size={28} />
               Sealstone
             </a>
             <button className="menu-btn" type="button" aria-label="Close the menu" onClick={() => setMenu(false)}>
