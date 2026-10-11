@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>Sealstone · Deploy to MST testnet</title>
+  </head>
+  <body>
+    <main id="mst-root">
+      <p class="eyebrow">Sealstone · optional testnet deploy</p>
+      <h1>Deploy a vault to MST testnet</h1>
+      <p class="lede">
+        Connect your wallet, name the provider and arbiter, and deploy one <code>MilestoneVault</code>. Your connected account becomes the client.
+        Nothing is signed or funded beyond the deploy transaction and its gas. Simulated testnet funds only (tMSTC).
+      </p>
+
+      <section class="card" id="step-wallet">
+        <h2>1. Wallet</h2>
+        <label>Wallet extension<select id="sel-wallet"><option value="">Looking for wallets…</option></select></label>
+        <div class="row">
+          <button id="btn-connect" class="btn go" type="button">Connect wallet</button>
+          <button id="btn-rescan" class="btn" type="button">Rescan</button>
+        </div>
+        <p id="wallet-status" class="muted" role="status">Not connected.</p>
+        <details class="help">
+          <summary>Wallet not showing up? Checklist and diagnostics</summary>
+          <ol>
+            <li>Open this exact page in the same browser profile where the wallet extension is installed (not a private window, unless the extension is allowed there).</li>
+            <li>In the browser's extensions page, make sure the extension is <b>enabled</b> and its <b>site access</b> allows this page (set it to "On all sites"), then reload this page.</li>
+            <li>Unlock the wallet and press <b>Rescan</b>.</li>
+            <li>If several wallet extensions are installed, disable the others for a moment, or pick the right one in the list.</li>
+            <li>If it still isn't listed, copy the diagnostics below and send them to whoever is helping you.</li>
+          </ol>
+          <pre id="diagnostics" class="diag"></pre>
+        </details>
+      </section>
+
+      <section class="card" id="step-parties">
+        <h2>2. Parties</h2>
+        <label>Client (your connected account)<input id="in-client" readonly placeholder="connect a wallet" /></label>
+        <label>Provider address<input id="in-provider" placeholder="0x…" spellcheck="false" autocomplete="off" /></label>
+        <label>Arbiter address<input id="in-arbiter" placeholder="0x…" spellcheck="false" autocomplete="off" /></label>
+        <p id="hash-preview" class="muted">Agreement hash: enter two valid, distinct addresses.</p>
+      </section>
+
+      <section class="card" id="step-deploy">
+        <h2>3. Deploy</h2>
+        <button id="btn-deploy" class="btn go" type="button" disabled>Deploy MilestoneVault</button>
+        <p id="deploy-status" class="muted" role="status"></p>
+        <div id="result" hidden>
+          <p>Vault address: <code id="res-address"></code></p>
+          <p>Transaction: <code id="res-tx"></code></p>
+          <p><a id="res-explorer-address" target="_blank" rel="noreferrer">Open the contract in the explorer</a> ·
+             <a id="res-explorer-tx" target="_blank" rel="noreferrer">Open the transaction</a></p>
+          <button id="btn-download" class="btn" type="button">Download deployment record (JSON)</button>
+        </div>
+      </section>
+    </main>
+    <script type="module" src="/src/mst/main.ts"></script>
+  </body>
+</html>

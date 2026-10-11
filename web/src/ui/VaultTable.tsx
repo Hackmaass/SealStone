@@ -31,9 +31,11 @@ export function VaultTable({ list, empty }: { list: VaultSummary[]; empty?: Reac
           const pct = n === 0 ? 0 : Math.round((v.settled / n) * 100);
           return (
             <tr key={v.address} data-vault={v.address} onClick={() => navigate(`/vault/${v.address}`)} tabIndex={0} onKeyDown={(e) => e.key === "Enter" && navigate(`/vault/${v.address}`)}>
-              <td data-label="Agreement" className="vt-name">
-                <b>{vaultName(v)}</b>
-                <span className="muted small mono">{shortHash(v.address)}</span>
+              <td data-label="Agreement">
+                <div className="vt-name">
+                  <b>{vaultName(v)}</b>
+                  <span className="muted small mono">{shortHash(v.address)}</span>
+                </div>
               </td>
               <td data-label="Status">
                 <span className={`chip ${STATE_CHIP[v.agreementState] ?? "pending"}`}>

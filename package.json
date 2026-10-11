@@ -13,6 +13,7 @@
     "setup": "npm install",
     "chain": "npm run node --workspace contracts",
     "deploy:demo": "npm run deploy:demo --workspace contracts",
+    "deploy:mst": "npm run deploy:mst --workspace contracts",
     "test:contracts": "npm run test --workspace contracts",
     "coverage": "npm run coverage --workspace contracts",
     "server": "npm run dev --workspace server",

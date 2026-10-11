@@ -16,9 +16,10 @@ body.menu-open{overflow:hidden}
 /* ---------- tablet and below ---------- */
 @media (max-width:980px){
   main{padding:20px}
-  .promo{grid-template-columns:auto 1fr}
-  .promo-cta{grid-column:1/-1}
   .statrow{gap:22px}
+  .dstats{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .dgrid{grid-template-columns:1fr}
+  .daside{position:static;display:grid;grid-template-columns:1fr 1fr;align-items:stretch}
 }
 
 /* ---------- the compact bar + menu: tablets and phones (the full bar needs about 1180 px) ---------- */
@@ -41,13 +42,25 @@ body.menu-open{overflow:hidden}
   h1{font-size:1.5rem}
   .pagehead{align-items:flex-start;flex-direction:column;gap:14px}
   .statrow{display:grid;grid-template-columns:1fr 1fr;gap:14px 18px;width:100%}
-  .promo{grid-template-columns:1fr;padding:16px}
-  .promo-art{display:none}
-  .promo-cta .btn{width:100%;justify-content:center}
-  .dash-card-head,.empty,.attention li{padding-left:16px;padding-right:16px}
-  .attention li{flex-direction:column;align-items:stretch}
-  .attention li .btn{justify-content:center}
-  .dash-actions .btn{flex:1;justify-content:center}
+  .pagehead-actions{width:100%}
+  .pagehead-actions .btn{flex:1;justify-content:center}
+  .dstats{gap:10px}
+  .dstat{padding:14px;gap:10px;flex-direction:column}
+  .dstat-ic{width:36px;height:36px}
+  .dstat-v{font-size:1.125rem}
+  .daside{grid-template-columns:1fr}
+  .dash-card-head,.dcard-head,.empty,.attention li,.allclear{padding-left:16px;padding-right:16px}
+  .actas{padding:6px 16px 14px}
+  .dmoney dl,.dmoney-note{padding-left:16px;padding-right:16px}
+  .attention li{flex-wrap:wrap}
+  .attention li .att-body{flex-basis:calc(100% - 52px)}
+  .attention li .btn{flex:1 1 100%;justify-content:center}
+  .vcard{padding:16px}
+  .vcard-ms{grid-template-columns:1fr}
+  .vcard-ms li{flex-direction:row;align-items:center;justify-content:space-between;gap:8px}
+  .vcard-foot{flex-direction:column;align-items:stretch}
+  .vcard-foot dl{justify-content:space-between;gap:12px}
+  .vcard-foot .btn{width:100%;justify-content:center}
   .filters .search{max-width:none}
   .filters .select{flex:1}
 
@@ -58,8 +71,8 @@ body.menu-open{overflow:hidden}
   .vtable tbody tr:first-child{border-top:0}
   .vtable td{padding:0;border:0}
   .vtable td::before{content:attr(data-label);display:block;font-size:.75rem;color:var(--ink-2);margin-bottom:2px}
-  .vtable td.vt-name{grid-column:1/-1;min-width:0;display:flex;flex-direction:column;gap:2px}
-  .vtable td.vt-name::before,.vtable td.vt-open::before{display:none}
+  .vtable td[data-label="Agreement"]{grid-column:1/-1;min-width:0}
+  .vtable td[data-label="Agreement"]::before,.vtable td.vt-open::before{display:none}
   .vtable td[data-label="Progress"]{grid-column:1/-1}
   .vtable td.num{text-align:left}
   .vtable td.vt-open{grid-column:1/-1}
@@ -122,6 +135,7 @@ body.menu-open{overflow:hidden}
 
 @media (max-width:520px){
   .statrow .stat .v{font-size:1.0625rem}
+  .dstat-h{display:none}
   .actas-chip{max-width:118px}
   .actas-chip .n{max-width:96px}
   .vheadbox .vhead-in{flex-direction:column;align-items:flex-start}

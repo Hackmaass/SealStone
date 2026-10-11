@@ -56,5 +56,7 @@ export default defineConfig({
   // Pre-bundle every dependency up front. Discovering one lazily (the app code-splits its pages) makes the dev server re-run its
   // optimiser and reload the page, which broke the first load after a demo reset.
   optimizeDeps: { include: ['react', 'react-dom', 'react-dom/client', 'react/jsx-dev-runtime', 'ethers', 'zod'] },
+  // The optional MST testnet deploy page is its own entry (not part of the app shell).
+  build: { rollupOptions: { input: { main: path.resolve(import.meta.dirname, 'index.html'), mstDeploy: path.resolve(import.meta.dirname, 'mst-deploy.html') } } },
   server: { port: 5173, strictPort: true, host: '127.0.0.1' },
 })

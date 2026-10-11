@@ -9,6 +9,7 @@ server/data/agreements/*.json
 !server/data/agreements/.gitkeep
 *.log
 
-# Solution Proposal and Architecture Report (kept local, not on git)
+# Solution Proposal, Architecture Report, and Competitive Analysis (kept local, not on git)
 docs/report/
 docs/Sealstone-Solution-Proposal-Architecture.pdf
+docs/BLOCKCHAIN-COMPETITIVE-ANALYSIS.md
