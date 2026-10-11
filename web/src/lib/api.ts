@@ -1,7 +1,9 @@
 import { z } from "zod";
+import { isHosted } from "./hosted";
 import { ambiguitySchema, proposedChecklistSchema, confirmedChecklistSchema, type ConfirmedChecklist, type GateInput, type Resolution } from "@mv/shared";
 
-export const API_URL: string = (import.meta.env.VITE_API_URL as string | undefined) ?? "http://127.0.0.1:8787";
+// A hosted copy is deployed with the server as a second Vercel service on the same domain, so it calls /api on its own origin.
+export const API_URL: string = (import.meta.env.VITE_API_URL as string | undefined) ?? (isHosted ? "" : "http://127.0.0.1:8787");
 
 export type Mode = "auto" | "ollama" | "gemini" | "rules";
 

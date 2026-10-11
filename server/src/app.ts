@@ -1,6 +1,7 @@
 import cors from "cors";
 import express, { type NextFunction, type Request, type Response } from "express";
 import { mkdirSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { z } from "zod";
@@ -18,6 +19,9 @@ import {
 } from "@mv/shared";
 import { configFromEnv, extract, providerStatus, type AiConfig } from "./ai";
 import type { FetchLike } from "./ai/ollama";
+
+// The Vercel bundle (scripts/bundle-server.mjs) replaces this with the sample texts, because a deployed function has no repo checkout to read.
+declare const __EMBEDDED_SAMPLES__: Array<{ name: string; text: string }> | undefined;
 
 const ROOT = fileURLToPath(new URL("../../", import.meta.url));
 
@@ -60,7 +64,8 @@ const noteBody = z.object({ hash: z.string().regex(HASH_RE), text: z.string().mi
 export function createApp(options: AppOptions = {}) {
   const fetchImpl = options.fetchImpl ?? fetch;
   const config = options.config ?? configFromEnv(process.env);
-  const dataDir = options.dataDir ?? path.join(ROOT, "server", "data", "agreements");
+  // Vercel's filesystem is read-only except /tmp, and /tmp is per instance: stored agreements there are not durable.
+  const dataDir = options.dataDir ?? (process.env.VERCEL ? path.join(tmpdir(), "sealstone-agreements") : path.join(ROOT, "server", "data", "agreements"));
   const samplesDir = options.samplesDir ?? path.join(ROOT, "samples", "agreements");
   const now = options.now ?? (() => new Date());
   const deps = { fetchImpl, config };
@@ -158,6 +163,10 @@ export function createApp(options: AppOptions = {}) {
   });
 
   app.get("/api/samples", (_req, res) => {
+    if (typeof __EMBEDDED_SAMPLES__ !== "undefined") {
+      res.json(__EMBEDDED_SAMPLES__.map((x) => ({ name: x.name, text: normalizeSourceText(x.text) })));
+      return;
+    }
     let names: string[] = [];
     try {
       names = readdirSync(samplesDir).filter((f) => f.endsWith(".txt")).sort();

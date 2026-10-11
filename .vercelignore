@@ -1,0 +1,13 @@
+﻿# Not needed to build the web app. Keeps a `vercel deploy` upload small. (Git-connected deploys clone the repo and ignore this.)
+node_modules
+docs
+e2e-shots
+web/e2e-shots
+web/e2e
+coverage
+artifacts
+cache
+typechain-types
+prompts
+.env
+*.log

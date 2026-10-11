@@ -1,22 +1,66 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "framework": null,
-  "installCommand": "npm ci --workspace web --include-workspace-root",
-  "buildCommand": "npm run build --workspace web && node scripts/vercel-output.mjs",
-  "outputDirectory": "dist",
-  "cleanUrls": false,
-  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }],
+  "services": {
+    "server": {
+      "root": "server",
+      "framework": "express",
+      "entrypoint": "vercel-entry.mjs",
+      "installCommand": "cd .. && npm ci --workspace server --workspace shared --include-workspace-root",
+      "buildCommand": "npm run bundle"
+    },
+    "web": {
+      "root": "web",
+      "framework": "vite",
+      "installCommand": "cd .. && npm ci --workspace web --workspace shared --include-workspace-root",
+      "buildCommand": "npm run build",
+      "outputDirectory": "dist",
+      "rewrites": [
+        {
+          "source": "/(.*)",
+          "destination": "/index.html"
+        }
+      ]
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": {
+        "service": "server"
+      }
+    },
+    {
+      "source": "/(.*)",
+      "destination": {
+        "service": "web"
+      }
+    }
+  ],
   "headers": [
     {
       "source": "/assets/(.*)",
-      "headers": [{ "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }]
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
     },
     {
       "source": "/(.*)",
       "headers": [
-        { "key": "X-Content-Type-Options", "value": "nosniff" },
-        { "key": "Referrer-Policy", "value": "no-referrer" },
-        { "key": "X-Frame-Options", "value": "DENY" }
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "no-referrer"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        }
       ]
     }
   ]
