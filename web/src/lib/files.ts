@@ -5,10 +5,15 @@ export interface HashedFile {
   size: number;
   /** SHA-256 of the bytes, 0x-prefixed. This is what the contract stores as the deliverable hash. */
   hash: string;
+  /** Only for small text-like files: the readable text, so the optional AI review can read it. Never part of the hash. */
+  text?: string;
 }
 
 export async function hashFile(file: File): Promise<HashedFile> {
-  return { name: file.name, size: file.size, hash: await fileSha256(new Uint8Array(await file.arrayBuffer())) };
+  const hash = await fileSha256(new Uint8Array(await file.arrayBuffer()));
+  const textLike = /\.(txt|md|markdown|csv|json|log|tex|rst)$/i.test(file.name) || file.type.startsWith("text/");
+  const text = textLike && file.size <= 200_000 ? (await file.text()).slice(0, 40_000) : undefined;
+  return { name: file.name, size: file.size, hash, ...(text !== undefined ? { text } : {}) };
 }
 
 /** A pasted text deliverable (for example a git commit SHA): the SHA-256 of its UTF-8 bytes. */

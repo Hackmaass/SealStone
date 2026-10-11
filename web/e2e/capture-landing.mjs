@@ -14,7 +14,7 @@ const VAULT = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
 
 const reset = () => execSync("npm run demo:reset", { cwd: ROOT, stdio: "ignore" });
 // Status toasts are transient and would sit on top of the pictures: keep them out of the frame.
-const hideToasts = () => { document.addEventListener("DOMContentLoaded", () => { const st = document.createElement("style"); st.textContent = ".toasts{display:none!important}"; document.head.appendChild(st); }); };
+const hideToasts = () => { document.addEventListener("DOMContentLoaded", () => { const st = document.createElement("style"); st.textContent = ".toasts,.asst-fab{display:none!important}"; document.head.appendChild(st); }); };
 const log = (m) => console.log(`✓ ${m}`);
 const written = [];
 async function shot(page, name, opts = {}) {

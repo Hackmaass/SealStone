@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useApp } from "./app";
+import { onVaultsChanged } from "./registry";
 import { loadVaultSummaries, type VaultSummary } from "./vaultList";
 
 export type VaultListState = { status: "loading" } | { status: "ready"; list: VaultSummary[] } | { status: "error"; message: string };
@@ -38,6 +39,7 @@ export function useVaultList(): { state: VaultListState; refresh: () => void } {
       alive.current = false;
     };
   }, []);
+  useEffect(() => onVaultsChanged(refresh), [refresh]); // a vault was created or opened by address
   useEffect(() => {
     const wait = Math.max(0, 900 - (Date.now() - last.current));
     const t = setTimeout(refresh, wait);

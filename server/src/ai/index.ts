@@ -24,6 +24,9 @@ export interface AiConfig {
   ollamaModel: string;
   geminiKey: string;
   geminiModel: string;
+  /** Optional: Sarvam AI for the assistant, the arbiter brief and the approval review (never for extraction). */
+  sarvamKey?: string;
+  sarvamModel?: string;
   /** Per-call LLM timeout. Spec: 30 s. */
   llmTimeoutMs: number;
 }
@@ -34,6 +37,8 @@ export function configFromEnv(env: NodeJS.ProcessEnv): AiConfig {
     ollamaModel: env.OLLAMA_MODEL || "llama3.2:3b",
     geminiKey: env.GEMINI_API_KEY || "",
     geminiModel: env.GEMINI_MODEL || "",
+    sarvamKey: env.SARVAM_API_KEY || "",
+    sarvamModel: env.SARVAM_MODEL || "sarvam-105b-conversations",
     llmTimeoutMs: 30_000,
   };
 }
@@ -65,6 +70,7 @@ export interface AiDeps {
 export interface ProviderStatus {
   ollama: boolean;
   gemini: boolean;
+  sarvam: boolean;
   rules: true;
   models: { ollama: { configured: string; installed: string[] | null }; gemini: { configured: string | null } };
 }
@@ -74,6 +80,7 @@ export async function providerStatus(deps: AiDeps): Promise<ProviderStatus> {
   return {
     ollama: installed !== null && hasModel(installed, deps.config.ollamaModel),
     gemini: Boolean(deps.config.geminiKey && deps.config.geminiModel),
+    sarvam: Boolean(deps.config.sarvamKey),
     rules: true,
     models: {
       ollama: { configured: deps.config.ollamaModel, installed },

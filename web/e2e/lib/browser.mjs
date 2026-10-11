@@ -6,7 +6,32 @@ import { chromium } from "playwright-core";
 export const BASE = process.env.WEB_URL ?? "http://127.0.0.1:5173";
 export const CHROME = process.env.CHROME_PATH ?? "C:/Program Files/Google/Chrome/Application/chrome.exe";
 
-export const launch = () => chromium.launch({ executablePath: CHROME, headless: true });
+/**
+ * Marks a browser as "already onboarded" (wallet connected, tour done) so every script that opens the app lands on the app, not on the
+ * first-run connect screen and tour. The onboarding script opts out with `launch({ onboarded: false })`.
+ * The keys are the ones in src/lib/onboarding.ts.
+ */
+const ONBOARDED = () => {
+  try {
+    localStorage.setItem("mv.onboard.wallet", "demo");
+    localStorage.setItem("mv.onboard.tour", "done");
+  } catch {
+    /* storage blocked */
+  }
+};
+
+export async function launch({ onboarded = true } = {}) {
+  const browser = await chromium.launch({ executablePath: CHROME, headless: true });
+  if (onboarded) {
+    const newContext = browser.newContext.bind(browser);
+    browser.newContext = async (...args) => {
+      const ctx = await newContext(...args);
+      await ctx.addInitScript(ONBOARDED);
+      return ctx;
+    };
+  }
+  return browser;
+}
 
 export const PHONE = { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true };
 export const DESKTOP = { viewport: { width: 1366, height: 768 }, deviceScaleFactor: 1 };

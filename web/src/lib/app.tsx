@@ -1,6 +1,8 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { ACCOUNT_ROLES, accountAddress, provider, type AccountRole } from "./chain";
 import { api, type Health, type Mode } from "./api";
+import { NET, NOBODY, type Net } from "./network";
+import { useWalletState } from "./wallet";
 
 export interface PartyNames {
   client: string;
@@ -18,6 +20,16 @@ export interface LastAi {
 }
 
 interface AppState {
+  /** "local": Hardhat test accounts. "wallet": the visitor's own wallet on MST testnet (lib/network.ts). Fixed for the life of the page. */
+  net: Net;
+  /** Who is acting: the chosen test account (local) or the connected wallet's address (wallet; the zero address when nobody is connected). */
+  me: string;
+  /** a short name for `me`, for sentences like "You're acting as ..." */
+  meLabel: string;
+  /** wallet mode: the connected account, if any */
+  walletAccount: string | null;
+  /** wallet mode: its balance in tMSTC */
+  walletBalance: bigint | null;
   roleIdx: number;
   role: AccountRole;
   setRoleIdx: (i: number) => void;
@@ -75,8 +87,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [theme, setTheme] = useState<"light" | "dark" | null>((safeGet("mv.theme") as "light" | "dark" | null) ?? "dark");
   const [presenter, setPresenter] = useState(false);
   const lastBlock = useRef<number | null>(null);
+  const wallet = useWalletState();
+  const [walletBalance, setWalletBalance] = useState<bigint | null>(null);
+  const walletAccount = NET === "wallet" ? wallet.account : null;
 
-  // Poll the block number about once a second; read balances only when the block changes.
+  // Poll the block number about once a second (every few seconds against a public RPC); read balances only when the block changes.
   useEffect(() => {
     let alive = true;
     // One refused request (this machine does that at random) is not "the chain is down": it takes 3 misses in a row.
@@ -90,23 +105,28 @@ export function AppProvider({ children }: { children: ReactNode }) {
         setBlock(n);
         if (lastBlock.current !== n) {
           lastBlock.current = n;
-          const vals = await Promise.all(ACCOUNT_ROLES.map((r) => provider.getBalance(accountAddress(r))));
-          if (alive) setBalances({ client: vals[0], provider: vals[1], arbiter: vals[2], stranger: vals[3] });
+          if (NET === "wallet") {
+            if (walletAccount) setWalletBalance(await provider.getBalance(walletAccount));
+          } else {
+            const vals = await Promise.all(ACCOUNT_ROLES.map((r) => provider.getBalance(accountAddress(r))));
+            if (alive) setBalances({ client: vals[0], provider: vals[1], arbiter: vals[2], stranger: vals[3] });
+          }
         }
       } catch {
         if (alive && ++misses >= 3) setChainOnline(false);
       }
     };
     void tick();
-    const t = setInterval(() => void tick(), 1000);
+    const t = setInterval(() => void tick(), NET === "wallet" ? 5000 : 1000);
     return () => {
       alive = false;
       clearInterval(t);
     };
-  }, []);
+  }, [walletAccount]);
 
   // /api/health hits Ollama's tags endpoint, so poll sparingly.
   const refreshHealth = useCallback(() => {
+    // On a hosted copy this calls /api on the same origin (the server service). If that service is absent, api.ts refuses to call loopback and this reports offline.
     api
       .health()
       .then((h) => {
@@ -159,7 +179,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
       const el = e.target as HTMLElement | null;
       if (el && (el.matches("input,textarea,select") || el.isContentEditable)) return;
       if (e.ctrlKey || e.metaKey || e.altKey) return;
-      if (e.key >= "1" && e.key <= "4") setRoleIdx(Number(e.key) - 1);
+      if (e.key >= "1" && e.key <= "4") {
+        if (NET === "local") setRoleIdx(Number(e.key) - 1); // with a real wallet, the wallet decides who you are
+      }
       else if (e.key === "p" || e.key === "P") togglePresenter();
       else if (e.key === "t" || e.key === "T") toggleTheme();
     };
@@ -167,8 +189,16 @@ export function AppProvider({ children }: { children: ReactNode }) {
     return () => window.removeEventListener("keydown", onKey);
   }, [togglePresenter, toggleTheme]);
 
+  const me = NET === "wallet" ? (walletAccount ?? NOBODY) : accountAddress(ACCOUNT_ROLES[roleIdx]);
+  const meLabel = NET === "wallet" ? (walletAccount ? `${walletAccount.slice(0, 6)}…${walletAccount.slice(-4)}` : "no wallet") : names[ACCOUNT_ROLES[roleIdx]];
+
   const value = useMemo<AppState>(
     () => ({
+      net: NET,
+      me,
+      meLabel,
+      walletAccount,
+      walletBalance,
       roleIdx,
       role: ACCOUNT_ROLES[roleIdx],
       setRoleIdx,
@@ -189,7 +219,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       presenter,
       togglePresenter,
     }),
-    [roleIdx, names, setNames, block, chainOnline, balances, health, serverOnline, refreshHealth, aiMode, setAiMode, lastAi, theme, toggleTheme, presenter, togglePresenter],
+    [me, meLabel, walletAccount, walletBalance, roleIdx, names, setNames, block, chainOnline, balances, health, serverOnline, refreshHealth, aiMode, setAiMode, lastAi, theme, toggleTheme, presenter, togglePresenter],
   );
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

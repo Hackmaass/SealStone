@@ -1,5 +1,6 @@
 import { useCallback, useState } from "react";
 import { explain } from "./chain";
+import { WalletError, explainWalletError } from "./wallet";
 import type { DecodedRevert } from "./revert";
 import { useToast } from "../ui/toast";
 
@@ -19,6 +20,12 @@ export function useTx(role: string, onRejected?: (d: DecodedRevert, label: strin
         await fn();
         return true;
       } catch (e) {
+        // The wallet said no (the person closed the pop-up, or it is on the wrong account or network): nothing was sent.
+        const code = (e as { code?: number | string; info?: { error?: { code?: number } } }).info?.error?.code ?? (e as { code?: number | string }).code;
+        if (e instanceof WalletError || code === 4001 || code === "ACTION_REJECTED") {
+          toast(<>{explainWalletError(e)}</>, true);
+          return false;
+        }
         const d = explain(e, role);
         if (d.reverted) {
           setNotice(d);

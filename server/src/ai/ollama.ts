@@ -26,6 +26,8 @@ export async function chatOllama(opts: {
   system: string;
   user: string;
   timeoutMs?: number;
+  /** Ollama's `format`: a JSON schema, or "json". Defaults to the extraction schema. */
+  format?: unknown;
 }): Promise<string> {
   const res = await opts.fetchImpl(`${opts.baseUrl}/api/chat`, {
     method: "POST",
@@ -34,7 +36,7 @@ export async function chatOllama(opts: {
     body: JSON.stringify({
       model: opts.model,
       stream: false,
-      format: llmChecklistJsonSchema,
+      format: opts.format ?? llmChecklistJsonSchema,
       options: { temperature: 0 },
       messages: [
         { role: "system", content: opts.system },

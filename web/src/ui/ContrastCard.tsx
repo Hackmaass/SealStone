@@ -61,7 +61,7 @@ function Sealstone({ f, ledgerOk }: { f: DuelFigures; ledgerOk: boolean }) {
 export function ContrastCard({ duel, stale = false, busy, offline = false, onRun }: { duel: Duel | null; /** the previous result, kept on screen while a new run is in progress */ stale?: boolean; busy: boolean; /** there is no chain to run against */ offline?: boolean; onRun: () => void }) {
   if (!duel) {
     return (
-      <section className="duel idle" data-testid="contrast-card" aria-label="Same attack, two escrows">
+      <section className="duel idle" data-testid="contrast-card" data-tour="duel" aria-label="Same attack, two escrows">
         <div>
           <span className="eyebrow">Same attack, two escrows</span>
           <h2>See what the guard is worth</h2>
@@ -74,7 +74,7 @@ export function ContrastCard({ duel, stale = false, busy, offline = false, onRun
     );
   }
   return (
-    <section className={`duel${stale ? " stale" : ""}`} data-testid="contrast-card" aria-label="Same attack, two escrows" aria-busy={stale}>
+    <section className={`duel${stale ? " stale" : ""}`} data-testid="contrast-card" data-tour="duel" aria-label="Same attack, two escrows" aria-busy={stale}>
       <header className="duel-head">
         <div>
           <span className="eyebrow">{stale ? "Same attack, two escrows · running again…" : "Same attack, two escrows"}</span>

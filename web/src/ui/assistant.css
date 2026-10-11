@@ -1,0 +1,42 @@
+/* The proposal-only assistant: a launcher and a chat panel. Tokens only, so light, dark and presenter mode all work. */
+.asst-fab{position:fixed;right:24px;bottom:24px;z-index:60;display:inline-flex;align-items:center;gap:8px;padding:12px 18px;border:0;border-radius:var(--r-pill);background:var(--accent);color:var(--on-accent);font-weight:650;cursor:pointer;box-shadow:var(--shadow)}
+@media (hover:hover){.asst-fab:hover{filter:brightness(1.06)}}
+body .toasts{bottom:88px}
+
+.asst{position:fixed;right:24px;bottom:24px;z-index:65;width:min(400px,calc(100vw - 32px));height:min(600px,calc(100vh - 48px));display:flex;flex-direction:column;background:var(--paper-2);border:1px solid var(--rule);border-radius:var(--r-md);box-shadow:var(--shadow);overflow:hidden}
+.asst-head{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--rule)}
+.asst-head b{font-size:1rem}
+.asst-badge{margin-left:10px;font-size:.6875rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;padding:2px 9px;border-radius:var(--r-pill);background:var(--accent-wash);color:var(--accent)}
+.asst-x{display:grid;place-items:center;width:32px;height:32px;border:0;border-radius:50%;background:var(--paper-3);color:var(--ink);cursor:pointer}
+
+.asst-log{flex:1;overflow-y:auto;overscroll-behavior:contain;padding:14px 16px;display:flex;flex-direction:column;gap:12px}
+.asst-msg{max-width:92%;display:flex;flex-direction:column;gap:6px}
+.asst-msg p{margin:0;padding:10px 13px;border-radius:14px;font-size:.9375rem;line-height:1.45;white-space:pre-wrap}
+.asst-msg.user{align-self:flex-end}
+.asst-msg.user p{background:var(--accent);color:var(--on-accent);border-bottom-right-radius:4px}
+.asst-msg.assistant{align-self:flex-start}
+.asst-msg.assistant p{background:var(--paper);border:1px solid var(--rule);border-bottom-left-radius:4px}
+.asst-meta{font-size:.6875rem;color:var(--ink-2);padding-left:4px}
+.asst-actions{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.asst-act{width:100%;text-align:left;display:flex;gap:8px;align-items:center;padding:9px 12px;border:1px solid var(--accent);border-radius:12px;background:var(--accent-wash);color:var(--accent);font-weight:620;cursor:pointer}
+@media (hover:hover){.asst-act:hover{background:var(--paper-2)}}
+.asst-act.done{border-color:var(--rule);background:var(--paper-3);color:var(--ink-2);font-weight:500}
+
+.asst-typing{display:inline-flex;gap:4px;align-items:center}
+.asst-typing i{width:7px;height:7px;border-radius:50%;background:var(--ink-2);animation:asst-b 1s infinite ease-in-out}
+.asst-typing i:nth-child(2){animation-delay:.15s}.asst-typing i:nth-child(3){animation-delay:.3s}
+@keyframes asst-b{0%,80%,100%{opacity:.25;transform:translateY(0)}40%{opacity:1;transform:translateY(-3px)}}
+
+.asst-chips{display:flex;flex-wrap:wrap;gap:6px;padding:0 16px 10px}
+.asst-chips button{padding:6px 12px;border:1px solid var(--rule);border-radius:var(--r-pill);background:var(--paper);font-size:.8125rem;cursor:pointer}
+@media (hover:hover){.asst-chips button:hover{border-color:var(--accent);color:var(--accent)}}
+.asst-form{display:flex;gap:8px;padding:10px 12px;border-top:1px solid var(--rule)}
+.asst-form input{flex:1;min-width:0;border:1px solid var(--rule);background:var(--paper);border-radius:var(--r-pill);padding:9px 14px}
+.asst-foot{margin:0;padding:0 16px 12px;font-size:.75rem;color:var(--ink-2)}
+
+@media (max-width:768px){
+  .asst-fab{right:14px;bottom:max(14px,env(safe-area-inset-bottom))}
+  .asst{right:0;bottom:0;left:0;width:auto;height:min(78vh,640px);border-radius:var(--r-md) var(--r-md) 0 0}
+  .asst-form input{font-size:16px}
+}
+@media (prefers-reduced-motion:reduce){.asst-typing i{animation:none;opacity:.6}}

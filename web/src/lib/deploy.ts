@@ -11,7 +11,7 @@ export async function deployVault(
   confirmed: ConfirmedChecklist,
   hash: string,
   deployer: Signer,
-): Promise<{ address: string; txHash: string }> {
+): Promise<{ address: string; txHash: string; blockNumber: number | null }> {
   // The hash must be the hash of exactly this confirmed checklist, or nothing is deployed.
   if (agreementHash(confirmed) !== hash) throw new Error("The agreement hash does not match the confirmed terms. Nothing was deployed.");
 
@@ -30,5 +30,5 @@ export async function deployVault(
   if (onChainHash !== hash || onChainTotal !== amounts.reduce((a, b) => a + b, 0n)) {
     throw new Error("The deployed contract does not hold the confirmed terms. Do not use it.");
   }
-  return { address, txHash: receipt?.hash ?? contract.deploymentTransaction()?.hash ?? "" };
+  return { address, txHash: receipt?.hash ?? contract.deploymentTransaction()?.hash ?? "", blockNumber: receipt?.blockNumber ?? null };
 }

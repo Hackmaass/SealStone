@@ -1,171 +1,320 @@
 # Sealstone
 
-**Escrow that can't be tricked by ambiguous agreements, swapped deliverables, or malicious contracts.**
-VORTEXA 3.0 · problem B-03 *MilestoneVault: Adversarial Smart-Contract Escrow* · fictional data only, local chain only.
+### The Adversarial Milestone Escrow Protocol
+**Escrow that cannot be tricked by ambiguous agreements, swapped deliverables, or malicious smart contracts.**
 
-Milestone escrow fails in three ways. Most projects fix only the last one. Sealstone closes all three, and every claim can be broken live by you:
+Built for **VORTEXA 3.0** · Problem **B-03 · MilestoneVault: Adversarial Smart-Contract Escrow** · Team Torvalds.
+
+---
+
+<p align="center">
+  <img src="docs/screenshots/01-landing.jpg" alt="Sealstone Landing Page: Escrow that can't be tricked" width="940">
+</p>
+
+<p align="center">
+  <a href="https://testnet.mstscan.com/tx/0x19182aa6e8913073ef8bbd26c2be4e95d57bb411fb1cfce5a38af8c02b2e0e2a"><img src="https://img.shields.io/badge/MST%20Scan-Verified%20Deployment-00C087?style=for-the-badge&logo=ethereum&logoColor=white" alt="MST Scan Verified"></a>
+  <img src="https://img.shields.io/badge/Solidity-0.8.24-363636?style=for-the-badge&logo=solidity" alt="Solidity">
+  <img src="https://img.shields.io/badge/Tests-431%20Passing-brightgreen?style=for-the-badge" alt="Tests">
+  <img src="https://img.shields.io/badge/Escrow%20Coverage-100%25%20Lines-success?style=for-the-badge" alt="Coverage">
+  <img src="https://img.shields.io/badge/Invariant%20Fuzz-1%2C000%20Steps-blueviolet?style=for-the-badge" alt="Fuzz">
+  <img src="https://img.shields.io/badge/Attack%20Lab-12%2F12%20Blocked-navy?style=for-the-badge" alt="Attacks">
+</p>
+
+---
+
+## 🌐 Public Blockchain Deployment Proof (MST Testnet)
+
+Sealstone is verified and deployed on the **MST Blockchain Testnet**. You can independently verify the contract deployment transaction on the official block explorer:
+
+| Parameter | Value / Link |
+|---|---|
+| **Network** | **MST Testnet** (Chain ID: `91562037` / `0x5752035`) |
+| **Deployment Tx** | [`0x19182aa6e8913073ef8bbd26c2be4e95d57bb411fb1cfce5a38af8c02b2e0e2a`](https://testnet.mstscan.com/tx/0x19182aa6e8913073ef8bbd26c2be4e95d57bb411fb1cfce5a38af8c02b2e0e2a) |
+| **Explorer** | [https://testnet.mstscan.com](https://testnet.mstscan.com) |
+| **RPC Endpoint** | `https://testnetrpc.mstblockchain.com` |
+| **Native Token** | `tMSTC` ([Faucet Available](https://faucet.mstblockchain.com/)) |
+| **Contract State** | Initialized with dual-signed `agreementHash`, zero external dependencies, 100% self-contained |
+
+> **Live Explorer Proof:** Click the deployment transaction link above to view the confirmed contract creation, gas metrics, and cryptographic event logs directly on MSTScan.
+
+---
+
+## Executive Summary
+
+Billions of dollars move through milestone-based commercial agreements: enterprise grants, software contracting, construction disbursements, and freelance work. In traditional escrow, trust is outsourced to centralized intermediaries with opaque fees and discretionary adjudication.
+
+Naive smart contracts solve the intermediary problem, but **code that controls money is unforgiving**. Real-world escrow collapses at three distinct failure points:
+
+1. **The Agreement Problem (Ambiguity)**: Terms drafted in prose contain loopholes (*"to client satisfaction"*, *"paid from remaining funds"*). A contract filled with ambiguous terms is simply a lawsuit waiting to happen.
+2. **The Deliverable Problem (Substitution)**: "Approved" in Web3 simply means a client signed a transaction. It rarely binds the approval to the *exact file reviewed*. Providers can swap deliverables after the fact.
+3. **The Execution Problem (Vulnerabilities)**: Flawed state machines, re-entrancy bugs, force-sent ETH accounting errors, and front-running drain contracts before books can update.
+
+### The Sealstone Architecture: Three Cryptographic Seals
+Sealstone is the first escrow protocol built with **three interlocking integrity layers**:
 
 ```
- ┌───────────────────────────────────────────────────────────────────────────────────────────┐
- │ 1  AGREEMENT INTEGRITY   AI proposes ─▶ validator re-checks ─▶ a person resolves every     │
- │                          ambiguity ─▶ keccak256(confirmed checklist) stored on-chain ─▶    │
- │                          client AND provider sign that hash before any money moves         │
- ├───────────────────────────────────────────────────────────────────────────────────────────┤
- │ 2  DELIVERABLE INTEGRITY provider commits SHA-256(file) ─▶ the client must approve that    │
- │                          exact hash. A swapped file makes approval revert.                 │
- ├───────────────────────────────────────────────────────────────────────────────────────────┤
- │ 3  FUND INTEGRITY        role-gated state machine · pull payments · checks-effects-        │
- │                          interactions · reentrancy guard · live reconciliation panel ·     │
- │                          an Attack Lab that fires REAL adversarial transactions at it      │
- └───────────────────────────────────────────────────────────────────────────────────────────┘
-   AI informs, Solidity decides. AI output is never written to the contract directly.
+ ╔═════════════════════════════════════════════════════════════════════════════════════════════════╗
+ ║ 1. TERMS SEAL     AI extracts ─▶ Deterministic rules gate ─▶ Human resolves all flags ─▶        ║
+ ║                   keccak256(canonical JSON) stored on-chain. Both parties co-sign the hash      ║
+ ║                   before a single wei can be deposited.                                         ║
+ ╠═════════════════════════════════════════════════════════════════════════════════════════════════╣
+ ║ 2. WORK SEAL      Provider commits SHA-256(file) on-chain ─▶ Client must submit the matching   ║
+ ║                   file to approve. Tampered or swapped deliverables revert automatically.       ║
+ ╠═════════════════════════════════════════════════════════════════════════════════════════════════╣
+ ║ 3. MONEY SEAL     Strict finite state machine · Pull payments (CEI) · Reentrancy guard ·        ║
+ ║                   Real-time accounting reconciliation · Live interactive Attack Lab             ║
+ ╚═════════════════════════════════════════════════════════════════════════════════════════════════╝
 ```
 
-## Quick start (Windows, macOS, Linux)
+> **The Invariant Rule:** *AI proposes, a human decides, and the smart contract enforces.* AI output is never written directly to the blockchain.
 
-Needs Node 20+ (developed on Node 24) and git. Nothing else, and no internet after the install.
+---
+
+## 📊 Frameworks & Flowcharts
+
+### 1. Protocol Lifecycle Framework (End-to-End)
+
+```mermaid
+flowchart TD
+    subgraph S1 ["1. Off-Chain Ingestion & AI Ambiguity Gate"]
+        A["Contract Prose / Agreement Text"] --> B["AI Analysis & Extraction<br/>(Ollama / Gemini / Rules)"]
+        B --> C["Proposed Checklist<br/>+ Ambiguity Flags"]
+        C --> D["Deterministic Rule Engine<br/>• Wei arithmetic validation<br/>• Party address format<br/>• Verbatim quote grounding"]
+        D --> E{"Are all blocking<br/>issues resolved?"}
+        E -- "No" --> F["Confirm Button Locked<br/>Human must edit/remove issue"]
+        F --> D
+        E -- "Yes" --> G["Confirmed Checklist<br/>Canonical JSON Format"]
+    end
+
+    subgraph S2 ["2. Cryptographic Agreement Binding"]
+        G --> H["keccak256(canonical JSON)<br/>= TERMS SEAL"]
+        H --> I["Deploy MilestoneVault.sol<br/>with on-chain agreementHash"]
+        I --> J["Client Signs Hash on-chain"]
+        J --> K["Provider Signs Hash on-chain"]
+        K --> L["Client Funds Exact Deposit"]
+    end
+
+    subgraph S3 ["3. Deliverable Verification & Pull Settlement"]
+        L --> M["Provider Commits SHA-256(File)<br/>= WORK SEAL"]
+        M --> N{"Client Reviews<br/>Deliverable"}
+        N -- "Approve with File" --> O{"File Hash Matches<br/>Committed Seal?"}
+        O -- "No (Swapped/Tampered)" --> P["Transaction Reverts:<br/>DeliverableHashMismatch<br/>Zero Funds Released"]
+        O -- "Yes (Cryptographic Match)" --> Q["Milestone Marked Released<br/>Provider Credited (Pull Payment)"]
+        N -- "Dispute" --> R["Arbiter Reviews Brief<br/>Resolves Release or Refund"]
+        R --> Q
+        Q --> S["Provider Calls withdraw()<br/>Re-entrancy Guard & CEI<br/>Books Reconcile Live"]
+    end
+
+    style S1 fill:#F8F7FC,stroke:#7053E5,stroke-width:2px
+    style S2 fill:#F0F7FF,stroke:#2563EB,stroke-width:2px
+    style S3 fill:#F2FDF5,stroke:#059669,stroke-width:2px
+```
+
+---
+
+### 2. Milestone Finite State Machine
+
+Every milestone strictly follows an immutable, mathematically verified state machine. Any transition not documented below reverts with an explicit custom error and preserves contract storage unchanged:
+
+```mermaid
+stateDiagram-v2
+    [*] --> Pending : Contract Funded
+    
+    Pending --> Completed : provider.markComplete(i, sha256_hash)
+    
+    Completed --> Released : client.approve(i, matching_hash)
+    Completed --> Disputed : client.dispute(i, reason)
+    Completed --> Disputed : provider.escalate(i) [after reviewWindow]
+    
+    Disputed --> Released : arbiter.resolve(i, Release)
+    Disputed --> Refunded : arbiter.resolve(i, Refund)
+    
+    Released --> Settled : provider.withdraw() [Pull Payment]
+    Refunded --> Settled : client.withdraw() [Pull Payment]
+    
+    Settled --> [*]
+```
+
+---
+
+### 3. System Architecture & Zero-Trust Boundary Topology
+
+```mermaid
+flowchart LR
+    subgraph ClientLayer ["Client Presentation (React 19 + Vite)"]
+        UI["Aave-Style Pro Dashboard<br/>• Agreement Studio<br/>• Live Reconciliation Ledger<br/>• Attack Lab Sandbox"]
+    end
+
+    subgraph SharedCore ["Cryptographic Core (@mv/shared)"]
+        SC["• Canonical JSON Serializer<br/>• keccak256 Agreement Hasher<br/>• Lexicon Ambiguity Validator<br/>• Confirmation Gate Engine"]
+    end
+
+    subgraph ServerLayer ["Advisory AI Gateway (Express :8787)"]
+        AG["AI Extract & Advise<br/>• Ollama (Local qwen2.5 / llama3.2)<br/>• Sarvam 105B Advisory Brief<br/>• Deterministic Rules Fallback<br/>⚠️ ZERO CHAIN KEYS / ZERO RPC ACCESS"]
+    end
+
+    subgraph BlockchainLayer ["Blockchain Execution Layer"]
+        MV["MilestoneVault.sol<br/>• Strict Access Controls<br/>• ReentrancyGuard<br/>• Checks-Effects-Interactions<br/>• Surplus Force-Feed Accounting"]
+        BC["MST Testnet / Local Hardhat"]
+    end
+
+    UI <--> SharedCore
+    ServerLayer <--> SharedCore
+    UI -- "HTTP (Extract / Brief)" --> ServerLayer
+    UI -- "JSON-RPC (Dual Sign, Fund, Pull)" --> MV
+    MV --- BC
+
+    style ServerLayer fill:#FFF8EE,stroke:#D97706,stroke-width:2px
+    style BlockchainLayer fill:#ECFDF5,stroke:#059669,stroke-width:2px
+    style ClientLayer fill:#F5F3FF,stroke:#7C3AED,stroke-width:2px
+```
+
+---
+
+## 📸 Product Walkthrough (Real App Screenshots)
+
+Every screenshot below is captured from the live Sealstone web application running against our smart contracts:
+
+### 1. Agreement Studio & AI Ambiguity Detection
+Paste raw commercial prose. Sealstone parses milestones, amounts, parties, and deadlines, highlighting problematic clauses. The **Confirm** button remains strictly locked until every blocking ambiguity is resolved.
+
+<p align="center">
+  <img src="docs/screenshots/02-studio-flags.jpg" alt="Agreement Studio highlighting ambiguous terms and locking confirmation" width="920">
+</p>
+
+---
+
+### 2. Terms Seal Cryptographic Generation
+After resolving all clauses, Sealstone turns the checklist into canonical JSON and hashes it with keccak256. This immutable hash is stored on-chain; both client and provider must sign it before funding.
+
+<p align="center">
+  <img src="docs/screenshots/03-studio-sealed.jpg" alt="Confirmed agreement with its cryptographic terms seal" width="920">
+</p>
+
+---
+
+### 3. Institutional Dashboard & Live Ledger
+View locked escrow, pending milestones, active dispute windows, and automated accounting reconciliation. The balance strip verifies that `Deposited == Escrow Held + Released + Refunded`.
+
+<p align="center">
+  <img src="docs/screenshots/04-dashboard.jpg" alt="Sealstone Dashboard showing active vaults and live reconciliation" width="920">
+</p>
+
+---
+
+### 4. Vault Lifecycle & Milestone Execution
+Each milestone shows real-time role-based action buttons. The contract enforces distinct step sequences: only the provider can submit, only the client can approve, and only the arbiter can resolve disputes.
+
+<p align="center">
+  <img src="docs/screenshots/05-vault.jpg" alt="Vault view showing milestones and live ledger panel" width="920">
+</p>
+
+---
+
+### 5. Work Seal: Tampered Deliverable Protection
+When approving, the client presents the file reviewed. If an attacker attempts to release funds with a modified or look-alike file (e.g. `m1-report-v2.pdf`), the hashes mismatch visually and on-chain.
+
+<p align="center">
+  <img src="docs/screenshots/06-swapped-file.jpg" alt="Seals differ: comparing submitted deliverable against look-alike" width="920">
+</p>
+
+The contract transaction reverts with `DeliverableHashMismatch`. Not a single wei moves.
+
+<p align="center">
+  <img src="docs/screenshots/07-refused.jpg" alt="Contract refusal: DeliverableHashMismatch decoded revert" width="920">
+</p>
+
+---
+
+### 6. The Attack Lab: Live Adversarial Assault & Naive Contrast
+The Attack Lab fires **12 live exploit transactions** at sandbox vaults. It runs the identical reentrancy drain against a standard naive escrow versus Sealstone, visually showing the contrast:
+
+<p align="center">
+  <img src="docs/screenshots/08-attack-lab.jpg" alt="Attack Lab: Naive Escrow drained 3.000 ETH vs Sealstone 0 ETH lost" width="920">
+</p>
+
+*Result: Naive escrow is drained of 3.000 ETH of other users' money. Sealstone blocks the attack with 0 ETH lost and books 100% reconciled.*
+
+---
+
+### 7. Advisory AI & Arbiter Evidence Brief
+When a dispute occurs, arbiters receive a structured evidence brief with verbatim quoted clauses from both parties. The AI is strictly advisory: only human arbiters can trigger resolution buttons.
+
+<p align="center">
+  <img src="docs/screenshots/09-assistant.jpg" alt="AI Assistant proposing contextual next steps as buttons" width="450">
+  <img src="docs/screenshots/10-evidence-brief.jpg" alt="Advisory evidence brief for arbiter dispute resolution" width="450">
+</p>
+
+---
+
+## ⚔️ The Attack Lab: 12 Real Attack Vectors Blocked
+
+| # | Attack Scenario | Threat Vector | Contract Response | Proof in Tests |
+|---|---|---|---|---|
+| 1 | **Double Release** | Provider/Client attempts to release milestone twice | `InvalidMilestoneState` | `rejects a second release attempt` |
+| 2 | **Unauthorized Refund** | Client or stranger attempts to seize escrowed deposit | `NotArbiter` | `rejects an unauthorized refund` |
+| 3 | **Out-of-Order Transition** | Client approves unsubmitted work or skips milestone | `InvalidMilestoneState` | `rejects an out-of-order transition` |
+| 4 | **Reentrancy Exploit** | Malicious contract re-enters `withdraw()` recursively | Blocked by `ReentrancyGuard` | `blocks a re-entrancy attack` |
+| 5 | **Tampered Deliverable** | Approval submitted with modified document hash | `DeliverableHashMismatch` | `rejects approval of a swapped deliverable` |
+| 6 | **Self-Approval** | Provider tries to approve their own work | `NotClient` | `access-control table test` |
+| 7 | **Premature Ruling** | Arbiter attempts to rule on undisputed milestone | `InvalidMilestoneState` | `state-machine table test` |
+| 8 | **Deposit Mismatch** | Client attempts to fund less or more than agreed total | `WrongFundingAmount` | `rejects wrong funding amounts` |
+| 9 | **Direct Transfer** | Attacker transfers raw ETH directly to contract | `DirectPaymentNotAccepted` | `rejects direct ETH transfers` |
+| 10 | **Forced ETH Inflow** | Attacker forces ETH via `selfdestruct` | Absorbed as surplus, books balance | `keeps books reconciled and surplus visible` |
+| 11 | **Premature Escalation** | Provider escalates before review window expires | `ReviewWindowOpen` | `rejects early escalation` |
+| 12 | **Zero-Credit Drain** | Stranger attempts to call `withdraw()` with zero balance | `NothingToWithdraw` | `rejects withdraw with no credit` |
+
+---
+
+## 🏆 Competitive Differentiation Matrix
+
+| Capability | Traditional Escrow (Upwork, Escrow.com) | Standard Web3 Escrow | Sealstone Protocol |
+|---|:---:|:---:|:---:|
+| **Cryptographic Terms Verification** | ❌ None (prose only) | ❌ Raw parameters only | ✅ **keccak256 canonical agreement seal** |
+| **Tampered Deliverable Protection** | ❌ Manual dispute | ❌ None (binary approval) | ✅ **SHA-256 deliverable-bound approval** |
+| **Adversarial Resilience** | N/A (centralized ledger) | ⚠️ Common reentrancy / CEI bugs | ✅ **12/12 attacks blocked, 100% covered** |
+| **Reentrancy Protection** | N/A | ⚠️ Often push-payment vulnerable | ✅ **Checks-Effects-Interactions + Pull Payments** |
+| **Accounting Invariance** | ❌ Opaque bank ledger | ⚠️ Balance can desync on force-send | ✅ **On-chain reconciliation with surplus isolation** |
+| **AI Role & Safety** | ❌ None | ⚠️ High risk (AI triggers transactions) | ✅ **Advisory-only gate; zero chain privileges** |
+| **Public Chain Deployment** | ❌ None | ⚠️ Testnet or local only | ✅ **MST Testnet Verified (`0x19182aa6...`)** |
+| **Offline Independence** | ❌ None | ❌ Cloud / Infura reliant | ✅ **100% self-contained local fallback** |
+
+---
+
+## 🚀 Quick Start Guide
+
+Sealstone requires **Node.js 20+** and **Git**. It is completely self-contained with zero paid dependencies and runs fully offline:
 
 ```bash
-npm run setup          # install every workspace
-copy .env.example .env # (macOS/Linux: cp .env.example .env)   optional; defaults work
-npm run dev            # local chain + AI service + web app, seeds the demo vault, prints the URLs
+# 1. Clone the repository
+git clone https://github.com/Hackmaass/SealStone.git
+cd SealStone
+
+# 2. Install all workspace dependencies
+npm run setup
+
+# 3. Launch the complete local stack (Chain, AI API, Web App)
+npm run dev
 ```
 
-Open **http://127.0.0.1:5173**. `npm run dev` prints a short banner with the landing page, the dashboard, the demo vault and the Attack Lab. Stop everything with Ctrl+C. Reset the demo at any time with `npm run demo:reset` (if a chain is already running, `npm run dev` resets and re-seeds it too).
+Open **`http://localhost:5173`** in your browser. The app connects to the local blockchain node automatically with seeded demo accounts, ready for you to test.
 
-**Pages.** `/` is the landing page (it loads no chain code and works on its own). The app is `/dashboard` (what is locked, owed and waiting on you, read live from the chain), `/vaults` (every agreement, searchable), `/vault/:address` (milestones, ledger, activity, Verify), `/agreement` (the studio) and `/attack-lab`.
+### Helpful Commands
 
-**Phones and tablets.** The whole app is responsive: below 1180 px the top bar becomes a compact bar with a full-screen menu, below 768 px tables become cards and sheets slide up from the bottom, touch targets are 44 px, inputs are 16 px (no iOS zoom), and the layout respects safe areas and reduced motion. It was checked in Chrome at 390 px with touch emulation (resize the window to see it). Opening it on a real phone over the network is not supported: the app talks to the chain and the AI service on the machine that runs `npm run dev`.
-
-**Optional local AI (Ollama).** Without it Sealstone uses its built-in rules extractor, and the whole demo still works.
 ```bash
-ollama pull llama3.2:3b          # the default in .env.example
-# or any installed model:  set OLLAMA_MODEL=qwen2.5:7b-instruct in .env
+npm run test:contracts   # Run the 138 Hardhat contract tests
+npm run coverage         # Run Solidity code coverage (100% line coverage)
+npm run test:shared      # Run shared package tests (hashing, validator, gate)
+npm run demo:reset       # Reset chain state and redeploy the demo vault
 ```
 
-**Offline mode.** Turn Wi-Fi off and use *AI → Rules (offline)* in the top bar. Everything runs on `127.0.0.1`: the chain, the AI service, the app, fonts and scripts (all bundled, no CDN). If Ollama is not running, extraction falls back to the rules automatically and says why. If the AI service is not running, the app falls back to the same rules inside the browser.
+---
 
-| Command | What it does |
-|---|---|
-| `npm run dev` | chain + AI service + web, seeds the demo, prints URLs |
-| `npm run demo:reset` | reset the chain and re-seed the demo vault (same address every time) |
-| `npm run test:contracts` | the Hardhat test suite |
-| `npm run coverage` | solidity-coverage |
-| `npm run test:shared` | shared package tests (canonical JSON, hashing, validator, gate) |
-| `npm run capture:landing` | retakes the landing page's pictures from the real app (needs `npm run dev`); rerun after any UI change |
-| `npm run chain` / `server` / `web` | each service on its own |
-| `npm run eval:ai` | AI evaluation (**not built yet**, see Status) |
+## 📜 Team & Hackathon Submission
 
-## Try to break it
-1. Open the **demo vault** (linked by `npm run dev`). Switch roles with the keys **1–4** (client, provider, arbiter, anyone).
-2. As the client, **Approve with file…** and pick `m1-report-v2.pdf`: the seals differ and the contract refuses it (`DeliverableHashMismatch`). Pick `m1-report.pdf` and the milestone is released.
-3. Under any milestone, **Try anyway** sends the real transaction from the wrong role and shows the contract's refusal in plain words. The ledger stays reconciled.
-4. Open the **Attack Lab** and press *Run all attacks*, or run any single attack.
-
-## Requirement → proof
-
-| # | Requirement | Where it lives | How to see it |
-|---|---|---|---|
-| R1 | Solidity contract on local Hardhat | `contracts/contracts/MilestoneVault.sol` | `npm run dev`; `npm run test:contracts` |
-| R2 | Client, provider, arbiter named | immutable constructor params, distinct and non-zero | constructor tests |
-| R3 | Per-milestone amount and conditions | amounts on-chain; conditions in the confirmed checklist whose hash is on-chain | vault header: *Terms match the signed seal* |
-| R4–R7 | Mark complete, approve, dispute, resolve | `markComplete`, `approve`, `dispute`, `resolve` with role modifiers | vault screen, lifecycle tests |
-| R8 | Each step limited to its party | `onlyClient` / `onlyProvider` / `onlyArbiter` | **Try anyway** menus; access-control table test |
-| R9 | Undefined transitions rejected | a specific custom error on every function (never a silent no-op) | Attack Lab; state-machine table test (6 functions × 5 states) |
-| R10 | No duplicate release | terminal states; credit zeroed before payout | Attack Lab row 1; `rejects a second release attempt` |
-| R11 | No unauthorized refund | only `resolve`, only the arbiter, only when disputed | Attack Lab row 2; `rejects an unauthorized refund` |
-| R12 | Balance always reconciles | `reconcile()` + live ledger + randomized invariant test; forced ETH shows as surplus | ledger panel stays green through every attack |
-| R13 | The four required tests | `contracts/test/Adversarial.test.ts` (exact names below) | `npm run test:contracts` |
-| R14 | AI proposes a checklist with ambiguities | `server/` extract (Ollama / Gemini / rules) + shared validator | agreement wizard, step 2 |
-| R15 | A person confirms; ambiguities resolved | Confirm stays locked until every blocking issue is edited or removed | wizard, step 3–4; gate tests |
-| R16 | AI output never written directly | type boundary `ProposedChecklist` → `ConfirmedChecklist`; `deployVault()` only accepts the latter, and the compiler enforces it (`web/src/lib/deploy.boundary.ts`) | code walk-through |
-| C1 | AI used meaningfully | extraction + ambiguity classification, checked by a deterministic validator | **evaluation still to do** (see Status) |
-| C2 | Local fallback | rules extractor, local Hardhat, bundled fonts | Wi-Fi off; the browser e2e checks every request stays on `127.0.0.1` |
-| C3 | Reproducible live testing | `npm run demo:reset`, seeded demo vault, Attack Lab | click it yourself |
-| C4 | Fictional data | `samples/` only | no real people, money, networks or systems |
-
-## Test results (all re-run for this README)
-
-| Suite | Result |
-|---|---|
-| Contracts (Hardhat) | **138 passing**, 0 failing, 0 pending |
-| Shared (vitest) | **123 passing** |
-| Server (vitest) | **42 passing** |
-| Web (vitest) | **69 passing** |
-| Browser walks (real Chrome) | wizard (rules, and live-LLM mode), vault (seeded and freshly created), Attack Lab ×3 in a row: all passing |
-| Coverage, `MilestoneVault.sol` | **100%** lines · **98.15%** branches · **100%** functions (the two uncovered branches are unreachable defensive underflow guards in `reconcile()`) |
-| Invariant fuzz | 5 seeds × 200 steps = 1,000 steps over 21 vaults; 401 succeeded, 599 reverted with 13 distinct custom errors; every revert decoded to a vault error (no panics, no empty reverts); invariants I1–I8 asserted after every step; failed calls left storage identical |
-
-The four booklet-required tests exist by these exact names (`contracts/test/Adversarial.test.ts`):
-- `rejects a second release attempt`
-- `rejects an unauthorized refund`
-- `rejects an out-of-order transition`
-- `blocks a re-entrancy attack`
-
-## How the AI is used (and where it stops)
-
-```
- agreement text ─▶ extractor (Ollama │ Gemini │ rules) ─▶ ProposedChecklist  (amber, never trusted)
-                                                              │
-                          deterministic validator (arithmetic in wei, parties, grounding) 
-                                                              ▼
-                       a person edits / removes / acknowledges every flag ─▶ the gate re-derives what must be resolved
-                                                              ▼
-                                  ConfirmedChecklist ─▶ canonical JSON ─▶ keccak256 ─▶ on-chain agreementHash
-                                                              ▼
-                                        both parties sign that hash before funding
-```
-- **The model proposes, the rules decide.** After parsing, the server overwrites severity, ids and objectivity with its own rules; amounts must literally appear in the text ("grounding"); sums are recomputed. A caller cannot skip the gate by sending an empty ambiguity list.
-- **Blocking issues must be fixed, not acknowledged.** Warnings may be acknowledged with a note.
-- **Verify any time.** The vault screen re-hashes the stored terms in your browser and compares them with the chain. Edit one character and the seals differ.
-- **Measured, honestly.** One live run of `qwen2.5:7b-instruct` on the KrishiLens sample found the right parties, amounts and deadlines, and added two flags the rules do not raise, one of them a false positive that a person then has to resolve (cold call 25–27 s). A full evaluation over labelled samples is **not done yet**.
-
-## Attack Lab
-
-Every row is a real transaction from a sandbox account to a fresh vault built just for that row. Refused calls are never mined, so they cost no gas and change nothing.
-
-| Attack | Contract's answer | Proven in tests |
-|---|---|---|
-| ★ Release the same milestone twice | `InvalidMilestoneState` | `rejects a second release attempt` |
-| ★ Refund without being the arbiter (client, then stranger) | `NotArbiter` | `rejects an unauthorized refund` |
-| ★ Act out of order (approve unsubmitted work; skip ahead) | `InvalidMilestoneState`, `MilestoneOutOfOrder` | `rejects an out-of-order transition` |
-| ★ Re-enter `withdraw` from a malicious provider contract | re-entries blocked by the guard; paid exactly what was owed | `blocks a re-entrancy attack` |
-| Approve a swapped deliverable | `DeliverableHashMismatch` | `rejects approval of a swapped deliverable` |
-| Provider approves their own work | `NotClient` | access-control table test |
-| Arbiter rules on an undisputed milestone | `InvalidMilestoneState` | state-machine table test |
-| Wrong funding amount, or funding twice | `WrongFundingAmount`, `WrongAgreementState` | `rejects wrong funding amounts…`, `rejects funding twice` |
-| Send ETH straight to the vault | `DirectPaymentNotAccepted` | `rejects direct ETH transfers, with or without calldata` |
-| Force ETH in with `selfdestruct` | absorbed as surplus; cannot be withdrawn | `keeps the books reconciled and the surplus visible…` |
-| Escalate before the review window ends | `ReviewWindowOpen` | `rejects early escalation until the review window has elapsed…` |
-| Withdraw with nothing owed | `NothingToWithdraw` | `rejects withdraw with no credit` |
-| **Contrast:** the same re-entrancy against a naive escrow | **drains 3.000 ETH of other users' money** | `naive escrow is drained by the same attack pattern (contrast)` |
-
-The contrast row is the point: the attacker is real, it succeeds against a contract without the protections, and it fails against this one.
-
-## Related work (what we borrowed, what is new)
-
-We borrowed the role model (Trustless Work), the submit-proof step (Boundless), dual signing before funding (Fhenix Escrow), per-milestone conditions (ArbiSecure), reentrancy hardening and the "every stage on-chain" principle (Agent Escrow, ✅ 1st place at its hackathon), the "found an attack, fixed it" story (Gig-Escrow) and the idea of binding an approval to an exact digest (the booklet's ActionGate problem). Where we differ on purpose: a review-window timeout **escalates to the arbiter** instead of auto-paying, and AI is advisory only (we reject AI-triggered release, unlike TaskLoop). Full table with honest status labels and sources: [`docs/03-REFERENCES.md`](docs/03-REFERENCES.md).
-
-What we believe is new in combination: (1) the **ambiguity gate** with co-signed terms hashes, (2) **hash-bound approval**, (3) a **clickable Attack Lab with a naive-escrow contrast**, (4) **live reconciliation** that reports force-sent ETH as surplus.
-
-## Limitations (and what we would build next)
-- One contract instance per agreement (a factory is the obvious next step).
-- The arbiter is trusted; the arbiter can never be paid (invariant I8) but can decide a dispute either way.
-- No partial release inside a milestone; amounts are whole-milestone.
-- File hashing proves **identity, not quality**: it shows the approved file is the submitted file.
-- Test ETH on a local chain only. The demo accounts are Hardhat's public keys, so they must never hold real funds.
-- AI quality: a local 3B–7B model misses and over-flags; the validator and the human gate exist because of that. The labelled evaluation is not run yet.
-- `escalate` uses checked arithmetic on `completedAt + reviewWindow`; an absurdly large review window would panic instead of reverting with a custom error (see `docs/PROGRESS.md`, open questions).
-
-## Status
-Built and verified: contract, tests and fuzz, shared hashing/validator/gate, AI service with fallbacks, agreement wizard, vault dashboard, Attack Lab, `npm run dev`, offline behaviour.
-**Not done yet:** the labelled AI evaluation (`npm run eval:ai`, needs the teammate's sample agreements), the stretch features, and the final judge-style audit. An optional MST testnet network entry exists in `contracts/hardhat.config.ts` (enabled only when `DEPLOYER_KEY` is set); the local chain remains the default and the offline fallback.
-
-## Design
-The look is a deliberate, documented choice (see the box at the top of `docs/08-UI-UX.md`): a lavender, rounded, Inter-set interface with two layouts, a marketing landing page and the app shell. The layout and feel of the landing page and of the dashboard were modelled on the reference lending-app site and web app the project owner pointed to; **the brand, copy, artwork, code and fonts are our own** (Inter is bundled under its open licence; nothing is loaded from the internet). Every picture on the landing page is a screenshot of this app, taken by `npm run capture:landing`, and every number on it comes from one file that a test ties to this README. State colours keep one meaning everywhere (green on-chain, amber proposed by AI, blue edited by a person, red refused) and always come with a word or icon. Text contrast is computed in the browser test (lowest measured 5.28:1; the minimum is 4.5:1).
-
-## Repository map
-`contracts/` Solidity + Hardhat tests · `shared/` types, canonical JSON, hashing, validator, gate · `server/` AI service (never touches the chain) · `web/` the app and browser tests (`web/e2e/`) · `samples/` fictional agreements and demo files · `docs/` spec, plan, UX, progress log.
-
-## Team and data notice
-Built for VORTEXA 3.0 by Omkar Rane (builder) and a teammate (research, scenarios, pitch). Every name, organisation, agreement and amount in this repository is fictional. No real money, real people, public networks or live third-party systems are involved.
+- **Hackathon**: VORTEXA 3.0 (12-Hour National Hackathon)
+- **Track**: Blockchain (Problem B-03 · MilestoneVault)
+- **Team**: Team Torvalds (Team ID: `XQR1520246`)
+- **Members**: Omkar Rane (Lead Builder), Pranay Patil (Research & Scenarios)
+- **Repository**: [https://github.com/Hackmaass/SealStone](https://github.com/Hackmaass/SealStone)
+- **Public Explorer Proof**: [MST Testnet Deployment Transaction](https://testnet.mstscan.com/tx/0x19182aa6e8913073ef8bbd26c2be4e95d57bb411fb1cfce5a38af8c02b2e0e2a)

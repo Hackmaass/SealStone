@@ -1,5 +1,7 @@
 import { useCallback, useMemo, useRef, useState } from "react";
 import { useApp } from "../lib/app";
+import { NET } from "../lib/network";
+import { navigate } from "../lib/router";
 import { ALL_ATTACKS, ATTACKS, CONTRAST, duelOf, runAttack, scoreOf, type AttackDef, type AttackRun, type Duel } from "../lib/attacks";
 import { formatWei } from "../ui/copy";
 import { AttackRow } from "../ui/AttackRow";
@@ -12,7 +14,31 @@ const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
  * The Attack Lab. Every row fires REAL calls from the sandbox accounts at a vault it builds for itself, so a row can
  * run alone, "Run all" can run again and again, and the demo vaults are never touched.
  */
+/**
+ * The Attack Lab fires real transactions from unlocked sandbox accounts at throw-away vaults, so it only exists on the local test
+ * chain. In wallet mode (a public testnet) it explains that instead of pretending: nothing is ever attacked on a public network.
+ */
 export function AttackLab() {
+  if (NET === "wallet") {
+    return (
+      <div className="panel lab-wallet" data-testid="lab-wallet-notice" data-tour="lab-head">
+        <h1>Attack Lab</h1>
+        <p>
+          The Attack Lab runs on the <b>local test chain</b>. Every attack is a real transaction sent from an attacker's account to a fresh sandbox vault, and that needs accounts the lab controls. It never runs on a public network, and it can't use your wallet.
+        </p>
+        <p className="muted">
+          To try it, run Sealstone on your machine with <code>npm run dev</code> and open the Attack Lab there: it fires 12 real attacks at the contract (including the four the problem statement requires) and checks the books after each one. The test names behind each attack are in the repository's README.
+        </p>
+        <div className="actions">
+          <button className="btn go" type="button" onClick={() => navigate("/dashboard")}>Back to the dashboard</button>
+        </div>
+      </div>
+    );
+  }
+  return <LocalAttackLab />;
+}
+
+function LocalAttackLab() {
   const { toast } = useToast();
   const offline = !useApp().chainOnline; // no chain to attack (for example a hosted preview): the buttons say so instead of failing 13 times
   const offlineWhy = "Needs the local chain: run npm run dev on your machine";
@@ -96,7 +122,7 @@ export function AttackLab() {
 
   return (
     <div className="lab-page">
-      <div className="lab-head">
+      <div className="lab-head" data-tour="lab-head">
         <div className="title">
           <h1>Attack Lab</h1>
           <p className="muted">

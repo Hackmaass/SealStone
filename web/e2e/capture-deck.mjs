@@ -13,7 +13,7 @@ const VAULT = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
 const reset = () => execSync("npm run demo:reset", { cwd: ROOT, stdio: "ignore" });
 const hideToasts = () => document.addEventListener("DOMContentLoaded", () => {
   const st = document.createElement("style");
-  st.textContent = ".toasts{display:none!important}";
+  st.textContent = ".toasts,.asst-fab{display:none!important}";
   document.head.appendChild(st);
 });
 async function shot(page, name, opts = {}) {

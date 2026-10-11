@@ -1,4 +1,6 @@
 import { accountAddress, deployment, provider, vaultContract } from "./chain";
+import { NET } from "./network";
+import { knownVaults } from "./registry";
 import { loadTerms } from "./terms";
 import { MILESTONE_NAMES, type MilestoneView, type ReconcileView } from "./vaultModel";
 
@@ -120,7 +122,8 @@ async function summarize(f: Found): Promise<VaultSummary | null> {
 
 /** Every real vault on this chain, newest first, with the numbers the dashboard shows. */
 export async function loadVaultSummaries(): Promise<VaultSummary[]> {
-  const found = await findCreations();
+  // Wallet mode (a public testnet): no block scan. The list is the vaults this browser created or was asked to open.
+  const found: Found[] = NET === "wallet" ? knownVaults().map((v) => ({ address: v.address, block: v.block ?? 0, client: "", isVault: true })) : await findCreations();
   const all = await Promise.all(found.map(summarize));
   return all.filter((s): s is VaultSummary => s !== null).sort((a, b) => b.createdAt - a.createdAt);
 }

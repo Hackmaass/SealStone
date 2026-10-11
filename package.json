@@ -23,6 +23,7 @@
     "demo:reset": "npm run reset --workspace contracts",
     "test:shared": "npm run test --workspace shared",
     "capture:landing": "node web/e2e/capture-landing.mjs",
+    "capture:readme": "node web/e2e/capture-readme.mjs",
     "auto-commit": "node scripts/auto-commit.mjs",
     "auto-commit:dry": "node scripts/auto-commit.mjs --dry-run"
   },

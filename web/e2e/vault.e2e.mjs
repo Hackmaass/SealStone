@@ -1,6 +1,6 @@
 // Vault screen end to end on the PRE-SEEDED vault (demo steps 6-9 + Verify). Run `npm run demo:reset` first.
 // Needs: chain, server and web running. Usage: node web/e2e/vault.e2e.mjs [shots-dir]
-import { chromium } from "playwright-core";
+import { launch } from "./lib/browser.mjs";
 import { mkdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { execSync } from "node:child_process";
@@ -13,7 +13,7 @@ mkdirSync(SHOTS, { recursive: true });
 const CHROME = process.env.CHROME_PATH ?? "C:/Program Files/Google/Chrome/Application/chrome.exe";
 const deployment = JSON.parse(readFileSync(new URL("../src/generated/deployment.json", import.meta.url), "utf8"));
 
-const browser = await chromium.launch({ executablePath: CHROME, headless: true });
+const browser = await launch(); // already onboarded: see lib/browser.mjs
 const page = await browser.newPage({ viewport: { width: 1366, height: 768 } });
 const errors = [];
 page.on("pageerror", (e) => errors.push(`pageerror: ${e.message}`));

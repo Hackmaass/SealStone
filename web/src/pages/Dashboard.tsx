@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { OpenVault } from "../ui/OpenVault";
 import { useApp } from "../lib/app";
 import { ACCOUNT_ROLES, accountAddress } from "../lib/chain";
 import { navigate } from "../lib/router";
@@ -8,6 +9,7 @@ import { AGREEMENT_NAMES, nextStep, roleOfAddress, withdrawPlan } from "../lib/v
 import { Amount, HashSeal } from "../ui/components";
 import { formatWei, shortHash } from "../ui/copy";
 import { VaultTableSkeleton, vaultName } from "../ui/VaultTable";
+import { UNIT } from "../lib/units";
 
 const sentence = (s: string): string => s.replace(/^Your move: /, "").replace(/^./, (c) => c.toUpperCase());
 const plural = (n: number, one: string, many = `${one}s`) => `${n} ${n === 1 ? one : many}`;
@@ -87,14 +89,14 @@ function VaultRow({ r }: { r: Row }) {
 export function Dashboard() {
   const app = useApp();
   const { state, refresh } = useVaultList();
-  const me = accountAddress(app.role);
+  const me = app.me;
   const list = useMemo(() => (state.status === "ready" ? state.list : []), [state]);
   const ready = state.status === "ready";
   const totals = useMemo(() => totalsOf(list), [list]);
   const rows = useMemo(() => rowsFor(list, me), [list, me]);
   const waiting = rows.filter((r) => r.mine).length;
   // when nothing waits on you but someone else has a move, say so (one tap to switch)
-  const counts = useMemo(() => ACCOUNT_ROLES.map((r) => rowsFor(list, accountAddress(r)).filter((x) => x.mine).length), [list]);
+  const counts = useMemo(() => (app.net === "local" ? ACCOUNT_ROLES.map((r) => rowsFor(list, accountAddress(r)).filter((x) => x.mine).length) : []), [list, app.net]);
   const elsewhere = counts.findIndex((n, i) => n > 0 && i !== app.roleIdx);
   const flow = useMemo(
     () => list.reduce((s, v) => ({ deposited: s.deposited + v.reconcile.deposited, withdrawn: s.withdrawn + v.reconcile.withdrawn, balance: s.balance + v.reconcile.actualBalance }), { deposited: 0n, withdrawn: 0n, balance: 0n }),
@@ -112,14 +114,14 @@ export function Dashboard() {
   const headline = !ready
     ? "Reading the chain…"
     : list.length === 0
-      ? "No vaults yet. Draft an agreement to create one."
+      ? app.net === "wallet" ? "No vaults here yet. Draft an agreement, or open one by its address." : "No vaults yet. Draft an agreement to create one."
       : waiting > 0
         ? `${plural(waiting, "vault")} ${waiting === 1 ? "needs" : "need"} your move.`
         : elsewhere >= 0
           ? `Nothing needs you right now. ${app.names[ACCOUNT_ROLES[elsewhere]]} has a move.`
           : "You're all caught up.";
   const verdict = !ready ? "Checking the ledgers…" : list.length === 0 ? "" : totals.allReconciled ? "✓ Every ledger reconciles" : "✕ A ledger does not reconcile";
-  const eth = (wei: bigint) => (ready ? <>{formatWei(wei, 3)}<span className="unit"> ETH</span></> : "—");
+  const eth = (wei: bigint) => (ready ? <>{formatWei(wei, 3)}<span className="unit"> {UNIT}</span></> : "—");
   const pills: Array<[Filter, string]> = [["all", "All"], ["mine", waiting > 0 ? `Needs your move (${waiting})` : "Needs your move"], ["active", "Active"], ["done", "Done"]];
 
   return (
@@ -137,7 +139,7 @@ export function Dashboard() {
             {verdict}
           </p>
         </div>
-        <dl className="dhead-nums">
+        <dl className="dhead-nums" data-tour="money">
           <div>
             <dt>In escrow</dt>
             <dd data-testid="hero-escrow">{eth(totals.inEscrow)}</dd>
@@ -167,7 +169,7 @@ export function Dashboard() {
         </div>
       </div>
 
-      <section className="dpanel" aria-label="Vaults" data-testid="attention">
+      <section className="dpanel" aria-label="Vaults" data-testid="attention" data-tour="attention">
         <div className="dpanel-head">
           <h2>Vaults</h2>
           <span className="muted small">
@@ -195,6 +197,11 @@ export function Dashboard() {
           <div className="empty">
             <p>No agreements yet.</p>
             <p className="muted small">Draft one from text to create your first vault.</p>
+            {app.net === "wallet" && (
+              <div style={{ marginTop: 12 }}>
+                <OpenVault compact />
+              </div>
+            )}
           </div>
         )}
         {ready && list.length > 0 && shown.length === 0 && (

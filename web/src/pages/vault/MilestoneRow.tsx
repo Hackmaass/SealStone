@@ -1,8 +1,10 @@
 import { useRef } from "react";
+import { NET } from "../../lib/network";
 import { Amount, HashSeal, HashText, RevertNotice, StateBadge, StateTrack } from "../../ui/components";
 import { shortHash } from "../../ui/copy";
 import type { DecodedRevert } from "../../lib/revert";
 import { planFor, type ActionId, type MilestoneView, type VaultRole } from "../../lib/vaultModel";
+import { BriefPanel } from "./EvidencePanels";
 import { useNote } from "./Sheets";
 
 const isZero = (h: string): boolean => /^0x0*$/.test(h);
@@ -109,6 +111,7 @@ export function MilestoneRow(p: RowProps) {
           />
         )}
         {resolvedByArbiter && <NoteLine hash={m.rationaleHash} heading="Arbiter's reasoning:" />}
+        {p.role === "arbiter" && m.state === "Disputed" && p.terms && p.terms.conditions.length > 0 && <BriefPanel conditions={p.terms.conditions} evidenceHash={m.evidenceHash} />}
 
         {p.reject && (
           <>
@@ -192,7 +195,7 @@ export function MilestoneRow(p: RowProps) {
           </div>
         )}
 
-        {timeLeft > 0n && (
+        {timeLeft > 0n && NET === "local" && (
           <div className="time-control">
             <button type="button" className="linklike" disabled={p.busy !== null} onClick={() => p.onSkipTime(timeLeft + 1n)}>
               Demo control: skip the review window

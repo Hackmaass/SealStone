@@ -79,7 +79,7 @@ for label, val, y in [("TEAM LEADER :", "Omkar Rane", 8.75), ("TEAM MEMBERS :", 
     r.font.color.rgb = rgb(INK)
 seal(s_title, "brand.png", 11.0, 6.9, 1.5)
 tb(s_title, 12.75, 6.85, 5, 0.9, [[("SEALSTONE", {"bold": True})]], size=56, color=NAVY)
-tb(s_title, 12.75, 7.75, 5, 0.6, "Escrow that can't be tricked", size=26, color=PURPLE)
+tb(s_title, 12.75, 7.75, 5, 0.6, [[("Escrow that can't be tricked", {"font": SERIF, "italic": True, "size": 24})]], size=24, color=PURPLE)
 notes(s_title, "0:00 (20 s). We are Sealstone, our answer to B-03 MilestoneVault. One sentence: escrow that can't be tricked by ambiguous agreements, swapped deliverables, or malicious contracts. Everything you will see today is a working product you can test.")
 
 # ───────────────────────── helpers for the rest ─────────────────────────
@@ -124,8 +124,8 @@ for i, (n, title, body) in enumerate(cards):
     tb(s_prob, x + 1.25, CY + 0.28, CW - 1.5, 0.8, [[(title, {"bold": True})]], size=30, color=NAVY, anchor="m")
     tb(s_prob, x + 0.3, CY + 1.3, CW - 0.6, 1.8, body, size=24, color=INK)
 my = CY + 3.25
-pill(s_prob, X0 + 0.3, my, CW - 0.6, 0.6, '"to the mentor\'s satisfaction"', fill=AMBER_W, color=AMBER, size=22, bold=False)
-pill(s_prob, X0 + 0.3, my + 0.78, CW - 0.6, 0.6, '"paid from the remaining funds"', fill=AMBER_W, color=AMBER, size=22, bold=False)
+pill(s_prob, X0 + 0.3, my, CW - 0.6, 0.6, '"to the mentor\'s satisfaction"', fill=AMBER_W, color=AMBER, size=19, bold=False, opts={"font": SERIF, "italic": True})
+pill(s_prob, X0 + 0.3, my + 0.78, CW - 0.6, 0.6, '"paid from the remaining funds"', fill=AMBER_W, color=AMBER, size=19, bold=False, opts={"font": SERIF, "italic": True})
 x2 = X0 + CW + GP
 seal(s_prob, "v1.png", x2 + 0.6, my - 0.1, 1.05)
 tb(s_prob, x2 + 1.7, my, 1.9, 0.95, [[("≠", {"bold": True, "font": "Segoe UI Symbol"})]], size=66, color=RED, align="c", anchor="m")
@@ -133,10 +133,10 @@ seal(s_prob, "v2.png", x2 + 3.65, my - 0.1, 1.05)
 tb(s_prob, x2 + 0.15, my + 1.0, 1.8, 0.4, "reviewed", size=20, color=PURPLE, align="c")
 tb(s_prob, x2 + 3.35, my + 1.0, 1.8, 0.4, "delivered", size=20, color=PURPLE, align="c")
 x3 = X0 + 2 * (CW + GP)
-tb(s_prob, x3 + 0.3, my - 0.15, CW - 0.6, 1.0, [[("3.000 ETH", {"bold": True})]], size=62, color=RED)
+tb(s_prob, x3 + 0.3, my - 0.15, CW - 0.6, 1.0, [[("3.000 ETH", {"font": IMPACT})]], size=58, color=RED)
 tb(s_prob, x3 + 0.3, my + 0.85, CW - 0.6, 0.6, "taken from a naive escrow in one attack", size=22, color=PURPLE)
 shape(s_prob, 0.9, 8.3, 16.6, 1.9, fill=VIOLET_W, line=None, radius=0.2)
-pill(s_prob, 1.25, 8.75, 3.3, 0.7, "THE BRIEF SAYS", fill=NAVY, color=WHITE, size=24)
+pill(s_prob, 1.25, 8.75, 3.3, 0.7, "THE BRIEF SAYS", fill=NAVY, color=WHITE, size=20, opts={"font": SANS, "track": 250})
 tb(s_prob, 4.9, 8.3, 12.3, 1.9, "AI may propose a checklist, but a person must confirm it, ambiguities must be resolved, and AI output must never be written to the contract directly.", size=26, color=INK, anchor="m")
 notes(s_prob, "0:20 (40 s). Three failures. One: agreements are prose, so 'to the mentor's satisfaction' is a future dispute. Two: approval is not bound to a file, so what is reviewed can differ from what is paid. Three: money code is unforgiving; our Attack Lab shows a naive escrow losing 3 ETH of other people's money to one re-entrancy attack. The booklet adds the rule that shapes our design: AI proposes, a person confirms, and AI never writes to the contract.")
 
@@ -157,7 +157,7 @@ for i, (n, title, body, wash) in enumerate(layers):
 fh = browser(s_idea, os.path.join(LAND_IMG, "desktop-vault.jpg"), 10.6, 3.1, 6.9, url="sealstone.local/vault")
 pill(s_idea, 10.6, 3.1 + fh + 0.3, 6.9, 0.75, "Every milestone, and a ledger that reconciles", fill=GREEN_W, color=GREEN, size=22)
 shape(s_idea, 0.9, 9.3, 16.6, 1.3, fill=NAVY, line=None, radius=0.2)
-tb(s_idea, 1.3, 9.3, 15.8, 1.3, [[("AI informs. Rules decide. ", {"font": SERIF, "italic": True, "size": 30, "bold": True, "color": PEACH}), ("Every money-moving decision is made in Solidity. AI output never reaches the contract.", {"color": WHITE})]], size=26, anchor="m")
+tb(s_idea, 1.3, 9.3, 15.8, 1.3, [[("AI informs. Rules decide. ", {"font": SERIF, "italic": True, "size": 30, "bold": True, "color": PEACH})], [("Every money-moving decision is made in Solidity. AI output never reaches the contract.", {"color": WHITE})]], size=26, anchor="m")
 notes(s_idea, "1:00 (60 s). Our idea closes all three failures. Layer one is the agreement: the AI proposes and flags ambiguity, a deterministic validator re-checks everything, a person resolves each flag, and the keccak hash of the confirmed terms is stored on-chain and signed by both sides. Layer two is the file: approval is bound to its SHA-256. Layer three is the money: a role-gated state machine with pull payments and a live reconciliation panel. The principle: AI informs, rules decide.")
 
 # ───────────────────────── 4. product in action ─────────────────────────
@@ -176,7 +176,7 @@ for i, (path, n, cap, sub, url, phl, phh) in enumerate(shots):
     badge(s_prod, x - 0.18, 3.2 - 0.18, 0.62, n, fill=CORAL, color=NAVY, size=26)
     tb(s_prod, x, 3.2 + h + 0.2, SW, 0.55, [[(cap, {"bold": True})]], size=26, color=NAVY)
     tb(s_prod, x, 3.2 + h + 0.8, SW, 1.3, sub, size=21, color=INK)
-tb(s_prod, 0.9, 8.05, 9.0, 0.6, [[("LIVE DEMO PATH", {"bold": True}), ("   about 5 minutes", {"color": PURPLE})]], size=28, color=NAVY)
+tb(s_prod, 0.9, 8.05, 9.0, 0.6, [[("LIVE DEMO PATH", {"bold": True, "font": SANS, "track": 250, "size": 24}), ("   about 5 minutes", {"color": PURPLE, "font": SERIF, "italic": True, "size": 26})]], size=28, color=NAVY)
 steps = ["Extract", "Resolve flags", "Confirm + sign", "Submit file", "Swap it: refused", "Run 12 attacks"]
 BW, BG = 2.55, 0.26
 for i, st in enumerate(steps):
@@ -206,8 +206,8 @@ nodes = [
     ("10", "Pull and reconcile", "withdraw, then the ledger checks itself", "chain"),
 ]
 R1Y, R2Y = 3.45, 6.75
-tb(s_t1, 0.9, 2.95, 9, 0.45, [[("OFF-CHAIN  ", {"bold": True}), ("AI proposes, rules and people decide", {})]], size=22, color=PURPLE)
-tb(s_t1, 0.9, 6.25, 9, 0.45, [[("ON-CHAIN  ", {"bold": True}), ("Solidity decides", {})]], size=22, color=PURPLE)
+tb(s_t1, 0.9, 2.95, 9, 0.45, [[("OFF-CHAIN   ", {"bold": True, "font": SANS, "track": 250, "size": 20}), ("AI proposes, rules and people decide", {"font": SERIF, "italic": True, "size": 22})]], size=22, color=PURPLE)
+tb(s_t1, 0.9, 6.25, 9, 0.45, [[("ON-CHAIN   ", {"bold": True, "font": SANS, "track": 250, "size": 20}), ("Solidity decides", {"font": SERIF, "italic": True, "size": 22})]], size=22, color=PURPLE)
 pos = {}
 for i, (n, title, sub, kind) in enumerate(nodes):
     col = i if i < 5 else 9 - i
@@ -228,7 +228,7 @@ for i in range(9):
     else:
         arrow(s_t1, x1 - 0.02, y1 + NH / 2, x2 + NW + 0.02, y2 + NH / 2, color=NAVY)
 pill(s_t1, 8.0, 5.7, 7.3, 0.6, "AI BOUNDARY: only the confirmed, hashed version crosses", fill=CORAL, color=NAVY, size=20)
-tb(s_t1, 0.9, 9.15, 5, 0.45, [[("COLOUR KEY", {"bold": True})]], size=20, color=PURPLE)
+tb(s_t1, 0.9, 9.15, 5, 0.45, [[("COLOUR KEY", {"bold": True, "font": SANS, "track": 250, "size": 18})]], size=20, color=PURPLE)
 for i, (label_, kind) in enumerate([("AI-proposed", "ai"), ("Rules", "rule"), ("Person", "human"), ("On-chain", "chain")]):
     f, c = KIND[kind]
     pill(s_t1, 0.9 + i * 2.75, 9.7, 2.55, 0.62, label_, fill=f, color=c, size=20, line=c)
@@ -271,8 +271,8 @@ label(s_t2, 12.3, 6.55, 3.0, "resolve(Release)", "Arbiter", h=0.9)
 arrow(s_t2, D_[0] + SW_ + 0.03, D_[1] + SH_ / 2 + 0.2, F_[0] - 0.03, F_[1] + SH_ / 2 + 0.2, color=BLUE, w=4)
 label(s_t2, 11.8, 9.0, 3.0, "resolve(Refund)", "Arbiter", h=0.9)
 tb(s_t2, 0.9, 7.35, 5.6, 1.8, [[("Check order in every function", {"bold": True, "color": NAVY})], "role, agreement state, index, then milestone state. The first rule that fails names the error."], size=20, color=PURPLE, after=4)
-shape(s_t2, 0.9, 9.65, 16.6, 1.0, fill=NAVY, line=None, radius=0.2)
-tb(s_t2, 1.3, 9.65, 15.8, 1.0, [[("Final states never change. ", {"font": SERIF, "italic": True, "size": 30, "bold": True, "color": PEACH}), ("A second release, an unauthorized refund or a skipped step reverts with a named error.", {"color": WHITE})]], size=24, anchor="m")
+shape(s_t2, 0.9, 9.5, 16.6, 1.3, fill=NAVY, line=None, radius=0.2)
+tb(s_t2, 1.3, 9.5, 15.8, 1.3, [[("Final states never change. ", {"font": SERIF, "italic": True, "size": 30, "bold": True, "color": PEACH})], [("A second release, an unauthorized refund or a skipped step reverts with a named error.", {"color": WHITE})]], size=24, anchor="m")
 notes(s_t2, "3:30 (40 s). One state machine per milestone. The provider marks it complete with the file's hash. From Completed, only the client can approve with the same hash, which credits the provider, or dispute; the provider can escalate only after the review window. Only the arbiter can settle a dispute, either releasing to the provider or refunding the client. Released and Refunded are final. Anything else, such as a second release, reverts with a specific error and changes nothing.")
 
 # ───────────────────────── 7. technical approach 3/3: architecture ─────────────────────────
@@ -302,14 +302,14 @@ arrow(s_t3, 12.72, 4.4, 13.88, 4.4, color=RED, w=4, dash=True, head=False)
 badge(s_t3, 12.95, 4.05, 0.7, "✕", fill=RED, size=26)
 tb(s_t3, 12.65, 4.85, 1.25, 0.9, ["never", "connects"], size=18, color=RED, align="c")
 shape(s_t3, 0.9, 9.1, 16.6, 1.5, fill=NAVY, line=None, radius=0.2)
-tb(s_t3, 1.3, 9.1, 15.8, 1.5, [[("Local fallback. ", {"font": SERIF, "italic": True, "size": 30, "bold": True, "color": PEACH}), ("With Wi-Fi off it still works: rules extractor, local chain, bundled fonts. No paid API, GPU or cloud.", {"color": WHITE})]], size=26, anchor="m")
+tb(s_t3, 1.3, 9.1, 15.8, 1.5, [[("Local fallback. ", {"font": SERIF, "italic": True, "size": 30, "bold": True, "color": PEACH})], [("With Wi-Fi off it still works: rules extractor, local chain, bundled fonts. No paid API, GPU or cloud.", {"color": WHITE})]], size=26, anchor="m")
 notes(s_t3, "4:10 (30 s). Three parts. The web app, which also works on a phone, talks to the chain directly over JSON-RPC. The AI service extracts, validates and gates, and it has no route, key or RPC connection to the chain: it only stores confirmed JSON. One shared package implements hashing, the validator and the gate, so the browser, server and deploy scripts agree byte for byte. Everything is local, so the full demo works with Wi-Fi off.")
 
 # ───────────────────────── 8. feasibility and viability ─────────────────────────
 set_title(s_feas, "FEASIBILITY AND VIABILITY")
 claim2(s_feas, "Built, tested and reproducible in 12 hours,", "with no paid service.")
-tb(s_feas, 0.9, 3.0, 4.4, 0.45, [[("BOOKLET RULE", {"bold": True})]], size=22, color=PURPLE)
-tb(s_feas, 5.75, 3.0, 5.0, 0.45, [[("EVIDENCE", {"bold": True})]], size=22, color=PURPLE)
+tb(s_feas, 0.9, 3.0, 4.4, 0.45, [[("BOOKLET RULE", {"bold": True, "font": SANS, "track": 250, "size": 20})]], size=22, color=PURPLE)
+tb(s_feas, 5.75, 3.0, 5.0, 0.45, [[("EVIDENCE", {"bold": True, "font": SANS, "track": 250, "size": 20})]], size=22, color=PURPLE)
 rows = [
     ("Working MVP, testable live", "npm run dev: studio, vault, Attack Lab"),
     ("Reproducible live testing", "demo:reset, a seeded vault, 383 tests"),
@@ -329,7 +329,7 @@ for i, (big, small) in enumerate(stats):
     x = 11.1 + (i % 2) * 3.3
     y = 3.0 + (i // 2) * 2.75
     shape(s_feas, x, y, 3.1, 2.55, fill=NAVY, line=None, radius=0.2, shadow=True)
-    tb(s_feas, x, y + 0.2, 3.1, 1.3, [[(big, {"bold": True})]], size=60, color=PEACH, align="c", anchor="m")
+    tb(s_feas, x, y + 0.2, 3.1, 1.3, [[(big, {"font": IMPACT})]], size=58, color=PEACH, align="c", anchor="m")
     tb(s_feas, x + 0.2, y + 1.55, 2.7, 0.9, small, size=20, color=WHITE, align="c")
 shape(s_feas, 11.1, 8.6, 6.4, 1.95, fill=CREAM, line=NAVY, line_w=2, radius=0.14)
 tb(s_feas, 11.4, 8.6, 5.9, 1.95, [[("$ ", {"color": PURPLE, "font": CODE}), ("npm run dev", {"font": CODE})], [("$ ", {"color": PURPLE, "font": CODE}), ("npm run test:contracts", {"font": CODE})], [("$ ", {"color": PURPLE, "font": CODE}), ("npm run demo:reset", {"font": CODE})]], size=19, color=NAVY, anchor="m", after=4)
@@ -347,14 +347,14 @@ cd.add_series("Naive escrow", (3, 3, 2, 1, 0))
 gf = s_imp.shapes.add_chart(XL_CHART_TYPE.LINE_MARKERS, I(1.1), I(3.95), I(9.0), I(4.95), cd)
 gf.name = "Chart: money left, naive vs Sealstone"
 ch = gf.chart
-ch.font.name, ch.font.size = HR, Pt(20)
+ch.font.name, ch.font.size = SANS, Pt(20)
 ch.font.color.rgb = rgb(INK)
 ch.has_title = False
 ch.has_legend = True
 ch.legend.position = XL_LEGEND_POSITION.BOTTOM
 ch.legend.include_in_layout = False
 ch.legend.font.size = Pt(22)
-ch.legend.font.name = HR
+ch.legend.font.name = SANS
 va = ch.value_axis
 va.minimum_scale, va.maximum_scale, va.major_unit = 0, 3.6, 1
 va.has_major_gridlines = True
@@ -363,14 +363,14 @@ va.format.line.fill.background()
 va.tick_labels.number_format = '0" ETH"'
 va.tick_labels.number_format_is_linked = False
 va.tick_labels.font.size = Pt(22)
-va.tick_labels.font.name = HR
+va.tick_labels.font.name = SANS
 ca = ch.category_axis
 ca.has_title = True
 ca.axis_title.text_frame.text = "Payouts made to the attacker"
 tr = ca.axis_title.text_frame.paragraphs[0].runs[0]
-tr.font.size, tr.font.bold, tr.font.name = Pt(22), False, HR
+tr.font.size, tr.font.bold, tr.font.name = Pt(20), False, SANS
 ca.tick_labels.font.size = Pt(22)
-ca.tick_labels.font.name = HR
+ca.tick_labels.font.name = SANS
 ca.format.line.color.rgb = rgb(RULE)
 for ser, colr, last in ((ch.plots[0].series[0], VIOLET, "3 ETH safe"), (ch.plots[0].series[1], RED, "0 ETH left")):
     ser.smooth = False
@@ -401,7 +401,7 @@ for i, (title, body) in enumerate(who):
     badge(s_imp, 10.85, y + 0.3, 0.72, str(i + 1), fill=CORAL, color=NAVY, size=26)
     tb(s_imp, 11.8, y + 0.15, 5.55, 0.6, [[(title, {"bold": True})]], size=24, color=NAVY)
     tb(s_imp, 11.8, y + 0.72, 5.5, 1.1, body, size=20, color=INK)
-tb(s_imp, 0.9, 9.95, 3.0, 0.6, [[("WHAT'S NEXT", {"bold": True})]], size=22, color=PURPLE, anchor="m")
+tb(s_imp, 0.9, 9.95, 3.0, 0.6, [[("WHAT'S NEXT", {"bold": True, "font": SANS, "track": 250, "size": 20})]], size=22, color=PURPLE, anchor="m")
 for i, t in enumerate(["Factory for many agreements", "A committee as arbiter", "Pilot on a public testnet"]):
     pill(s_imp, 4.0 + i * 4.5, 9.95, 4.3, 0.65, t, fill=VIOLET_W, color=VIOLET, size=20)
 notes(s_imp, "5:15 (35 s). The impact is visible in one picture. The same re-entrancy attack drains a naive escrow of 3 ETH of other people's money, and cannot touch ours. That translates into three groups of people: freelancers and clients who pay only for the exact file they approved, grant programmes that see everything locked and owed in one dashboard, and auditors who can reproduce every guarantee as a test. Next steps are a factory for many agreements, a committee arbiter, and a public-testnet pilot.")
@@ -419,15 +419,15 @@ CW10, GAP10, CY10, CH10 = 3.95, 0.27, 3.1, 5.4
 for i, (eyebrow, ink, wash, head, proof) in enumerate(cards10):
     x = 0.9 + i * (CW10 + GAP10)
     shape(s_diff, x, CY10, CW10, CH10, fill=WHITE, line=ink, line_w=2.5, shadow=True, radius=0.2)
-    pill(s_diff, x + 0.25, CY10 + 0.25, CW10 - 0.5, 0.5, eyebrow, fill=wash, color=ink, size=17)
+    pill(s_diff, x + 0.25, CY10 + 0.25, CW10 - 0.5, 0.5, eyebrow, fill=wash, color=ink, size=15, opts={"font": SANS, "track": 150})
     tb(s_diff, x + 0.3, CY10 + 0.95, CW10 - 0.6, 1.2, [[(head, {"bold": True})]], size=26, color=NAVY)
     shape(s_diff, x + 0.25, CY10 + 4.15, CW10 - 0.5, 1.1, fill=CREAM, line=None, radius=0.12)
-    tb(s_diff, x + 0.4, CY10 + 4.2, CW10 - 0.8, 0.3, [[("LIVE PROOF", {"bold": True})]], size=14, color=PURPLE)
+    tb(s_diff, x + 0.4, CY10 + 4.2, CW10 - 0.8, 0.3, [[("LIVE PROOF", {"bold": True, "font": SANS, "track": 250, "size": 13})]], size=14, color=PURPLE)
     tb(s_diff, x + 0.4, CY10 + 4.5, CW10 - 0.8, 0.7, [[(proof, {"font": CODE})]], size=15, color=NAVY)
 vy = CY10 + 2.3
 # 1: a vague phrase, resolved by a person
 x = 0.9
-pill(s_diff, x + 0.35, vy, CW10 - 0.7, 0.55, '"to the mentor\'s satisfaction"', fill=AMBER_W, color=AMBER, size=19, bold=False)
+pill(s_diff, x + 0.35, vy, CW10 - 0.7, 0.55, '"to the mentor\'s satisfaction"', fill=AMBER_W, color=AMBER, size=17, bold=False, opts={"font": SERIF, "italic": True})
 tb(s_diff, x + 0.35, vy + 0.55, CW10 - 0.7, 0.45, [[("↓", {"bold": True, "font": "Segoe UI Symbol"})]], size=26, color=PURPLE, align="c", anchor="m")
 pill(s_diff, x + 0.35, vy + 1.05, CW10 - 0.7, 0.55, "A live demo, set by a person", fill=GREEN_W, color=GREEN, size=19, bold=False)
 # 2: two seals that differ, and the named refusal
@@ -439,12 +439,12 @@ shape(s_diff, x + 0.3, vy + 1.05, CW10 - 0.6, 0.55, fill=RED_W, line=None, radiu
 tb(s_diff, x + 0.3, vy + 1.05, CW10 - 0.6, 0.55, [[("DeliverableHashMismatch", {"font": CODE, "bold": True})]], size=15, color=RED, align="c", anchor="m")
 # 3: forced ETH shown as surplus
 x = 0.9 + 2 * (CW10 + GAP10)
-tb(s_diff, x + 0.3, vy - 0.15, CW10 - 0.6, 0.9, [[("0.300 ETH", {"bold": True})]], size=44, color=VIOLET, align="c", anchor="m")
-tb(s_diff, x + 0.3, vy + 0.7, CW10 - 0.6, 0.4, "shown as surplus, never withdrawable", size=17, color=PURPLE, align="c")
+tb(s_diff, x + 0.3, vy - 0.15, CW10 - 0.6, 0.9, [[("0.300 ETH", {"font": IMPACT})]], size=46, color=VIOLET, align="c", anchor="m")
+tb(s_diff, x + 0.3, vy + 0.7, CW10 - 0.6, 0.4, "surplus, never withdrawable", size=17, color=PURPLE, align="c")
 pill(s_diff, x + 0.5, vy + 1.15, CW10 - 1.0, 0.5, "✓  books still reconcile", fill=GREEN_W, color=GREEN, size=19)
 # 4: twelve real attacks
 x = 0.9 + 3 * (CW10 + GAP10)
-tb(s_diff, x + 0.3, vy - 0.15, CW10 - 0.6, 0.9, [[("12 / 12", {"bold": True})]], size=48, color=NAVY, align="c", anchor="m")
+tb(s_diff, x + 0.3, vy - 0.15, CW10 - 0.6, 0.9, [[("12 / 12", {"font": IMPACT})]], size=50, color=NAVY, align="c", anchor="m")
 tb(s_diff, x + 0.3, vy + 0.7, CW10 - 0.6, 0.4, "real transactions, all blocked", size=17, color=PURPLE, align="c")
 pill(s_diff, x + 0.5, vy + 1.15, CW10 - 1.0, 0.5, "Run all attacks", fill=NAVY, color=WHITE, size=19)
 # the closing challenge
@@ -452,12 +452,12 @@ shape(s_diff, 0.9, 8.75, 16.6, 1.15, fill=NAVY, line=None, radius=0.2)
 tb(s_diff, 1.3, 8.75, 15.8, 1.15, [[("Don't take our word for it. ", {"font": SERIF, "italic": True, "bold": True, "color": PEACH, "size": 30}), ("Pick a role in the demo vault, or press Run all attacks.", {"color": WHITE, "size": 26})]], size=26, anchor="m")
 pill(s_diff, 0.9, 10.15, 4.4, 0.55, "AI never moves money", fill=VIOLET_W, color=VIOLET, size=18)
 pill(s_diff, 5.5, 10.15, 3.9, 0.55, "Works with Wi-Fi off", fill=VIOLET_W, color=VIOLET, size=18)
-tb(s_diff, 9.7, 10.05, 7.8, 0.8, [[("Honest limits: ", {"bold": True, "color": NAVY}), ("one contract per agreement, a trusted arbiter, and a hash proves identity, not quality.", {})]], size=17, color=PURPLE, anchor="m")
+tb(s_diff, 9.7, 10.05, 7.8, 0.8, [[("Honest limits: ", {"bold": True, "color": NAVY, "font": SANS, "size": 17}), ("one contract per agreement, a trusted arbiter, and a hash proves identity, not quality.", {})]], size=17, color=PURPLE, anchor="m")
 notes(s_diff, "5:50 (30 s). Each of these is something you can check live, not a claim. One: a vague phrase like 'to the mentor's satisfaction' cannot reach the contract until a person resolves it. Two: approval is bound to the exact file, so a look-alike is refused with a named error, DeliverableHashMismatch. Three: if someone force-sends ETH into the vault, it is counted as surplus, nobody can withdraw it, and the books still reconcile. Four: you can fire twelve real attacks at the contract yourself and read the result. The AI never moves money, the demo works with Wi-Fi off, and we state our limits: one contract per agreement, a trusted arbiter, and a hash proves identity, not quality. Don't take our word for it: pick a role, or press Run all attacks.")
 
 # ───────────────────────── 11. thank you ─────────────────────────
 seal(s_thanks, "brand.png", 9.35, 0.55, 1.3)
-tb(s_thanks, 3.6, 1.95, 12.8, 0.65, [[("SEALSTONE  ", {"bold": True}), ("escrow that can't be tricked", {})]], size=30, color=PURPLE, align="c")
+tb(s_thanks, 3.6, 1.95, 12.8, 0.65, [[("SEALSTONE  ", {"bold": True}), ("escrow that can't be tricked", {"font": SERIF, "italic": True, "size": 28})]], size=30, color=PURPLE, align="c")
 tb(s_thanks, 3.6, 2.6, 12.8, 0.6, "Team TORVALDS  ·  XQR1520246  ·  Omkar Rane (leader), Pranay Patil", size=24, color=NAVY, align="c")
 notes(s_thanks, "6:20. Thank you. Everything we showed is running on this laptop, offline. We would love you to try to break it: pick a role in the demo vault, or press Run all in the Attack Lab. Team TORVALDS, team ID XQR1520246: Omkar Rane and Pranay Patil.")
 

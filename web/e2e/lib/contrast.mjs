@@ -2,7 +2,8 @@
 // with the closest-in-brightness background pixel (the worst case). Not eyeballed. Used by the browser scripts.
 /** `pill`: skip the rounded ends, where the page behind the pill shows through the clip rectangle and is not its background.
  * Returns the lowest contrast ratio of the first element matching `selector` (scrolled to the middle, clear of the sticky bar). */
-export async function contrastOf(page, selector, { bar = 76, pill = false } = {}) {
+/** `inset`: trim this many px off the left and right of the measured area, to leave out a decorative border or accent bar that is not the text background. */
+export async function contrastOf(page, selector, { bar = 76, pill = false, inset = 0 } = {}) {
   const el = page.locator(selector).first();
   if (!(await el.count())) return null;
   await el.evaluate((n) => n.scrollIntoView({ block: "center" }));
@@ -18,6 +19,10 @@ export async function contrastOf(page, selector, { bar = 76, pill = false } = {}
   const vp = page.viewportSize();
   const x0 = Math.max(0, box.x), y0 = Math.max(bar, box.y);
   const clip = { x: x0, y: y0, width: Math.max(4, Math.min(box.x + box.width, vp.width) - x0), height: Math.max(4, Math.min(box.y + box.height, vp.height) - y0) };
+  if (inset) {
+    clip.x += inset;
+    clip.width = Math.max(4, clip.width - 2 * inset);
+  }
   if (pill) {
     const dx = Math.min(Math.floor(box.height / 2), Math.floor(clip.width / 4)), dy = Math.min(3, Math.floor(clip.height / 4));
     clip.x += dx; clip.width -= 2 * dx; clip.y += dy; clip.height -= 2 * dy;

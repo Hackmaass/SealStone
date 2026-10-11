@@ -4,9 +4,11 @@ import { formatWei, shortHash } from "../../ui/copy";
 import { api, ApiOffline, ApiRejected } from "../../lib/api";
 import { useApp } from "../../lib/app";
 import { ACCOUNT_ROLES, accountAddress } from "../../lib/chain";
+import { NET } from "../../lib/network";
 import { rememberAgreement, type GateSummary, type WizardAction, type WizardState } from "../../lib/wizard";
 import { GateBar, HashSeal, HashText } from "../../ui/components";
 import { useToast } from "../../ui/toast";
+import { UNIT } from "../../lib/units";
 
 const ROLES: Role[] = ["client", "provider", "arbiter"];
 
@@ -84,13 +86,30 @@ export function StepConfirm(props: {
                     <span className="edited" title={`AI proposed: ${proposed.parties[r].name ?? "no name"}`}> edited</span>
                   )}
                 </span>
-                <select aria-label={`Wallet for the ${r}`} value={state.addresses[r]} onChange={(e) => dispatch({ type: "address", role: r, address: e.target.value })} disabled={!!state.deployed}>
-                  {ACCOUNT_ROLES.map((acc, k) => (
-                    <option key={acc} value={accountAddress(acc)}>
-                      Account #{k} {shortHash(accountAddress(acc))}
-                    </option>
-                  ))}
-                </select>
+                {NET === "wallet" ? (
+                  <>
+                    <input
+                      className="mono"
+                      aria-label={`Wallet for the ${r}`}
+                      placeholder="0x… (the wallet address)"
+                      spellCheck={false}
+                      autoComplete="off"
+                      value={state.addresses[r]}
+                      readOnly={r === "client"}
+                      onChange={(e) => dispatch({ type: "address", role: r, address: e.target.value.trim() })}
+                      disabled={!!state.deployed}
+                    />
+                    {r === "client" && <span className="muted small">{app.walletAccount ? "Your connected wallet. It deploys the vault and funds it." : "Connect your wallet (top right): the client is the wallet that deploys and funds the vault."}</span>}
+                  </>
+                ) : (
+                  <select aria-label={`Wallet for the ${r}`} value={state.addresses[r]} onChange={(e) => dispatch({ type: "address", role: r, address: e.target.value })} disabled={!!state.deployed}>
+                    {ACCOUNT_ROLES.map((acc, k) => (
+                      <option key={acc} value={accountAddress(acc)}>
+                        Account #{k} {shortHash(accountAddress(acc))}
+                      </option>
+                    ))}
+                  </select>
+                )}
               </label>
             ))}
           </div>
@@ -126,7 +145,7 @@ export function StepConfirm(props: {
                       {dueEdited ? <span className="edited" title={`AI proposed: ${p?.deadline ?? "no date"}`}>{m.deadline ?? "No deadline"}</span> : m.deadline ?? "No deadline"}
                     </td>
                     <td className="mono" style={{ textAlign: "right" }}>
-                      {amountEdited ? <span className="edited" title={`AI proposed: ${p?.amount ?? "no amount"}`}>{formatWei(parseAmountWei(m.amount) ?? 0n)} ETH</span> : `${formatWei(parseAmountWei(m.amount) ?? 0n)} ETH`}
+                      {amountEdited ? <span className="edited" title={`AI proposed: ${p?.amount ?? "no amount"}`}>{formatWei(parseAmountWei(m.amount) ?? 0n)} {UNIT}</span> : `${formatWei(parseAmountWei(m.amount) ?? 0n)} ${UNIT}`}
                     </td>
                   </tr>
                 );
@@ -134,7 +153,7 @@ export function StepConfirm(props: {
               <tr>
                 <td />
                 <td colSpan={3}><b>Total</b></td>
-                <td className="mono" style={{ textAlign: "right" }}><b>{formatWei(total)} ETH</b></td>
+                <td className="mono" style={{ textAlign: "right" }}><b>{formatWei(total)} {UNIT}</b></td>
               </tr>
             </tbody>
           </table>
@@ -167,7 +186,7 @@ export function StepConfirm(props: {
           <span className="muted small">Any change to the terms, wallets or review window clears this seal.</span>
         </div>
       ) : (
-        <GateBar reasons={reasons} passes={reasons.length === 0 ? [`Every issue is resolved and re-checked. The terms add up to ${formatWei(total)} ETH.`, "Wallets assigned to client, provider and arbiter."] : []} label="Confirm terms" busy={busy} onClick={() => void confirm()} />
+        <GateBar reasons={reasons} passes={reasons.length === 0 ? [`Every issue is resolved and re-checked. The terms add up to ${formatWei(total)} ${UNIT}.`, "Wallets assigned to client, provider and arbiter."] : []} label="Confirm terms" busy={busy} onClick={() => void confirm()} />
       )}
       {!confirmed && (
         <div className="step-actions"><button className="btn secondary" type="button" onClick={onBack}>Back to the issues</button></div>

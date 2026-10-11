@@ -51,7 +51,7 @@ export function TermsPanel({ onChainHash, terms: stored, onRecheck }: { onChainH
 
   const computed = terms?.kind === "verified" ? onChainHash : terms?.kind === "mismatch" ? terms.computed : null;
   return (
-    <details className="terms-panel" data-testid="terms-panel">
+    <details className="terms-panel" data-testid="terms-panel" data-tour="terms">
       <summary>Verify the agreement</summary>
       <p className="muted small">
         The contract only stores a seal (a hash) of the confirmed terms. Your browser recomputes that seal from the terms and compares the two. Change any character below and check again.

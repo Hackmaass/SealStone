@@ -21,3 +21,5 @@ docs/design-refs/
 # Test output screenshots
 e2e-shots/
 **/e2e-shots/
+# Temporary lock files
+~$*

@@ -6,6 +6,10 @@ import { BrandMark } from "./BrandMark";
 import { formatWei, shortHash } from "./copy";
 import type { Mode } from "../lib/api";
 import deployment from "../generated/deployment.json";
+import { MST } from "../lib/mstNetwork";
+import { UNIT } from "../lib/units";
+import { useOnboarding } from "./Onboarding";
+import { WalletMenu } from "./WalletMenu";
 
 const ROLE_WORD = { client: "Client", provider: "Provider", arbiter: "Arbiter", stranger: "Anyone" } as const;
 const MODES: Array<[Mode, string]> = [
@@ -39,6 +43,7 @@ export function TopBar() {
   const app = useApp();
   const path = usePath();
   const [menu, setMenu] = useState(false);
+  const onboarding = useOnboarding();
   const dark = app.theme !== "light";
 
   // The phone menu closes when you go somewhere, and on Escape. While it is open the page behind it does not scroll.
@@ -80,9 +85,29 @@ export function TopBar() {
             </div>
           ))}
         </nav>
+        {app.net === "wallet" && (
+          <div className="side-group side-acting">
+            <div className="side-label">Your wallet</div>
+            <div className="side-wallet" data-tour="roles" data-testid="side-wallet">
+              {app.walletAccount ? (
+                <>
+                  <b className="mono">{shortHash(app.walletAccount)}</b>
+                  <span className="muted">{app.walletBalance !== null ? `${formatWei(app.walletBalance, 3)} ${UNIT}` : "…"} on {MST.name}</span>
+                  <span className="muted">Your role is decided per vault by this address.</span>
+                </>
+              ) : (
+                <>
+                  <b>Not connected</b>
+                  <span className="muted">You can read everything. Connect a wallet (top right) to act.</span>
+                </>
+              )}
+            </div>
+          </div>
+        )}
+        {app.net === "local" && (
         <div className="side-group side-acting">
           <div className="side-label">Acting as</div>
-          <div className="side-roles" role="group" aria-label="Acting as">
+          <div className="side-roles" role="group" aria-label="Acting as" data-tour="roles">
             {ACCOUNT_ROLES.map((r, i) => {
               const bal = app.balances[r];
               return (
@@ -102,6 +127,7 @@ export function TopBar() {
             })}
           </div>
         </div>
+        )}
       </aside>
 
       <header className="topbar">
@@ -110,7 +136,7 @@ export function TopBar() {
           Sealstone
         </a>
         <div className="spacer" />
-        <label className="pill desk-only" title={aiTitle}>
+        <label className="pill desk-only" title={aiTitle} data-tour="ai">
           <span className="dot amber" />
           <span className="pill-k">AI</span>
           <select aria-label="AI mode" value={app.aiMode} onChange={(e) => app.setAiMode(e.target.value as Mode)} style={{ border: 0, background: "transparent", padding: 0 }}>
@@ -122,14 +148,15 @@ export function TopBar() {
           </select>
           {sourceLabel && <span className="muted answered">answered: {sourceLabel}</span>}
         </label>
-        <span className="pill pill-block desk-only" title="Local Hardhat chain">
+        <span className="pill pill-block desk-only" title={app.net === "wallet" ? `${MST.name}, read from its public RPC` : "Local Hardhat chain"} data-tour="chain">
           <span className="dot" style={app.chainOnline ? undefined : { background: "var(--revert)" }} />
           Block{" "}
           <span className="mono" id="block">
             {app.block ?? "—"}
           </span>
         </span>
-        <button className="iconbtn round desk-only" aria-pressed={app.presenter} aria-label="Presenter mode" onClick={app.togglePresenter} title="Presenter mode (P)">
+        <div className="desk-only"><WalletMenu /></div>
+        <button className="iconbtn round desk-only" aria-pressed={app.presenter} aria-label="Presenter mode" onClick={app.togglePresenter} title="Presenter mode (P)" data-tour="presenter">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="2" /><path d="M8 20h8M12 16v4" /></svg>
         </button>
         <button className="iconbtn round desk-only" aria-label={dark ? "Switch to the light theme" : "Switch to the dark theme"} onClick={app.toggleTheme} title={`${dark ? "Light" : "Dark"} theme (T)`}>
@@ -141,11 +168,11 @@ export function TopBar() {
         </button>
 
         {/* phone: who you are acting as, and the menu button */}
-        <button className="actas-chip phone-only" type="button" onClick={() => setMenu(true)} aria-label={`Acting as ${app.names[app.role]}. Open the menu to change.`}>
-          <span className="r">{ROLE_WORD[app.role]}</span>
-          <span className="n">{app.names[app.role]}</span>
+        <button className="actas-chip phone-only" type="button" data-tour="roles" onClick={() => setMenu(true)} aria-label={app.net === "wallet" ? `Wallet ${app.meLabel}. Open the menu.` : `Acting as ${app.names[app.role]}. Open the menu to change.`}>
+          <span className="r">{app.net === "wallet" ? "Wallet" : ROLE_WORD[app.role]}</span>
+          <span className="n">{app.net === "wallet" ? app.meLabel : app.names[app.role]}</span>
         </button>
-        <button className="menu-btn phone-only" type="button" aria-expanded={menu} aria-controls="phone-menu" aria-label="Open the menu" onClick={() => setMenu(true)}>
+        <button className="menu-btn phone-only" type="button" data-tour="menu" aria-expanded={menu} aria-controls="phone-menu" aria-label="Open the menu" onClick={() => setMenu(true)}>
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" /></svg>
         </button>
       </header>
@@ -171,6 +198,16 @@ export function TopBar() {
               <button className="pm-link" onClick={() => navigate(`/vault/${deployment.preseededVault.address}`)}>Open the demo vault</button>
             </nav>
 
+            {app.net === "wallet" && (
+              <div className="pm-group">
+                <div className="pm-label">Your wallet</div>
+                <div className="pm-row" style={{ display: "grid", gap: 2 }}>
+                  <b className="mono">{app.walletAccount ? shortHash(app.walletAccount) : "Not connected"}</b>
+                  <span className="muted small">{app.walletAccount ? `${app.walletBalance !== null ? formatWei(app.walletBalance, 3) : "…"} ${UNIT} on ${MST.name}` : "You can read everything. Connect a wallet to act."}</span>
+                </div>
+              </div>
+            )}
+            {app.net === "local" && (
             <div className="pm-group">
               <div className="pm-label">Acting as</div>
               {ACCOUNT_ROLES.map((r, i) => {
@@ -186,6 +223,7 @@ export function TopBar() {
                 );
               })}
             </div>
+            )}
 
             <div className="pm-group">
               <label className="pm-row">
@@ -203,6 +241,13 @@ export function TopBar() {
               <button className="pm-row" type="button" onClick={app.toggleTheme}>
                 <span>Theme</span>
                 <span className="muted">{dark ? "Dark" : "Light"}</span>
+              </button>
+              <button className="pm-row" type="button" onClick={() => { setMenu(false); onboarding.startTour(); }}>
+                <span>Take the tour</span>
+                <span className="muted">?</span>
+              </button>
+              <button className="pm-row" type="button" onClick={() => { setMenu(false); onboarding.disconnect(); }}>
+                <span>Disconnect demo wallet</span>
               </button>
             </div>
           </div>

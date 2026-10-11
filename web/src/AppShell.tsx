@@ -2,6 +2,9 @@ import { AppProvider, useApp } from "./lib/app";
 import { matchRoute, usePath } from "./lib/router";
 import { ToastProvider } from "./ui/toast";
 import { TopBar } from "./ui/TopBar";
+import { Onboarding, useOnboarding } from "./ui/Onboarding";
+import { MST } from "./lib/mstNetwork";
+import { onMst, switchWalletToMst, useWalletState } from "./lib/wallet";
 import { Dashboard } from "./pages/Dashboard";
 import { Vaults } from "./pages/Vaults";
 import { Wizard } from "./pages/agreement/Wizard";
@@ -9,19 +12,40 @@ import { VaultPage } from "./pages/vault/VaultPage";
 import { AttackLab } from "./pages/AttackLab";
 import deployment from "./generated/deployment.json";
 import { isHosted } from "./lib/hosted";
+import { Assistant } from "./ui/Assistant";
 import "./ui/dashboard.css";
 import "./ui/calm.css";
 
 function Banners() {
   const app = useApp();
+  const ws = useWalletState();
+  const onboarding = useOnboarding();
+  if (app.net === "wallet") {
+    return (
+      <>
+        {!app.chainOnline && (
+          <div className="banner bad" role="alert">
+            Can't reach {MST.name} through its public RPC right now. Reads retry on their own; check your connection.
+          </div>
+        )}
+        {ws.account && !onMst(ws) && (
+          <div className="banner bad wallet-banner" role="alert" data-testid="wrong-network">
+            <span>Your wallet is on another network. Sealstone only works on {MST.name} (chainId {MST.chainId}).</span>
+            <button className="btn go" type="button" onClick={() => void switchWalletToMst().catch(() => undefined)}>Switch to {MST.name}</button>
+          </div>
+        )}
+        {!ws.account && (
+          <div className="banner wallet-banner" role="status" data-testid="viewer-banner">
+            <span>You're looking without a wallet. Everything is readable; to act on a vault, connect one.</span>
+            <button className="btn secondary" type="button" onClick={onboarding.disconnect}>Connect a wallet</button>
+          </div>
+        )}
+      </>
+    );
+  }
   return (
     <>
-      {!app.chainOnline && isHosted && (
-        <div className="banner" role="status" data-testid="hosted-notice">
-          <b>Hosted preview.</b> Sealstone's chain and AI run on your own machine, so live actions (sign, fund, attack) need <code>npm run dev</code> there: run it, then open <code>http://127.0.0.1:5173</code>. Nothing here touches a public network.
-        </div>
-      )}
-      {!app.chainOnline && !isHosted && (
+      {!app.chainOnline && (
         <div className="banner bad" role="alert">
           Can't reach the local chain at {deployment.rpcUrl.replace("http://", "")}. Start it with <code>npm run chain</code>.
         </div>
@@ -63,11 +87,14 @@ export default function AppShell() {
   return (
     <AppProvider>
       <ToastProvider>
-        <TopBar />
-        <Banners />
-        <main>
-          <Routes />
-        </main>
+        <Onboarding>
+          <TopBar />
+          <Banners />
+          <main>
+            <Routes />
+          </main>
+        <Assistant />
+        </Onboarding>
       </ToastProvider>
     </AppProvider>
   );

@@ -1,0 +1,17 @@
+KrishiLens: Problem validation report (fictional demo text)
+
+Summary
+This report runs to 9 pages. It validates the crop-disease problem in the pilot region before any prototype is built.
+
+2. Farmer interviews
+We interviewed 12 farmers across three villages in the pilot region. Each interview used the same ten questions and is attached in the appendix.
+
+3. Crop diseases in the pilot region, ranked by how often farmers reported them
+1. Leaf blight
+2. Powdery mildew
+3. Leaf rust
+4. Bacterial wilt
+5. Mosaic virus
+
+4. Next step
+The ranking above will decide which three diseases the prototype learns to recognise first.

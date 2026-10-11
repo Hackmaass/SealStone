@@ -1,0 +1,13 @@
+/* Advisory AI panels (arbiter brief, approval review). Amber chips = "proposed by AI", never green. */
+.evidence{margin-top:12px;padding:14px 16px;border:1px dashed var(--proposed);border-radius:var(--r-md);background:var(--paper);display:flex;flex-direction:column;gap:8px}
+.evidence h4{margin:0;font-size:.9375rem;display:flex;align-items:center;gap:8px}
+.evidence summary{cursor:pointer;font-weight:620}
+.evidence textarea{width:100%;border:1px solid var(--rule);border-radius:var(--r-sm);background:var(--paper-2);padding:8px;resize:vertical}
+.evidence .actions{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.ev-list{list-style:none;margin:6px 0 0;padding:0;display:flex;flex-direction:column;gap:12px}
+.ev-list li{padding-top:10px;border-top:1px solid var(--rule);display:flex;flex-direction:column;gap:4px;align-items:flex-start}
+.ev-list li p{margin:0}
+.ev-cond{font-weight:600}
+.ev-quote{margin:2px 0 0;padding:6px 10px;border-left:3px solid var(--proposed);background:var(--proposed-wash);border-radius:0 var(--r-sm) var(--r-sm) 0;font-size:.875rem}
+.ev-source{margin:0}
+@media (max-width:768px){.evidence .actions .btn{width:100%;justify-content:center}}

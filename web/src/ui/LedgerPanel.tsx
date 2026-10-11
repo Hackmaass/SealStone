@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { HashSeal } from "./components";
 import { formatWei } from "./copy";
 import { reconcileFailures, type ReconcileView } from "../lib/vaultModel";
+import { UNIT } from "../lib/units";
 
 const reduced = (): boolean => typeof matchMedia === "function" && matchMedia("(prefers-reduced-motion: reduce)").matches;
 
@@ -76,7 +77,7 @@ export function LedgerPanel({ r, block, labels }: { r: ReconcileView; block: num
           <tr>
             <td className="op" />
             <td>Deposited</td>
-            <td><Num wei={r.deposited} /> ETH</td>
+            <td><Num wei={r.deposited} /> {UNIT}</td>
           </tr>
           <tr>
             <td className="op">−</td>
@@ -112,7 +113,7 @@ export function LedgerPanel({ r, block, labels }: { r: ReconcileView; block: num
           </tr>
           <tr>
             <td className="op" />
-            <td className="muted">Surplus from forced ETH</td>
+            <td className="muted">Surplus from forced {UNIT}</td>
             <td className="muted"><Num wei={r.surplus} /></td>
           </tr>
         </tbody>

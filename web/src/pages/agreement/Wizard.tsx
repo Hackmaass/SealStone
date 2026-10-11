@@ -2,7 +2,8 @@ import { useEffect, useMemo, useReducer, useRef, useState } from "react";
 import { checkGate, validate, type GateInput } from "@mv/shared";
 import { api, ApiOffline, ApiRejected, type ExtractResponse, type Mode } from "../../lib/api";
 import { useApp } from "../../lib/app";
-import { accountAddress } from "../../lib/chain";
+import { ACCOUNT_ROLES, accountAddress } from "../../lib/chain";
+import { NET } from "../../lib/network";
 import { extractLocally } from "../../lib/localExtract";
 import { STEP_NAMES, gateReasons, loadState, reducer, saveState, summarizeGate, type Step, type WizardState } from "../../lib/wizard";
 import { useToast } from "../../ui/toast";
@@ -29,9 +30,19 @@ function gateInputOf(state: WizardState): Omit<GateInput, "confirmedAt"> | null 
 export function Wizard() {
   const app = useApp();
   const { toast } = useToast();
-  const defaults = { client: accountAddress("client"), provider: accountAddress("provider"), arbiter: accountAddress("arbiter") };
+  // Local mode: the three test accounts. Wallet mode: the client is whoever is connected; the other two are typed in.
+  const defaults = NET === "wallet"
+    ? { client: app.walletAccount ?? "", provider: "", arbiter: "" }
+    : { client: accountAddress("client"), provider: accountAddress("provider"), arbiter: accountAddress("arbiter") };
   const [state, dispatch] = useReducer(reducer, defaults, loadState);
   useEffect(() => saveState(state), [state]);
+  // Wallet mode: the client follows the connected wallet, and test-account addresses left over from the local demo are cleared.
+  useEffect(() => {
+    if (NET !== "wallet" || state.deployed) return;
+    const test = new Set(ACCOUNT_ROLES.map((r) => accountAddress(r).toLowerCase()));
+    if ((app.walletAccount ?? "").toLowerCase() !== state.addresses.client.toLowerCase()) dispatch({ type: "address", role: "client", address: app.walletAccount ?? "" });
+    for (const r of ["provider", "arbiter"] as const) if (test.has(state.addresses[r].toLowerCase())) dispatch({ type: "address", role: r, address: "" });
+  }, [app.walletAccount, state.addresses, state.deployed]);
 
   // ── the gate, computed locally with the SAME shared code the server uses ──
   const input = useMemo(() => gateInputOf(state), [state]);
@@ -98,7 +109,7 @@ export function Wizard() {
   }
 
   const stepper = (
-    <ol className="steps" id="steps">
+    <ol className="steps" id="steps" data-tour="steps">
       {STEP_NAMES.map((name, k) => {
         const n = (k + 1) as Step;
         const cls = n < state.step ? "done" : n === state.step ? "now" : "";
@@ -123,7 +134,7 @@ export function Wizard() {
     return (
       <>
         {stepper}
-        <div className="panel doc">
+        <div className="panel doc" data-tour="paste">
           <div className="doc-head">
             <div>
               <h1>Paste the agreement</h1>

@@ -2,18 +2,37 @@ import { useCallback, useEffect, useState, type Dispatch, type ReactNode } from 
 import { useTx } from "../../lib/useTx";
 import { navigate } from "../../lib/router";
 import { useApp } from "../../lib/app";
-import { hasCode, signerAt, vaultContract } from "../../lib/chain";
+import { hasCode, readableAfter, signerAt, vaultContract } from "../../lib/chain";
+import { NET } from "../../lib/network";
+import { rememberVault } from "../../lib/registry";
 import { deployVault } from "../../lib/deploy";
 import type { WizardAction, WizardState } from "../../lib/wizard";
 import { Amount, HashSeal, HashText, RevertNotice } from "../../ui/components";
 import { formatWei } from "../../ui/copy";
 import { useToast } from "../../ui/toast";
+import { UNIT } from "../../lib/units";
+
+/**
+ * Wallet mode: says whether the connected wallet is on the account a step needs. Each party signs from their own account, so with
+ * one wallet you switch accounts between steps; this updates by itself when you do (the wallet announces the change).
+ */
+function AccountHint({ expected, who }: { expected: string; who: string }) {
+  const app = useApp();
+  if (NET !== "wallet") return null;
+  const short = `${expected.slice(0, 6)}…${expected.slice(-4)}`;
+  const ok = !!app.walletAccount && app.walletAccount.toLowerCase() === expected.toLowerCase();
+  return (
+    <p className={`status-note ${ok ? "ok" : "open"}`} data-testid="account-hint" data-ok={ok}>
+      {ok ? `Your wallet is on the ${who}'s account (${short}).` : !app.walletAccount ? `Connect your wallet, on the ${who}'s account (${short}).` : `Switch your wallet to the ${who}'s account (${short}), then press the button.`}
+    </p>
+  );
+}
 
 export function StepChain({ state, dispatch, startOver }: { state: WizardState; dispatch: Dispatch<WizardAction>; startOver: ReactNode }) {
   const app = useApp();
   const { toast } = useToast();
   const confirmed = state.confirmed;
-  const tx = useTx(app.names[app.role]);
+  const tx = useTx(NET === "wallet" ? "your wallet" : app.names[app.role]);
 
   // ───── Step 5: deploy ─────
   if (state.step === 5 || !state.deployed) {
@@ -36,6 +55,7 @@ export function StepChain({ state, dispatch, startOver }: { state: WizardState; 
           the “awaiting signatures” state: no money moves until both parties sign this exact seal.
         </p>
         {tx.notice && <RevertNotice d={tx.notice} />}
+        <AccountHint expected={confirmed.checklist.parties.client.address} who="client" />
         <div className="step-actions" style={{ justifyContent: "center" }}>
           <button className="btn secondary" type="button" disabled={tx.busy !== null} onClick={() => dispatch({ type: "goto", step: 4 })}>Back</button>
           <button
@@ -46,6 +66,8 @@ export function StepChain({ state, dispatch, startOver }: { state: WizardState; 
               void tx.run("deploy", async () => {
                 const signer = await signerAt(confirmed.checklist.parties.client.address);
                 const r = await deployVault(confirmed.checklist, confirmed.hash, signer);
+                if (NET === "wallet") rememberVault(r.address, r.blockNumber ?? undefined); // a public testnet has no registry: this browser keeps the list
+                await readableAfter({ blockNumber: r.blockNumber });
                 dispatch({ type: "deployed", address: r.address, txHash: r.txHash });
                 toast("Contract deployed. Waiting for both signatures.");
               })
@@ -74,7 +96,7 @@ function SignAndFund({ state, dispatch, startOver }: { state: WizardState; dispa
   const { toast } = useToast();
   const confirmed = state.confirmed!;
   const address = state.deployed!.address;
-  const tx = useTx(app.names[app.role]);
+  const tx = useTx(NET === "wallet" ? "your wallet" : app.names[app.role]);
   const [chain, setChain] = useState<OnChain | null>(null);
 
   const refresh = useCallback(async () => {
@@ -105,7 +127,7 @@ function SignAndFund({ state, dispatch, startOver }: { state: WizardState; dispa
     tx.run(`sign-${role}`, async () => {
       const signer = await signerAt(parties[role].address);
       const sent = await vaultContract(address, signer).sign(confirmed.hash);
-      await sent.wait();
+      await readableAfter(await sent.wait());
       dispatch({ type: "signed", role, txHash: sent.hash });
       toast(`Signed as ${role}`);
       await refresh();
@@ -115,9 +137,9 @@ function SignAndFund({ state, dispatch, startOver }: { state: WizardState; dispa
     tx.run("fund", async () => {
       const signer = await signerAt(parties.client.address);
       const sent = await vaultContract(address, signer).fund({ value: chain!.total });
-      await sent.wait();
+      await readableAfter(await sent.wait());
       dispatch({ type: "funded", txHash: sent.hash });
-      toast(`Escrow funded with ${formatWei(chain!.total)} ETH`);
+      toast(`Escrow funded with ${formatWei(chain!.total)} ${UNIT}`);
       navigate(`/vault/${address}`);
     });
 
@@ -137,6 +159,7 @@ function SignAndFund({ state, dispatch, startOver }: { state: WizardState; dispa
         ) : (
           <>
             <p className="muted small">Waiting for signature</p>
+            <AccountHint expected={parties[role].address} who={role} />
             <button className="btn" type="button" disabled={tx.busy !== null || funded} onClick={() => void sign(role)}>
               {tx.busy === `sign-${role}` ? "Waiting for block…" : `Sign as ${role}`}
             </button>
@@ -163,8 +186,9 @@ function SignAndFund({ state, dispatch, startOver }: { state: WizardState; dispa
       </div>
       {tx.notice && <RevertNotice d={tx.notice} />}
       <div className="panel sigcard">
-        <h3>Fund {chain ? formatWei(chain.total) : "…"} ETH</h3>
+        <h3>Fund {chain ? formatWei(chain.total) : "…"} {UNIT}</h3>
         <p className="muted small">Locked until both parties have signed the same agreement hash.</p>
+        <AccountHint expected={parties.client.address} who="client" />
         <div>
           <button className="btn go" type="button" disabled={!bothSigned || funded || tx.busy !== null} onClick={() => void fund()} title={bothSigned ? undefined : "Both parties must sign first"}>
             {tx.busy === "fund" ? "Waiting for block…" : "Fund escrow"}

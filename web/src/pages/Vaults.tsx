@@ -1,5 +1,7 @@
 import { useMemo, useState } from "react";
 import { deployment } from "../lib/chain";
+import { NET } from "../lib/network";
+import { OpenVault } from "../ui/OpenVault";
 import { navigate } from "../lib/router";
 import { useVaultList } from "../lib/useVaultList";
 import { AGREEMENT_NAMES } from "../lib/vaultModel";
@@ -25,6 +27,7 @@ export function Vaults() {
         </div>
         <button className="btn go" type="button" onClick={() => navigate("/agreement")}>Draft an agreement</button>
       </div>
+      {NET === "wallet" && <OpenVault />}
 
       <div className="filters">
         <label className="search">
@@ -55,7 +58,7 @@ export function Vaults() {
                   <p className="muted small">Draft one from text, or open the demo vault.</p>
                   <div className="actions" style={{ marginTop: 10 }}>
                     <button className="btn go" type="button" onClick={() => navigate("/agreement")}>Draft an agreement</button>
-                    <button className="btn secondary" type="button" onClick={() => navigate(`/vault/${deployment.preseededVault.address}`)}>Open the demo vault</button>
+                    {NET === "local" && <button className="btn secondary" type="button" onClick={() => navigate(`/vault/${deployment.preseededVault.address}`)}>Open the demo vault</button>}
                   </div>
                 </div>
               ) : (

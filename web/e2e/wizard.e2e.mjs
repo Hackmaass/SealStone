@@ -1,7 +1,7 @@
 // End-to-end walk of the agreement wizard in a real browser (Chrome via playwright-core).
 // Needs: `npm run chain`, `npm run server`, `npm run web` running. Rules mode, so it is deterministic.
 // Usage: node web/e2e/wizard.e2e.mjs [shots-dir]   (AI_MODE=ollama to walk the live-LLM path: extra cards, "Proposed by Ollama")
-import { chromium } from "playwright-core";
+import { launch } from "./lib/browser.mjs";
 import { mkdirSync } from "node:fs";
 import path from "node:path";
 import { walkVault } from "./vaultWalk.mjs";
@@ -17,7 +17,7 @@ const fail = (m) => {
   throw new Error(m);
 };
 
-const browser = await chromium.launch({ executablePath: CHROME, headless: true });
+const browser = await launch(); // already onboarded: see lib/browser.mjs
 const page = await browser.newPage({ viewport: { width: 1366, height: 768 } });
 const errors = [];
 page.on("pageerror", (e) => errors.push(`pageerror: ${e.message}`));

@@ -2,15 +2,8 @@ import { agreementHash, confirmedChecklistSchema, type ConfirmedChecklist } from
 import { getAddress, isAddress } from "ethers";
 import sample from "../../../samples/krishilens.confirmed.json";
 
-/** MST testnet. Mainnet (chainId 4646) is deliberately not representable here. */
-export const MST = {
-  chainId: 91562037,
-  chainIdHex: "0x5752035",
-  name: "MST Testnet",
-  rpc: "https://testnetrpc.mstblockchain.com",
-  symbol: "tMSTC",
-  explorer: "https://testnet.mstscan.com",
-} as const;
+/** MST testnet. Mainnet (chainId 4646) is deliberately not representable here. Defined in lib/mstNetwork.ts so the app and this page share it. */
+export { MST } from "../lib/mstNetwork";
 
 export type PartyCheck = { ok: true; provider: string; arbiter: string } | { ok: false; reason: string };
 

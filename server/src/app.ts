@@ -7,6 +7,8 @@ import { fileURLToPath } from "node:url";
 import { z } from "zod";
 import {
   GateError,
+  assistantContextSchema,
+  assistantMessageSchema,
   agreementHash,
   assertConfirmable,
   canonicalJSON,
@@ -18,6 +20,8 @@ import {
   normalizeSourceText,
 } from "@mv/shared";
 import { configFromEnv, extract, providerStatus, type AiConfig } from "./ai";
+import { assist } from "./ai/assistant";
+import { analyseEvidence, evidenceBodySchema } from "./ai/evidence";
 import type { FetchLike } from "./ai/ollama";
 
 // The Vercel bundle (scripts/bundle-server.mjs) replaces this with the sample texts, because a deployed function has no repo checkout to read.
@@ -34,6 +38,7 @@ export interface AppOptions {
 }
 
 const modeSchema = z.enum(["auto", "ollama", "gemini", "rules"]);
+const assistantBody = z.object({ messages: z.array(assistantMessageSchema).min(1).max(12), context: assistantContextSchema, mode: z.enum(["auto", "sarvam", "ollama", "rules"]).default("auto") });
 const MAX_TEXT = 100_000;
 const MAX_NOTE = 5_000;
 const MAX_NOTES = 500;
@@ -88,13 +93,31 @@ export function createApp(options: AppOptions = {}) {
 
   app.get("/api/health", wrap(async (_req, res) => {
     const status = await providerStatus(deps);
-    res.json({ ok: true, providers: { ollama: status.ollama, gemini: status.gemini, rules: true }, models: status.models });
+    res.json({ ok: true, providers: { ollama: status.ollama, gemini: status.gemini, sarvam: status.sarvam, rules: true }, models: status.models });
   }));
 
   app.post("/api/extract", wrap(async (req, res) => {
     const body = parse(extractBody, req.body, res);
     if (!body) return;
     res.json(await extract(body.text, body.mode, deps));
+  }));
+
+  // The assistant only SUGGESTS (a fixed, validated action list the browser shows as buttons). It cannot touch the chain.
+  app.post("/api/assistant", wrap(async (req, res) => {
+    const body = parse(assistantBody, req.body, res);
+    if (!body) return;
+    if (body.messages[body.messages.length - 1].role !== "user") {
+      res.status(400).json({ error: "The last message must come from the user" });
+      return;
+    }
+    res.json(await assist(body, deps));
+  }));
+
+  // Advisory only: the arbiter's evidence brief and the client's approval review. No ruling, no approval, no chain access.
+  app.post("/api/evidence", wrap(async (req, res) => {
+    const body = parse(evidenceBodySchema, req.body, res);
+    if (!body) return;
+    res.json(await analyseEvidence(body, deps));
   }));
 
   app.post("/api/validate", (req, res) => {

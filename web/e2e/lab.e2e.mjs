@@ -1,6 +1,6 @@
 // Attack Lab end to end: "Run all" three times in a row with no reload, and the pre-seeded demo vault untouched.
 // Needs: chain, server and web running, and a fresh `npm run demo:reset`. Usage: node web/e2e/lab.e2e.mjs [shots-dir]
-import { chromium } from "playwright-core";
+import { launch } from "./lib/browser.mjs";
 import { Interface, JsonRpcProvider } from "ethers";
 import { mkdirSync, readFileSync } from "node:fs";
 import path from "node:path";
@@ -40,7 +40,7 @@ const fail = (m) => {
   throw new Error(m);
 };
 
-const browser = await chromium.launch({ executablePath: CHROME, headless: true });
+const browser = await launch(); // already onboarded: see lib/browser.mjs
 const page = await browser.newPage({ viewport: { width: 1366, height: 768 } });
 const errors = [];
 page.on("pageerror", (e) => errors.push(`pageerror: ${e.message}`));

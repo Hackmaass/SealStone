@@ -22,6 +22,14 @@
 | 11 | 4:30 | Run re-entrancy against **NaiveEscrow** → drained | "Same attacker drains a naive contract, so the attack is real, and ours blocks it." |
 | 12 | 4:45 | Show `npm run test:contracts` + coverage + the AI eval table | "Every guarantee has a test, and here's how well the AI actually does." |
 
+**Wi-Fi off:** before turning the Wi-Fi off, set the AI selector (top bar) to **Rules (offline)**. Extraction already falls back by itself, but with the selector on Auto the assistant, the evidence brief and the approval review first try Sarvam and wait up to 8 s before the built-in rules answer. In Rules (offline) they answer instantly and nothing leaves the machine.
+
+**Optional AI extras (advisory, never decide anything)**
+- *Assistant* (the "Ask" button, bottom right): "What's next for me?" It suggests a button to click; it never moves money. Try "approve milestone 1 for me": it explains that only the confirmation sheet can do that.
+- *Approval review* (client, in the Approve sheet, after step 6): open "Check the work against what was agreed", click "Use the demo report's text", then "Check against the conditions": all three milestone-1 conditions show as appearing addressed. The seal comparison proves it is the same *file*; this only helps judge the *work*.
+- *Arbiter evidence brief* (step 9, before ruling): the client's dispute reason should talk about the conditions, e.g. **"The report we received is only 6 pages long and covers interviews with just 7 farmers. It lists three diseases, not a ranking of the five most common ones."** The arbiter opens "Evidence brief", pastes the provider's side, e.g. **"The report runs to 9 pages. We interviewed 12 farmers across three villages. Section 3 ranks the five most common crop diseases by how often farmers reported them."**, and gets each condition marked contested with a quote from each side. Then the arbiter rules with the normal Release / Refund buttons.
+- Say it plainly: the AI reads, the quotes are checked word for word by code, and the arbiter decides.
+
 **Invite the judge:** "Pick any role and try to steal money." The role switcher and Attack Lab make this safe.
 
 ## Likely judge questions → answers

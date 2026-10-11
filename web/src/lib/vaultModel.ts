@@ -1,4 +1,5 @@
 import { formatWei, shortHash } from "../ui/copy";
+import { UNIT } from "./units";
 
 /**
  * Pure rules for the vault screen: who may do what next, how raw events read as a story, and which ledger check failed.
@@ -146,7 +147,7 @@ export function withdrawPlan(role: VaultRole, credit: bigint): WithdrawPlan {
   if (role === "arbiter") return { enabled: false, label: "Withdraw", reason: "The arbiter can never be paid from this vault.", tryAnyway: true };
   if (role === "stranger") return { enabled: false, label: "Withdraw", reason: "Nothing is owed to this account.", tryAnyway: true };
   if (credit === 0n) return { enabled: false, label: "Withdraw", reason: "Nothing owed to you yet.", tryAnyway: true };
-  return { enabled: true, label: `Withdraw ${formatWei(credit)} ETH`, reason: "", tryAnyway: false };
+  return { enabled: true, label: `Withdraw ${formatWei(credit)} ${UNIT}`, reason: "", tryAnyway: false };
 }
 
 // ───────────────────────── ledger ─────────────────────────
@@ -168,7 +169,7 @@ export interface ReconcileView {
 /** The three checks reconcile() makes, named in words, so a red ledger says exactly what failed. */
 export function reconcileFailures(r: ReconcileView): string[] {
   const out: string[] = [];
-  if (r.actualBalance < r.expectedBalance) out.push("The contract holds less ETH than deposits minus withdrawals.");
+  if (r.actualBalance < r.expectedBalance) out.push(`The contract holds less ${UNIT} than deposits minus withdrawals.`);
   if (r.heldInEscrow !== r.heldByMilestones) out.push("The money in escrow doesn't equal the unsettled milestones.");
   if (r.owedToParties !== r.released + r.refunded - r.withdrawn) out.push("The balances owed don't equal paid out minus withdrawn.");
   return out;
@@ -226,7 +227,7 @@ export const roleOfAddress = (parties: Parties, address: string | null | undefin
   return "stranger";
 };
 const ROLE_TITLE: Record<VaultRole, string> = { client: "Client", provider: "Provider", arbiter: "Arbiter", stranger: "Stranger" };
-const eth = (v: unknown): string => `${formatWei(BigInt(v as bigint))} ETH`;
+const eth = (v: unknown): string => `${formatWei(BigInt(v as bigint))} ${UNIT}`;
 const mile = (v: unknown): number => Number(v as bigint) + 1;
 
 function rawLine(e: RawEvent): string {
@@ -340,8 +341,8 @@ const ACTOR_WORD: Record<VaultRole, string> = { client: "the client", provider: 
 export function nextStep(i: NextStepInput): NextStep {
   const withdrawHint = (): string => {
     const parts: string[] = [];
-    if (i.credits.provider > 0n) parts.push(`the provider has ${formatWei(i.credits.provider)} ETH to withdraw`);
-    if (i.credits.client > 0n) parts.push(`the client has ${formatWei(i.credits.client)} ETH to withdraw`);
+    if (i.credits.provider > 0n) parts.push(`the provider has ${formatWei(i.credits.provider)} ${UNIT} to withdraw`);
+    if (i.credits.client > 0n) parts.push(`the client has ${formatWei(i.credits.client)} ${UNIT} to withdraw`);
     return parts.length ? `Also: ${parts.join(" and ")}.` : "";
   };
   if (i.agreementState === 0) return { actor: null, mine: false, headline: "The agreement is waiting for both signatures.", detail: "No money can move until the client and the provider sign the same seal." };

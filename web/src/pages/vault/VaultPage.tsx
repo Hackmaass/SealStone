@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { keccak256, toUtf8Bytes } from "ethers";
 import { navigate } from "../../lib/router";
 import { useApp } from "../../lib/app";
-import { ACCOUNT_ROLES, accountAddress, deployment, provider, signerAt, vaultContract } from "../../lib/chain";
+import { ACCOUNT_ROLES, accountAddress, deployment, provider, readableAfter, signerAt, vaultContract } from "../../lib/chain";
 import { useVault } from "../../lib/useVault";
 import { useTx } from "../../lib/useTx";
 import { loadAttempts, saveAttempts } from "../../lib/attempts";
@@ -29,6 +29,7 @@ import { useToast } from "../../ui/toast";
 import { MilestoneRow } from "./MilestoneRow";
 import { ApproveSheet, ReasonSheet, SubmitSheet, useNote } from "./Sheets";
 import { TermsBadge, TermsPanel } from "./TermsPanel";
+import { UNIT } from "../../lib/units";
 
 const PROBE = keccak256(toUtf8Bytes("try-anyway probe"));
 const ROLE_NAME: Record<VaultRole, string> = { client: "Client", provider: "Provider", arbiter: "Arbiter", stranger: "Stranger" };
@@ -107,7 +108,7 @@ function VaultView({ address, snapshot: s, refresh }: { address: string; snapsho
   }, [trusted]);
 
   // ───── who am I in THIS vault? Decided by address, not by which tab is lit ─────
-  const myAddress = accountAddress(app.role);
+  const myAddress = app.me;
   const parties = useMemo(() => partiesOf(s, names), [s, names]);
   const vaultRole: VaultRole = roleOfAddress(parties, myAddress);
 
@@ -137,7 +138,7 @@ function VaultView({ address, snapshot: s, refresh }: { address: string; snapsho
   // A refusal belongs to whoever caused it: switching accounts must not leave it looking like the new account's error.
   useEffect(() => {
     setReject(null);
-  }, [app.role]);
+  }, [app.role, app.me]);
   const tx = useTx(vaultRole === "stranger" ? "a stranger" : ROLE_NAME[vaultRole].toLowerCase(), onRejected);
 
   const [sheet, setSheet] = useState<Sheet>(null);
@@ -150,7 +151,7 @@ function VaultView({ address, snapshot: s, refresh }: { address: string; snapsho
         setReject(null);
         const signer = await signerAt(myAddress);
         const sent = await fn(vaultContract(address, signer));
-        await sent.wait();
+        await readableAfter(await sent.wait());
         toast(success);
       }).then(async (ok) => {
         closeSheet(); // a refusal shows in the row behind the sheet, so close it either way
@@ -164,14 +165,14 @@ function VaultView({ address, snapshot: s, refresh }: { address: string; snapsho
 
   const doSubmit = (i: number, f: HashedFile) => act("markComplete", i, (c) => c.markComplete(i, f.hash), `Work submitted. ${names.client === "the client" ? "The client" : names.client} can now review it.`);
   const doApprove = (i: number, f: HashedFile) =>
-    act("approve", i, (c) => c.approve(i, f.hash), `Released ${formatWei(s.milestones[i].amount)} ETH to ${names.provider}`);
+    act("approve", i, (c) => c.approve(i, f.hash), `Released ${formatWei(s.milestones[i].amount)} ${UNIT} to ${names.provider}`);
   const doDispute = async (i: number, text: string, hash: string) => {
     const ok = await act("dispute", i, (c) => c.dispute(i, hash), "Sent to the arbiter");
     if (ok) await saveNote(hash, text);
   };
   const doResolve = async (i: number, ruling: 0 | 1, text: string, hash: string) => {
     const amt = formatWei(s.milestones[i].amount);
-    const ok = await act(ruling === 0 ? "release" : "refund", i, (c) => c.resolve(i, ruling, hash), ruling === 0 ? `Released ${amt} ETH to ${names.provider}` : `Refunded ${amt} ETH to ${names.client}`);
+    const ok = await act(ruling === 0 ? "release" : "refund", i, (c) => c.resolve(i, ruling, hash), ruling === 0 ? `Released ${amt} ${UNIT} to ${names.provider}` : `Refunded ${amt} ${UNIT} to ${names.client}`);
     if (ok) await saveNote(hash, text);
   };
   const doEscalate = (i: number) => act("escalate", i, (c) => c.escalate(i), "Sent to the arbiter");
@@ -226,7 +227,7 @@ function VaultView({ address, snapshot: s, refresh }: { address: string; snapsho
 
   return (
     <div className="vault-page" data-vault-state={stateWord}>
-      <section className="panel vheadbox">
+      <section className="panel vheadbox" data-tour="vault-head">
         <div className="vhead-in">
         <HashSeal hash={s.agreementHash} state="onchain" size={48} draw />
         <div className="title">
@@ -247,16 +248,25 @@ function VaultView({ address, snapshot: s, refresh }: { address: string; snapsho
         <TermsPanel onChainHash={s.agreementHash} terms={terms} onRecheck={recheck} />
       </section>
 
-      <section className={`panel yourmove${step.mine ? " mine" : ""}`} aria-live="polite" data-testid="your-move">
+      <section className={`panel yourmove${step.mine ? " mine" : ""}`} aria-live="polite" data-testid="your-move" data-tour="your-move">
         <div>
           <p className="yourmove-head">{step.headline}</p>
           {step.detail && <p className="muted small">{step.detail}</p>}
-          <p className="muted small">
-            You're acting as <b>{app.names[app.role]}</b>
-            {vaultRole === "stranger" ? ", who isn't part of this agreement here. You can look around, and anything you try will be refused." : `, the ${ROLE_NAME[vaultRole].toLowerCase()} of this vault.`}
-          </p>
+          {app.net === "wallet" && !app.walletAccount ? (
+            <p className="muted small">You're looking at this vault without a wallet. Connect your wallet (top right) to act on it.</p>
+          ) : (
+            <p className="muted small">
+              You're acting as <b>{app.net === "wallet" ? app.meLabel : app.names[app.role]}</b>
+              {vaultRole === "stranger" ? ", who isn't part of this agreement here. You can look around, and anything you try will be refused." : `, the ${ROLE_NAME[vaultRole].toLowerCase()} of this vault.`}
+            </p>
+          )}
         </div>
-        {step.actor && !step.mine && actorTab >= 0 && (
+        {app.net === "wallet" && step.actor && step.actor !== "stranger" && !step.mine && (
+          <span className="muted small" data-testid="switch-wallet-hint">
+            Switch your wallet to {s.addresses[step.actor].slice(0, 6)}…{s.addresses[step.actor].slice(-4)} ({ROLE_NAME[step.actor].toLowerCase()}) to take this step.
+          </span>
+        )}
+        {app.net === "local" && step.actor && !step.mine && actorTab >= 0 && (
           <button className="btn secondary" type="button" onClick={() => app.setRoleIdx(actorTab)}>
             Switch to the {ROLE_NAME[step.actor].toLowerCase()} <span className="kbd">{actorTab + 1}</span>
           </button>
@@ -278,7 +288,7 @@ function VaultView({ address, snapshot: s, refresh }: { address: string; snapsho
 
       <div className="vgrid">
         <div>
-          <section className="panel ms" aria-label="Milestones">
+          <section className="panel ms" aria-label="Milestones" data-tour="milestones">
             {s.milestones.map((m) => {
               const t = checklist?.milestones[m.index];
               return (
@@ -307,8 +317,8 @@ function VaultView({ address, snapshot: s, refresh }: { address: string; snapsho
         </div>
 
         <aside className="rail-col">
-          <LedgerPanel r={s.reconcile} block={s.block} labels={ledgerLabels} />
-          <section className="panel withdraw" aria-label="Withdraw">
+          <div data-tour="ledger"><LedgerPanel r={s.reconcile} block={s.block} labels={ledgerLabels} /></div>
+          <section className="panel withdraw" aria-label="Withdraw" data-tour="withdraw">
             <h2>Your balance</h2>
             {wp.enabled ? (
               <>
@@ -358,6 +368,7 @@ function VaultView({ address, snapshot: s, refresh }: { address: string; snapsho
         amount={sheetMilestone?.amount ?? 0n}
         providerName={names.provider}
         submittedHash={sheetMilestone?.deliverableHash ?? "0x"}
+        conditions={checklist?.milestones[sheet?.index ?? 0]?.conditions ?? []}
         busy={busyAct?.startsWith("approve") ?? false}
         onClose={closeSheet}
         onSend={(f) => void doApprove(sheet!.index, f)}
@@ -380,7 +391,7 @@ function VaultView({ address, snapshot: s, refresh }: { address: string; snapsho
         context={sheet ? <DisputeContext s={s} index={sheet.index} checklistConditions={checklist?.milestones[sheet.index]?.conditions ?? []} /> : null}
         label="Why this ruling?"
         placeholder="Explain what you checked and why you decided this way."
-        sendLabel={sheet?.kind === "refund" ? `Refund ${formatWei(sheetMilestone?.amount ?? 0n)} ETH` : `Release ${formatWei(sheetMilestone?.amount ?? 0n)} ETH`}
+        sendLabel={sheet?.kind === "refund" ? `Refund ${formatWei(sheetMilestone?.amount ?? 0n)} ${UNIT}` : `Release ${formatWei(sheetMilestone?.amount ?? 0n)} ${UNIT}`}
         busy={busyAct?.startsWith("release") || busyAct?.startsWith("refund") || false}
         onClose={closeSheet}
         onSend={(text, hash) => void doResolve(sheet!.index, sheet!.kind === "refund" ? 1 : 0, text, hash)}

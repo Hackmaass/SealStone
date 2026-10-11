@@ -14,6 +14,9 @@ from pptx.util import Inches, Pt
 HB = "Heading Now 31-38 Bold"
 HR = "Heading Now 31-38"
 CODE = "Consolas"
+IMPACT = "Impact"  # big numerals
+SANS = "Calibri"  # body copy and tracked small-caps labels (ships with Office on Windows and Mac)
+BODY = 0.95  # Calibri point size relative to the condensed face it replaces
 SERIF = "Georgia"  # accent face for one-line takeaways (ships with Office on Windows and Mac); never used for numbers
 NAVY, INK, PURPLE = "172243", "161F3E", "4E4A76"
 CORAL, PEACH, LAV, CREAM = "EE7A6B", "FAD3AE", "D6C2DB", "FDF9ED"
@@ -97,10 +100,16 @@ def tb(slide, x, y, w, h, paras, size=24, font=HR, color=INK, align="l", anchor=
             run = para.add_run()
             run.text = text
             f = run.font
-            f.name = o.get("font", HB if o.get("bold") else font)
             fnt = o.get("font", HB if o.get("bold") else font)
             sz = o.get("size", size)
-            f.size = Pt(sz if fnt in (CODE, SERIF, "Segoe UI Symbol") else round(sz * SCALE, 1))
+            if fnt == HR:  # regular body text: Calibri, sized on its own scale
+                fnt, sz = SANS, sz * BODY
+                f.size = Pt(round(sz, 1))
+            else:
+                f.size = Pt(sz if fnt in (CODE, SERIF, IMPACT, SANS, "Segoe UI Symbol") else round(sz * SCALE, 1))
+            f.name = fnt
+            if o.get("track"):
+                run._r.get_or_add_rPr().set("spc", str(o["track"]))
             f.bold = True if o.get("bold") else None
             if o.get("italic"):
                 f.italic = True
@@ -133,9 +142,9 @@ def badge(slide, x, y, d, label, fill=NAVY, color=WHITE, size=26):
     return s
 
 
-def pill(slide, x, y, w, h, label, fill=VIOLET_W, color=VIOLET, size=22, bold=True, line=None):
+def pill(slide, x, y, w, h, label, fill=VIOLET_W, color=VIOLET, size=22, bold=True, line=None, opts=None):
     s = shape(slide, x, y, w, h, fill=fill, line=line, radius=h / 2)
-    tb(slide, x, y, w, h, [[(label, {"bold": bold})]], size=size, color=color, align="c", anchor="m")
+    tb(slide, x, y, w, h, [[(label, {"bold": bold, **(opts or {})})]], size=size, color=color, align="c", anchor="m")
     return s
 
 

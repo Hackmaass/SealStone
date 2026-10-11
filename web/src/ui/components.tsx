@@ -2,6 +2,7 @@ import { useEffect, useRef, type ReactNode } from "react";
 import { formatWei, shortHash } from "./copy";
 import { useToast } from "./toast";
 import { formatRawError, type DecodedRevert } from "../lib/revert";
+import { UNIT } from "../lib/units";
 
 export type SealState = "proposed" | "submitted" | "onchain" | "mismatch";
 
@@ -62,7 +63,7 @@ export function Amount({ wei, unit = true, decimals = 3 }: { wei: bigint; unit?:
   return (
     <span className="mono">
       {formatWei(wei, decimals)}
-      {unit ? " ETH" : ""}
+      {unit ? ` ${UNIT}` : ""}
     </span>
   );
 }

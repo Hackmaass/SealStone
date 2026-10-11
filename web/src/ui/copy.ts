@@ -1,4 +1,5 @@
 /** Plain-English copy for every contract error (docs/08 "Copy deck"). Every revert notice ends with "Nothing changed.". */
+import { UNIT } from "../lib/units";
 
 export const AGREEMENT_STATES = ["awaiting signatures", "awaiting funding", "active", "closed"] as const;
 export const MILESTONE_STATES = ["pending", "completed", "disputed", "released", "refunded"] as const;
@@ -66,7 +67,7 @@ export function explainRevert(name: string, args: Record<string, unknown> = {}, 
     case "WrongFundingAmount":
       return {
         title: "Fund the exact total",
-        detail: `Expected ${formatWei(args.expected as bigint)} ETH, received ${formatWei(args.sent as bigint)} ETH.`,
+        detail: `Expected ${formatWei(args.expected as bigint)} ${UNIT}, received ${formatWei(args.sent as bigint)} ${UNIT}.`,
       };
     case "InvalidMilestoneState": {
       const state = milestoneState(args.actual);

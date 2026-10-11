@@ -1,8 +1,10 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { ActionSheet, HashSeal, HashText } from "../../ui/components";
+import { ReviewPanel } from "./EvidencePanels";
 import { formatWei } from "../../ui/copy";
 import { DEMO_FILES, hashFile, hashText, loadDemoFile, noteHash, type HashedFile } from "../../lib/files";
 import { loadNote } from "../../lib/notes";
+import { UNIT } from "../../lib/units";
 
 /** Choose what to hash: a built-in demo file, any file from the computer (drop or browse), or pasted text such as a git commit SHA. */
 export function FilePicker({ value, onChange, allowText = false, showPicked = true }: { value: HashedFile | null; onChange: (f: HashedFile | null) => void; allowText?: boolean; showPicked?: boolean }) {
@@ -138,8 +140,8 @@ export function SubmitSheet({ open, index, title, busy, onClose, onSend }: { ope
 
 // ───────────────────────── client: approve with the reviewed file ─────────────────────────
 export function ApproveSheet({
-  open, index, amount, providerName, submittedHash, busy, onClose, onSend,
-}: { open: boolean; index: number; amount: bigint; providerName: string; submittedHash: string; busy: boolean; onClose: () => void; onSend: (f: HashedFile) => void }) {
+  open, index, amount, providerName, submittedHash, busy, conditions = [], onClose, onSend,
+}: { open: boolean; index: number; amount: bigint; providerName: string; submittedHash: string; busy: boolean; /** the agreed conditions for this milestone, for the optional AI review */ conditions?: string[]; onClose: () => void; onSend: (f: HashedFile) => void }) {
   const [file, setFile] = useState<HashedFile | null>(null);
   useEffect(() => {
     if (!open) setFile(null);
@@ -165,11 +167,12 @@ export function ApproveSheet({
           {file ? <HashText hash={file.hash} /> : <span className="muted small">nothing chosen yet</span>}
         </div>
       </div>
+      {conditions.length > 0 && <ReviewPanel conditions={conditions} fileName={file?.name ?? null} fileText={file?.text ?? null} />}
       <div className="preview" aria-live="polite">
         {!file && <>Pick the file you reviewed to see whether it is the one that was submitted.</>}
         {file && match && (
           <>
-            This releases <b>{eth} ETH</b> to {providerName}. It can't be undone.
+            This releases <b>{eth} {UNIT}</b> to {providerName}. It can't be undone.
           </>
         )}
         {file && !match && (
@@ -181,7 +184,7 @@ export function ApproveSheet({
       <Foot>
         <button className="btn secondary" type="button" onClick={onClose}>Cancel</button>
         <button className={match ? "btn go" : "btn"} type="button" disabled={!file || busy} onClick={() => file && onSend(file)}>
-          {busy ? "Waiting for block…" : match ? `Approve and release ${eth} ETH` : "Send anyway (the contract decides)"}
+          {busy ? "Waiting for block…" : match ? `Approve and release ${eth} ${UNIT}` : "Send anyway (the contract decides)"}
         </button>
       </Foot>
     </ActionSheet>

@@ -42,3 +42,15 @@ export { ethAmountsInText, normalizeProposed, parseAmountWei, sanitizeQuotes, va
 export { mergeAmbiguities } from "./validate/merge";
 export { GateError, assertConfirmable, checkGate, type GateInput, type GateReport } from "./gate";
 export { extractWithRules } from "./extract/rules";
+export {
+  ASSISTANT_PAGES,
+  HELP_TEXT,
+  assistantActionSchema,
+  assistantContextSchema,
+  assistantMessageSchema,
+  ruleReply,
+  sanitizeActions,
+  type AssistantAction,
+  type AssistantContext,
+  type AssistantReply,
+} from "./assistant";
