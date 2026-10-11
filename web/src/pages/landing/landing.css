@@ -4,7 +4,7 @@
  * It has its own fixed light palette so it looks the same whatever the visitor's system theme is.
  */
 .lp{
-  --lp-ink:#2A2633; --lp-ink-2:#4F4B60; --lp-ink-3:#6A6678;
+  --lp-ink:#2A2633; --lp-ink-2:#4F4B60; --lp-ink-3:#5E5A6E;
   --lp-accent:#8E7CFF; --lp-accent-d:#5B45E6; --lp-wash:#F0ECFF; --lp-rule:#E9E6F4; --lp-card:#FFFFFF;
   --lp-radius:32px;
   background:#fff;color:var(--lp-ink);font-family:var(--sans);min-height:100vh;overflow-x:clip;

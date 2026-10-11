@@ -161,7 +161,7 @@ try {
   await openReady(p, `${BASE}/`, ".lp-hero", { timeout: 8000 });
   await p.click(".lp-burger");
   await p.waitForSelector('.lp-menu[role="dialog"]');
-  await p.getByRole("link", { name: "Who it's for" }).click();
+  await p.locator(".lp-menu").getByRole("link", { name: "Who it's for" }).click();
   await p.waitForSelector(".lp-menu", { state: "detached" });
   const reached = await p.evaluate(() => document.querySelector("#for").getBoundingClientRect().top);
   if (reached > 200) fail(`the menu link did not scroll to the section (top ${reached}px)`);
