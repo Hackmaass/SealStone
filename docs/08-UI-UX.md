@@ -8,7 +8,7 @@
 > - Surfaces: near-white cards on a faint lavender-grey page, large radii (16 px cards, 28 px hero panels, pill buttons), soft shadows, gentle lavender gradients on the landing page, one dark section.
 > - Type: Inter (variable, bundled via `@fontsource-variable/inter`, OFL), tight bold display headings; IBM Plex Mono stays for hashes, addresses and amounts.
 > - Accent: violet (`--accent`) for primary actions and links; light lavender (`--accent-wash`) for fills. The light violet is a FILL colour only; text uses the darker `--accent` so contrast stays >= 4.5:1.
-> - Two layouts: the marketing landing page (`/`) and the app shell (everything else: top nav with Dashboard / Vaults / Agreement studio / Attack Lab, the "Acting as" switcher, the chain and AI pills).
+> - Two layouts: the marketing landing page (`/`) and the app shell (everything else). **Since 2026-10-11 the app shell follows the Aave Pro template:** a left sidebar (Dashboard, Vaults | Create: Agreement studio | Verify: Attack Lab | the "Acting as" switcher, keys 1-4) and a quiet top strip with only the AI mode, the chain block, presenter mode and the theme toggle. Below 1181 px it falls back to the compact bar and the phone menu. The app starts in the dark theme (toggle: button or `T`); the landing page is unchanged. See docs/PROGRESS.md.
 > - The landing page's product visuals are real screenshots of this app (`npm run capture:landing`), never mock-ups.
 >
 > **What did NOT change (judges check these)**
