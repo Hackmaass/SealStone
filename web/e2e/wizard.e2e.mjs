@@ -22,6 +22,9 @@ const page = await browser.newPage({ viewport: { width: 1366, height: 768 } });
 const errors = [];
 page.on("pageerror", (e) => errors.push(`pageerror: ${e.message}`));
 page.on("console", (m) => m.type() === "error" && !/Failed to load resource|WebSocket|\[vite\]|@vite\/client|Failed to send error to Vite/.test(m.text()) && errors.push(`console: ${m.text()}`));
+// Requests the browser could not complete (e.g. net::ERR_NETWORK_ACCESS_DENIED): shown on failure so a refused connection is told apart from an app bug.
+const netFailures = [];
+page.on("requestfailed", (r) => netFailures.push(`${r.url().replace(BASE, "")} ${r.failure()?.errorText ?? ""}`));
 const external = new Set();
 page.on("request", (r) => {
   const u = new URL(r.url());
@@ -141,6 +144,9 @@ try {
 } catch (e) {
   await shot("failure").catch(() => {});
   console.error("E2E FAILED:", e.message);
+  if (errors.length) console.error("browser errors seen before the failure:\n" + errors.join("\n"));
+  if (netFailures.length) console.error("FAILED NETWORK REQUESTS (refused by the environment, not an app error):\n" + netFailures.join("\n"));
+  console.error("page url at failure:", page.url(), "| root children:", await page.evaluate(() => document.getElementById("root")?.children.length).catch(() => "n/a"));
   process.exitCode = 1;
 } finally {
   await browser.close();
